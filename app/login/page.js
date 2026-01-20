@@ -15,7 +15,7 @@ export default async function LoginPage() {
     );
 
     if (!res.ok) {
-      throw new Error(`API failed with status ${res.status}`);
+      // throw new Error(`API failed with status ${res.status}`);
     }
 
     getGoogleLogin = await res.json();

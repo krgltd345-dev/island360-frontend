@@ -7,21 +7,30 @@ import { Label } from "@/components/ui/label";
 import { Store, CheckCircle, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import LayoutWrapper from '@/components/layout/LayoutWrapper';
+import { useGetUserRoleQuery, useVendorApplicationMutation } from '@/services/userApi';
+import { useUploadDocumentMutation } from '@/services/upload';
 
 export default function VendorSignup() {
+  const { data: userRoleInfo, isLoading: userRoleInfoFetching } = useGetUserRoleQuery()
+  const [UploadFile] = useUploadDocumentMutation()
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [Application] = useVendorApplicationMutation()
   const [formData, setFormData] = useState({
-    vendor_business_name: '',
-    vendor_phone: '',
-    vendor_email: '',
-    vendor_address: '',
-    vendor_business_license: '',
-    vendor_tax_id: '',
-    vendor_insurance_doc_url: '',
-    vendor_license_doc_url: '',
-    is_non_profit: false,
-    is_cancellation_allowed: false,
+    businessName: '',
+    phoneNumber: '',
+    email: '',
+    address: '',
+    businessLicenseNumber: '',
+    taxId: '',
+    insurance: '',
+    taxDoc: '',
+    govtId: '',
+    businessLicense: '',
+    nonProfitStatus: false,
+    allowCancellations: false,
+    refundOnCancellations: '',
+    cancellationWindowHours: ''
   });
   const [uploadingDocs, setUploadingDocs] = useState(false);
   const [documents, setDocuments] = useState([]);
@@ -38,32 +47,17 @@ export default function VendorSignup() {
   //   checkAuth();
   // }, []);
 
-  // const { data: user } = useQuery({
-  //   queryKey: ['current-user'],
-  //   queryFn: () => base44.auth.me(),
-  //   enabled: isAuthenticated,
-  // });
-
-  // const applyVendorMutation = useMutation({
-  //   mutationFn: (data) => base44.auth.updateMe(data),
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: ['current-user'] });
-  //     toast.success('Application submitted! Awaiting admin approval.');
-  //   },
-  // });
-
   const handleDocumentUpload = async (file, docType) => {
     if (!file) return;
 
     setUploadingDocs(true);
     try {
-      const { file_uri } = await base44.integrations.Core.UploadPrivateFile({ file });
-      const newDoc = {
-        type: docType,
-        file_uri,
-        uploaded_at: new Date().toISOString(),
-      };
-      setDocuments([...documents, newDoc]);
+      const formData = new FormData()
+      formData.append("document", file)
+      const res = await UploadFile({ formData }).unwrap()
+
+      console.log(res, "UploadFile", docType);
+      setFormData((prev) => ({...prev, [docType] : res?.data?.url}))
       toast.success('Document uploaded securely');
     } catch (error) {
       toast.error('Failed to upload document');
@@ -73,30 +67,36 @@ export default function VendorSignup() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    try {
+      const data = {
+        businessName: formData?.businessName,
+        phoneNumber: formData?.phoneNumber,
+        email: formData?.email,
+        address: formData?.address,
+        businessLicenseNumber: formData?.businessLicenseNumber,
+        taxId: formData?.taxId,
+        insurance: formData?.insurance,
+        taxDoc: formData?.taxDoc,
+        govtId: formData?.govtId,
+        businessLicense: formData?.businessLicense,
+        nonProfitStatus: formData?.nonProfitStatus,
+        allowCancellations: formData?.allowCancellations,
+        ...(formData?.allowCancellations && {
+          refundOnCancellations: formData?.refundOnCancellations,
+          cancellationWindowHours: formData?.cancellationWindowHours
+        })
 
-    if (!formData.vendor_business_name) {
-      toast.error('Please enter your business name');
-      return;
+      }
+      console.log(data, "data");
+      const res = await Application(data).unwrap();
+      toast.success(res?.message)
+    } catch (error) {
+      console.log(error);
+      toast.error(error?.data?.message)
     }
-
-    // await applyVendorMutation.mutateAsync({
-    //   is_vendor: true,
-    //   vendor_approved: false,
-    //   is_non_profit: formData.is_non_profit,
-    //   verification_documents: documents,
-    //   verification_status: 'pending',
-    //   vendor_business_name: formData.vendor_business_name,
-    //   vendor_phone: formData.vendor_phone,
-    //   vendor_email: formData.vendor_email,
-    //   vendor_address: formData.vendor_address,
-    //   vendor_business_license: formData.vendor_business_license,
-    //   vendor_tax_id: formData.vendor_tax_id,
-    //   vendor_insurance_doc_url: formData.vendor_insurance_doc_url,
-    //   vendor_license_doc_url: formData.vendor_license_doc_url,
-    // });
   };
 
-  if (false) {
+  if (userRoleInfoFetching) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <Card className="p-8 text-center">
@@ -108,41 +108,39 @@ export default function VendorSignup() {
 
   // Already approved vendor - check if onboarding is complete
   if (
-    // user.is_vendor && user.vendor_approved
-    false
+    userRoleInfo?.data?.user?.vendorStatus === 'approved'
   ) {
-    if (!user.onboarding_completed) {
-      navigate(createPageUrl('VendorOnboarding'));
-      return null;
-    }
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Card className="p-8 text-center max-w-md">
-          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">You're All Set!</h2>
-          <p className="text-slate-600 mb-6">Your vendor account is active</p>
-          <Button onClick={() => navigate(createPageUrl('VendorDashboard'))} className="w-full bg-slate-900">
-            Go to Vendor Dashboard
-          </Button>
-        </Card>
-      </div>
+      <LayoutWrapper>
+        <div className="flex-1 mt-12 bg-slate-50 flex items-center justify-center">
+          <Card className="p-8 text-center max-w-md">
+            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">You're All Set!</h2>
+            <p className="text-slate-600 mb-6">Your vendor account is active</p>
+            <Button onClick={() => ""} className="w-full bg-slate-900">
+              Go to Vendor Dashboard
+            </Button>
+          </Card>
+        </div>
+      </LayoutWrapper>
     );
   }
 
   // Pending approval
   if (
-    // user.is_vendor && !user.vendor_approved
-    false
+    userRoleInfo?.data?.user?.vendorStatus == 'pending'
   ) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Card className="p-8 text-center max-w-md">
-          <Clock className="w-16 h-16 text-amber-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Application Pending</h2>
-          <p className="text-slate-600 mb-2">Your vendor application is under review</p>
-          <p className="text-sm text-slate-500">An administrator will review your application shortly</p>
-        </Card>
-      </div>
+      <LayoutWrapper>
+        <div className="flex-1 mt-12 bg-slate-50 flex items-center justify-center">
+          <Card className="p-8 text-center max-w-md">
+            <Clock className="w-16 h-16 text-amber-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">Application Pending</h2>
+            <p className="text-slate-600 mb-2">Your vendor application is under review</p>
+            <p className="text-sm text-slate-500">An administrator will review your application shortly</p>
+          </Card>
+        </div>
+      </LayoutWrapper>
     );
   }
 
@@ -163,8 +161,8 @@ export default function VendorSignup() {
               <div className="space-y-2">
                 <Label>Business Name *</Label>
                 <Input
-                  value={formData.vendor_business_name}
-                  onChange={(e) => setFormData({ ...formData, vendor_business_name: e.target.value })}
+                  value={formData.businessName}
+                  onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
                   placeholder="Your Business Name"
                   required
                 />
@@ -173,8 +171,8 @@ export default function VendorSignup() {
               <div className="flex items-center gap-2 p-4 bg-green-50 rounded-lg border border-green-200">
                 <input
                   type="checkbox"
-                  checked={formData.is_non_profit}
-                  onChange={(e) => setFormData({ ...formData, is_non_profit: e.target.checked })}
+                  checked={formData.nonProfitStatus}
+                  onChange={(e) => setFormData({ ...formData, nonProfitStatus: e.target.checked })}
                   className="w-4 h-4"
                 />
                 <Label className="text-green-900">
@@ -186,8 +184,8 @@ export default function VendorSignup() {
                 <Label>Contact Phone *</Label>
                 <Input
                   type="tel"
-                  value={formData.vendor_phone}
-                  onChange={(e) => setFormData({ ...formData, vendor_phone: e.target.value })}
+                  value={formData.phoneNumber}
+                  onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
                   placeholder="+1 (555) 000-0000"
                   required
                 />
@@ -197,8 +195,8 @@ export default function VendorSignup() {
                 <Label>Email for Booking Notifications *</Label>
                 <Input
                   type="email"
-                  value={formData.vendor_email}
-                  onChange={(e) => setFormData({ ...formData, vendor_email: e.target.value })}
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   placeholder="bookings@yourbusiness.com"
                   required
                 />
@@ -207,8 +205,8 @@ export default function VendorSignup() {
               <div className="space-y-2">
                 <Label>Business Address *</Label>
                 <Input
-                  value={formData.vendor_address}
-                  onChange={(e) => setFormData({ ...formData, vendor_address: e.target.value })}
+                  value={formData.address}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   placeholder="123 Main St, City, State, ZIP"
                   required
                 />
@@ -217,8 +215,8 @@ export default function VendorSignup() {
               <div className="space-y-2">
                 <Label>Business License Number</Label>
                 <Input
-                  value={formData.vendor_business_license}
-                  onChange={(e) => setFormData({ ...formData, vendor_business_license: e.target.value })}
+                  value={formData.businessLicenseNumber}
+                  onChange={(e) => setFormData({ ...formData, businessLicenseNumber: e.target.value })}
                   placeholder="License #"
                 />
               </div>
@@ -226,8 +224,8 @@ export default function VendorSignup() {
               <div className="space-y-2">
                 <Label>Tax ID / EIN</Label>
                 <Input
-                  value={formData.vendor_tax_id}
-                  onChange={(e) => setFormData({ ...formData, vendor_tax_id: e.target.value })}
+                  value={formData.taxId}
+                  onChange={(e) => setFormData({ ...formData, taxId: e.target.value })}
                   placeholder="XX-XXXXXXX"
                 />
               </div>
@@ -235,8 +233,8 @@ export default function VendorSignup() {
               <div className="flex items-center gap-2 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
                 <input
                   type="checkbox"
-                  checked={formData.is_cancellation_allowed}
-                  onChange={(e) => setFormData({ ...formData, is_cancellation_allowed: e.target.checked })}
+                  checked={formData.allowCancellations}
+                  onChange={(e) => setFormData({ ...formData, allowCancellations: e.target.checked })}
                   className="w-4 h-4"
                 />
                 <Label className="text-yellow-700">
@@ -244,23 +242,25 @@ export default function VendorSignup() {
                 </Label>
               </div>
               {
-                formData?.is_cancellation_allowed &&
+                formData?.allowCancellations &&
                 <>
                   <div className="space-y-2">
-                    <Label>Refund on Cancellation</Label>
+                    <Label>Refund on Cancellation *</Label>
                     <Input
-                      value={formData.vendor_business_license}
-                      onChange={(e) => setFormData({ ...formData, vendor_business_license: e.target.value })}
+                      value={formData.refundOnCancellations}
+                      onChange={(e) => setFormData({ ...formData, refundOnCancellations: e.target.value })}
                       placeholder="70%"
+                      required={formData?.allowCancellations}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label>{`Cancellation Window ( in Hours )`}</Label>
+                    <Label>{`Cancellation Window ( in Hours ) *`}</Label>
                     <Input
-                      value={formData.vendor_tax_id}
-                      onChange={(e) => setFormData({ ...formData, vendor_tax_id: e.target.value })}
+                      value={formData.cancellationWindowHours}
+                      onChange={(e) => setFormData({ ...formData, cancellationWindowHours: e.target.value })}
                       placeholder="48"
+                      required={formData?.allowCancellations}
                     />
                   </div>
                 </>
@@ -272,40 +272,43 @@ export default function VendorSignup() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Business License</Label>
+                    <Label>Business License *</Label>
                     <Input
+                      required
                       type="file"
-                      accept="image/*,application/pdf"
+                      accept="application/pdf"
                       disabled={uploadingDocs}
-                      onChange={(e) => handleDocumentUpload(e.target.files[0], 'business_license')}
+                      onChange={(e) => handleDocumentUpload(e.target.files[0], 'businessLicense')}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Government ID</Label>
+                    <Label>Government ID *</Label>
                     <Input
                       type="file"
-                      accept="image/*,application/pdf"
+                      required
+                      accept="application/pdf"
                       disabled={uploadingDocs}
-                      onChange={(e) => handleDocumentUpload(e.target.files[0], 'government_id')}
+                      onChange={(e) => handleDocumentUpload(e.target.files[0], 'govtId')}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Tax Document</Label>
+                    <Label>Tax Document *</Label>
                     <Input
                       type="file"
-                      accept="image/*,application/pdf"
+                      required
+                      accept="application/pdf"
                       disabled={uploadingDocs}
-                      onChange={(e) => handleDocumentUpload(e.target.files[0], 'tax_document')}
+                      onChange={(e) => handleDocumentUpload(e.target.files[0], 'taxDoc')}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Insurance (Optional)</Label>
+                    <Label>{`Insurance (Optional)`}</Label>
                     <Input
                       type="file"
-                      accept="image/*,application/pdf"
+                      accept="application/pdf"
                       disabled={uploadingDocs}
                       onChange={(e) => handleDocumentUpload(e.target.files[0], 'insurance')}
                     />

@@ -1,50 +1,47 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Edit, Save, X, Lock, Upload, FileWarning, MessageCircleWarning } from 'lucide-react';
+import { Edit, Save, X, Upload, MessageCircleWarning } from 'lucide-react';
 import { toast } from 'sonner';
-import { differenceInDays, parseISO } from 'date-fns';
+import { useUpdateUserMutation } from '@/services/userApi';
+import { useUploadImageMutation } from '@/services/upload';
 
 export default function PersonalInfoSection({ user }) {
   const [isEditing, setIsEditing] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [Update] = useUpdateUserMutation();
+  const [UploadImage] = useUploadImageMutation();
   const [formData, setFormData] = useState({
-    full_name: user.full_name || '',
-    phone: user.phone || '',
-    address: user.address || '',
+    name: user?.name || '',
+    phoneNumber: user?.phoneNumber || '',
+    address: user?.address || '',
   });
 
-  const canChangeName = useMemo(() => {
-    if (!user?.name_last_changed) return true;
-    const daysSinceChange = differenceInDays(new Date(), parseISO(user.name_last_changed));
-    return daysSinceChange >= 30;
-  }, [user?.name_last_changed]);
-
-  const daysUntilNameChange = useMemo(() => {
-    if (!user?.name_last_changed || canChangeName) return 0;
-    const daysSinceChange = differenceInDays(new Date(), parseISO(user.name_last_changed));
-    return 30 - daysSinceChange;
-  }, [user?.name_last_changed, canChangeName]);
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Check if name changed and if user can change it
-    if (formData.full_name !== user.full_name && !canChangeName) {
-      toast.error(`You can change your name again in ${daysUntilNameChange} days`);
-      return;
+    try {
+      const data = {
+        ...(formData?.name !== user?.name && { name: formData?.name }),
+        ...(formData?.address !== user?.address && formData?.address !== "" && { address: formData?.address }),
+        ...(formData?.phoneNumber !== user?.phoneNumber && formData?.phoneNumber !== "" && { phoneNumber: formData?.phoneNumber }),
+      }
+      console.log(formData, "formdata", data);
+      const res = await Update(data).unwrap();
+      toast.success(res?.message)
+      console.log(res, "res");
+    } catch (error) {
+      console.log(error);
+      toast.error(error?.data?.message)
     }
-    
-    updateUserMutation.mutate(formData);
   };
 
   const handleCancel = () => {
     setFormData({
-      full_name: user.full_name || '',
-      phone: user.phone || '',
-      address: user.address || '',
+      name: user?.name || '',
+      phoneNumber: user?.phoneNumber || '',
+      address: user?.address || '',
     });
     setIsEditing(false);
   };
@@ -55,9 +52,11 @@ export default function PersonalInfoSection({ user }) {
 
     setUploadingPhoto(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      await base44.auth.updateMe({ profile_photo_url: file_url });
-      queryClient.invalidateQueries({ queryKey: ['current-user'] });
+      const formData = new FormData()
+      formData.append("image", file)
+      const res = await UploadImage({ formData }).unwrap()
+      console.log(res, "res image");
+      const resUpdate = await Update({ profileImage: res?.data?.url }).unwrap();
       toast.success('Profile photo updated');
     } catch (error) {
       toast.error('Failed to upload photo');
@@ -71,14 +70,14 @@ export default function PersonalInfoSection({ user }) {
         <h3 className="text-xl font-semibold text-slate-900">Personal Information</h3>
         {!isEditing && (
           <div className='flex items-center gap-6'>
-          <Button variant="outline" onClick={() => setIsEditing(true)}>
-            <Edit className="w-4 h-4 mr-2" />
-            Edit
-          </Button>
-          <Button variant="destructive" onClick={() => setIsEditing(true)}>
-            <MessageCircleWarning className="w-4 h-4 mr-2" />
-            Delete Account
-          </Button>
+            <Button variant="outline" onClick={() => setIsEditing(true)}>
+              <Edit className="w-4 h-4 mr-2" />
+              Edit
+            </Button>
+            <Button variant="destructive" onClick={() => setIsEditing(true)}>
+              <MessageCircleWarning className="w-4 h-4 mr-2" />
+              Delete Account
+            </Button>
           </div>
         )}
       </div>
@@ -87,11 +86,11 @@ export default function PersonalInfoSection({ user }) {
         <Label className="mb-2 block">Profile Photo</Label>
         <div className="flex items-center gap-4">
           <div className="w-24 h-24 rounded-full overflow-hidden bg-slate-200 flex items-center justify-center">
-            {user.profile_photo_url ? (
-              <img src={user.profile_photo_url} alt="Profile" className="w-full h-full object-cover" />
+            {user?.profileImage ? (
+              <img src={user?.profileImage} alt="Profile" className="w-full h-full object-cover" />
             ) : (
               <span className="text-3xl font-bold text-slate-500">
-                {user.full_name?.charAt(0)?.toUpperCase() || 'U'}
+                {user?.name?.charAt(0)?.toUpperCase() || 'U'}
               </span>
             )}
           </div>
@@ -120,30 +119,19 @@ export default function PersonalInfoSection({ user }) {
         <div className="space-y-2">
           <Label className="flex items-center gap-2">
             Full Name
-            {isEditing && !canChangeName && (
-              <span className="text-xs text-amber-600 flex items-center gap-1">
-                <Lock className="w-3 h-3" />
-                Can change in {daysUntilNameChange} days
-              </span>
-            )}
           </Label>
           {isEditing ? (
             <>
               <Input
-                value={formData.full_name}
-                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Your full name"
-                disabled={!canChangeName}
-                className={!canChangeName ? 'bg-slate-50 cursor-not-allowed' : ''}
+                // disabled={!canChangeName}
+                className={''}
               />
-              {!canChangeName && (
-                <p className="text-xs text-slate-500">
-                  Name changes are limited to once every 30 days for security
-                </p>
-              )}
             </>
           ) : (
-            <p className="text-slate-900 font-medium">{user.full_name || 'Not provided'}</p>
+            <p className="text-slate-900 font-medium">{user.name || 'Not provided'}</p>
           )}
         </div>
 
@@ -160,12 +148,12 @@ export default function PersonalInfoSection({ user }) {
           {isEditing ? (
             <Input
               type="tel"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              value={formData.phoneNumber}
+              onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
               placeholder="+1 (555) 000-0000"
             />
           ) : (
-            <p className="text-slate-900 font-medium">{user.phone || 'Not provided'}</p>
+            <p className="text-slate-900 font-medium">{user.phoneNumber || 'Not provided'}</p>
           )}
         </div>
 

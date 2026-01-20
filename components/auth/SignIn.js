@@ -72,6 +72,7 @@ export default function SignIn({ onSwitchToSignUp, onSwitchToForgotPassword, get
       const res = await Login(formData).unwrap()
       console.log(res, "Login res");
       toast.success(res?.message)
+      router.push("/profile")
     } catch (error) {
       console.log(error);
       toast.error(error?.data?.message || 'Failed to sign in. Please try again.');

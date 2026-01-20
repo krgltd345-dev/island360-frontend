@@ -10,6 +10,7 @@ import LayoutWrapper from '@/components/layout/LayoutWrapper';
 import PersonalInfoSection from '@/components/profile/PersonalInfo';
 import BookingInfo from '@/components/profile/BookingInfo';
 import NotificationSettings from '@/components/profile/NotificationSettings';
+import { useGetUserProfileQuery, useGetUserRoleQuery } from '@/services/userApi';
 
 const user = {
   "profile_photo_url": "https://base44.app/api/apps/692d3a33918f94eb9f4221f4/files/public/692d3a33918f94eb9f4221f4/9773e46e9_borrower4.jpg",
@@ -54,6 +55,8 @@ const user = {
 export default function ProfilePage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const { data: userData, isLoading: userDataFetching } = useGetUserProfileQuery()
+  const { data: userRoleInfo, isLoading: userRoleInfoFetching } = useGetUserRoleQuery()
 
   // useEffect(() => {
   //   const checkAuth = async () => {
@@ -68,9 +71,7 @@ export default function ProfilePage() {
   // }, []);
 
   if (
-    // checkingAuth || isLoading || !user
-    false
-
+    userDataFetching || userDataFetching
   ) {
     return (
       <LayoutWrapper>
@@ -97,22 +98,22 @@ export default function ProfilePage() {
           <Card className="p-6 mb-8">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 rounded-full overflow-hidden bg-slate-900 flex items-center justify-center text-white text-2xl font-bold">
-                {user.profile_photo_url ? (
-                  <img src={user.profile_photo_url} alt="Profile" className="w-full h-full object-cover" />
+                {userData?.data?.profileImage ? (
+                  <img src={userData?.data?.profileImage} alt="Profile" className="w-full h-full object-cover" />
                 ) : (
-                  user.full_name?.charAt(0)?.toUpperCase() || 'U'
+                  userData?.data?.name?.charAt(0)?.toUpperCase() || 'U'
                 )}
               </div>
               <div className="flex-1">
-                <h2 className="text-2xl font-bold text-slate-900">{user.full_name}</h2>
-                <p className="text-slate-600">{user.email}</p>
+                <h2 className="text-2xl font-bold text-slate-900">{userRoleInfo?.data?.user?.name}</h2>
+                <p className="text-slate-600">{userRoleInfo?.data?.user?.email}</p>
                 <div className="flex items-center gap-2 mt-2">
-                  {user.role === 'admin' && (
+                  {(userRoleInfo?.data?.user?.role === 'SUPER_ADMIN' || userRoleInfo?.data?.user?.role === 'ADMIN') && (
                     <span className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded-full font-medium">
                       Administrator
                     </span>
                   )}
-                  {user.is_vendor && user.vendor_approved && (
+                  {userRoleInfo?.data?.user?.vendorId && (
                     <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full font-medium">
                       Verified Vendor
                     </span>
@@ -120,7 +121,7 @@ export default function ProfilePage() {
                 </div>
               </div>
               <div className="flex gap-2">
-                {user.role === 'admin' && (
+                {(userRoleInfo?.data?.user?.role === 'SUPER_ADMIN' || userRoleInfo?.data?.user?.role === 'ADMIN') && (
                   <Link href={'/adminpanel'}>
                     <Button variant="outline">
                       <User className="w-4 h-4 mr-2" />
@@ -128,14 +129,22 @@ export default function ProfilePage() {
                     </Button>
                   </Link>
                 )}
-                {user.is_vendor && user.vendor_approved && (
-                  <Link href={'/vendorsignup'}>
+                {userRoleInfo?.data?.user?.vendorId ? (
+                  <Link href={'/vendordashboard'}>
                     <Button className="bg-slate-900 hover:bg-slate-800">
                       <Store className="w-4 h-4 mr-2" />
                       Vendor Portal
                     </Button>
                   </Link>
-                )}
+                ) : (
+                  <Link href={'/vendorsignup'}>
+                    <Button className="bg-slate-900 hover:bg-slate-800">
+                      <Store className="w-4 h-4 mr-2" />
+                      Join as Vendor
+                    </Button>
+                  </Link>
+                )
+                }
               </div>
             </div>
           </Card>
@@ -167,7 +176,7 @@ export default function ProfilePage() {
             </TabsList>
 
             <TabsContent value="personal">
-              <PersonalInfoSection user={user} />
+              <PersonalInfoSection user={userData?.data} />
             </TabsContent>
 
             <TabsContent value="bookings">

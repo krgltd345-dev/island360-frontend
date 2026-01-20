@@ -2,51 +2,68 @@ import React, { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
 import { Bell, Mail, MessageSquare, Calendar, Star, Megaphone } from 'lucide-react';
 import { toast } from 'sonner';
+import { useGetNotificationsQuery, useUpdateNotificationsMutation } from '@/services/userApi';
+import { Skeleton } from '../ui/skeleton';
 
-export default function NotificationSettings({ user }) {
-  const [settings, setSettings] = useState({
-    notifications_email: user?.notifications_email ?? true,
-    notifications_booking: user?.notifications_booking ?? true,
-    notifications_messages: user?.notifications_messages ?? true,
-    notifications_reviews: user?.notifications_reviews ?? true,
-    notifications_marketing: user?.notifications_marketing ?? false,
-  });
+export default function NotificationSettings() {
+  const { data: notifications, isLoading } = useGetNotificationsQuery();
+  const [UpdateNotifications] = useUpdateNotificationsMutation()
 
   const notificationOptions = [
     {
-      key: 'notifications_email',
+      key: 'emailNotifications',
       icon: Mail,
       label: 'Email Notifications',
       description: 'Receive notifications via email',
     },
     {
-      key: 'notifications_booking',
+      key: 'bookingUpdates',
       icon: Calendar,
       label: 'Booking Updates',
       description: 'Get notified about booking confirmations and changes',
     },
     {
-      key: 'notifications_messages',
+      key: 'newMessages',
       icon: MessageSquare,
       label: 'New Messages',
       description: 'Receive alerts when you get new messages',
     },
     {
-      key: 'notifications_reviews',
+      key: 'reviewReminders',
       icon: Star,
       label: 'Review Reminders',
       description: 'Reminders to leave reviews after activities',
     },
     {
-      key: 'notifications_marketing',
+      key: 'marketingPromotions',
       icon: Megaphone,
       label: 'Marketing & Promotions',
       description: 'Receive updates about special offers and new features',
     },
   ];
+
+  if (
+    isLoading
+  ) {
+    return (
+      <div className=" bg-slate-50 py-8">
+        <Skeleton className="h-96 w-full" />
+      </div>
+    );
+  }
+
+
+  const handleSaveSetting = async (checked, option) => {
+    try {
+      const res = await UpdateNotifications({ [option]: checked }).unwrap()
+      console.log(res, "res");
+      toast.success(res?.message)
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return (
     <Card className="p-6">
@@ -77,22 +94,12 @@ export default function NotificationSettings({ user }) {
               <Switch
                 className={"cursor-pointer"}
                 id={option.key}
-                checked={settings[option.key]}
-                onCheckedChange={(checked) => setSettings({ ...settings, [option.key]: checked })}
+                checked={notifications?.data[option.key]}
+                onCheckedChange={(checked) => handleSaveSetting(checked, option.key)}
               />
             </div>
           );
         })}
-      </div>
-
-      <div className="mt-6 pt-6 border-t">
-        <Button
-          // onClick={handleSave}
-          // disabled={saveSettingsMutation.isPending}
-          className="w-full bg-slate-900 hover:bg-slate-800"
-        >
-          {'Save Preferences'}
-        </Button>
       </div>
     </Card>
   );
