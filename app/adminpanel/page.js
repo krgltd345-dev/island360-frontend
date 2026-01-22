@@ -34,12 +34,12 @@ export default function AdminPanel() {
   const { data: vendors, isLoading: vendorsLoading } = useGetVendorsQuery()
   const { data: users, isLoading: usersLoading } = useGetAllUserQuery({
     ...(userFilter && { key: userFilter }),
-      page: userPage,
-      limit,
+    page: userPage,
+    limit,
   })
   const { data: admins, isLoading: adminsLoading } = useGetAdminsQuery({
     ...(userFilter && { key: userFilter })
-  })
+  }, { skip: userRoleInfo?.data?.user?.role !== "SUPER_ADMIN"  })
   const [activeTab, setActiveTab] = useState('vendors');
   console.log(users, "users");
 
@@ -101,7 +101,7 @@ export default function AdminPanel() {
                 <Users className="w-4 h-4 text-blue-600" />
                 <p className="text-xs text-slate-600">Total Users</p>
               </div>
-              <p className="text-2xl font-bold text-slate-900">{admins?.pagination?.total + users?.pagination?.total}</p>
+              <p className="text-2xl font-bold text-slate-900">{users?.pagination?.total}</p>
             </Card>
 
             <Card

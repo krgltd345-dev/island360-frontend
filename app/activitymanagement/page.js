@@ -1,0 +1,145 @@
+'use client';
+import React, { useState, useEffect } from 'react';
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Plus, TrendingUp, Edit, Eye } from 'lucide-react';
+// import { Link, useNavigate } from 'react-router-dom';
+// import { createPageUrl } from '@/utils';
+// import ActivityPerformanceMetrics from '@/components/vendor/ActivityPerformanceMetrics';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from 'sonner';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { useGetActivityByIdQuery } from '@/services/activityApi';
+import LayoutWrapper from '@/components/layout/LayoutWrapper';
+import ActivityPerformanceMetrics from '@/components/activityManagement/ActivityMetrix';
+
+export default function ActivityManagement() {
+  const searchParams = useSearchParams();
+  const activityId = searchParams.get('id');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [uploadingImages, setUploadingImages] = useState(false);
+
+  const { data: Activity, isLoading } = useGetActivityByIdQuery({ id: activityId }, { skip: !activityId })
+  console.log(activityId, "activityId", Activity);
+  // useEffect(() => {
+  //   const checkAuth = async () => {
+  //     const authenticated = await base44.auth.isAuthenticated();
+  //     setIsAuthenticated(authenticated);
+  //     setCheckingAuth(false);
+  //     if (!authenticated) {
+  //       base44.auth.redirectToLogin(window.location.href);
+  //     }
+  //   };
+  //   checkAuth();
+  // }, []);
+
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <Card className="p-8 text-center">
+          <p className="text-slate-600">Loading...</p>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <LayoutWrapper>
+      <div className="min-h-screen mt-12 bg-slate-50 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <Link href={('/myactivities')}>
+              <Button variant="ghost" size="icon">
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900">{Activity?.data?.name}</h1>
+              <div className="flex items-center gap-2 mt-2">
+                <Badge variant="outline">{Activity?.data?.category?.name}</Badge>
+                <Badge variant={Activity?.data?.availableForBooking ? "default" : "secondary"}>
+                  {Activity?.data?.availableForBooking ? 'Active' : 'Inactive'}
+                </Badge>
+              </div>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Link href={`/activityDetail?id=${Activity?.data?._id}`}>
+              <Button variant="outline">
+                <Eye className="w-4 h-4 mr-2" />
+                View Public Page
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+          {/* Activity Images */}
+          <div className="grid grid-cols-3 gap-4 mb-8">
+          {Activity?.data?.imageUrls.length > 0 && Activity?.data?.imageUrls.map((item, idx) => (
+            <img key={idx} src={item} alt={'activity_image'} className="w-full h-48 object-cover rounded-lg" />
+          ))}
+        </div>
+
+          {/* Activity Details */}
+          <Card className="p-6 mb-8">
+          <h3 className="font-semibold text-slate-900 mb-4">Activity Details</h3>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <p className="text-slate-600">Price</p>
+              <p className="font-medium text-slate-900">${Activity?.data?.price} {Activity?.data?.billingType === 'PER_HOUR' ? '/ hour' : Activity?.data?.billingType === 'PER_UNIT' ? `/ ${Activity?.data?.unitName || 'unit'}` : '/ person'}</p>
+            </div>
+            <div>
+              <p className="text-slate-600">Duration { Activity?.data?.durationMinutes > 120 ? "( in Hours )" : "( in Mimutes )" }</p>
+              <p className="font-medium text-slate-900">{Activity?.data?.durationMinutes > 120 ? Activity?.data?.durationMinutes/60 : Activity?.data?.durationMinutes || 'N/A'}</p>
+            </div>
+            <div>
+              <p className="text-slate-600">Max Guests</p>
+              <p className="font-medium text-slate-900">{Activity?.data?.maxGuests || 'N/A'}</p>
+            </div>
+            <div>
+              <p className="text-slate-600">Default Capacity</p>
+              <p className="font-medium text-slate-900">{Activity?.data?.availableSpots || 'N/A'}</p>
+            </div>
+            <div>
+              <p className="text-slate-600">Activity Type</p>
+              <p className="font-medium text-slate-900">{Activity?.data?.type === 'GUIDED_TOUR' ? 'Guided' : 'Self-Guided'}</p>
+            </div>
+            <div>
+              <p className="text-slate-600">Operational Days</p>
+              <p className="font-medium text-slate-900">
+                {Activity?.data?.operationalDays?.length > 0 ? Activity?.data?.operationalDays.join(', ') : 'All days'}
+              </p>
+            </div>
+          </div>
+          {Activity?.data?.description && (
+            <div className="mt-4 pt-4 border-t">
+              <p className="text-slate-600 text-sm mb-1">Description</p>
+              <p className="text-slate-900">{Activity?.data?.description}</p>
+            </div>
+          )}
+        </Card>
+
+          {/* Performance Metrics */}
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <TrendingUp className="w-5 h-5 text-slate-700" />
+              <h2 className="text-2xl font-bold text-slate-900">Performance Metrics</h2>
+            </div>
+            <ActivityPerformanceMetrics />
+          </div>
+        </div>
+      </div>
+    </LayoutWrapper>
+  );
+}

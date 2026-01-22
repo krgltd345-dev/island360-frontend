@@ -9,27 +9,25 @@ import { Button } from '../ui/button';
 import Link from 'next/link';
 
 const categoryIcons = {
-  boating: Anchor,
-  scooter: Bike,
-  kayak_paddleboard: Anchor,
-  nature_trails: Sparkles,
-  jet_ski: Anchor,
-  non_profit: Heart,
+  Boating: Anchor,
+  Scooter: Bike,
+  "kayak/Paddleboard": Anchor,
+  "Nature Trails": Sparkles,
+  "Jet Ski": Anchor,
   other: Sparkles
 };
 
 const categoryColors = {
-  boating: "bg-sky-100 text-sky-700",
-  scooter: "bg-amber-100 text-amber-700",
-  kayak_paddleboard: "bg-teal-100 text-teal-700",
-  nature_trails: "bg-green-100 text-green-700",
-  jet_ski: "bg-blue-100 text-blue-700",
-  non_profit: "bg-green-100 text-green-700",
+  Boating: "bg-sky-100 text-sky-700",
+  Scooter: "bg-amber-100 text-amber-700",
+  "kayak/Paddleboard": "bg-teal-100 text-teal-700",
+  "Nature Trails": "bg-green-100 text-green-700",
+  "Jet Ski": "bg-blue-100 text-blue-700",
   other: "bg-violet-100 text-violet-700"
 };
 
 export default function ActivityCard({ activity, index = 0 }) {
-  const Icon = categoryIcons[activity.category] || Sparkles;
+  const Icon = categoryIcons[activity?.category?.name] || Sparkles;
 
   return (
     <motion.div
@@ -40,22 +38,16 @@ export default function ActivityCard({ activity, index = 0 }) {
       <Card className="group overflow-hidden bg-white border-0 shadow-sm hover:shadow-xl transition-all duration-500 py-0">
         <div className="relative h-56 overflow-hidden">
           <img
-            src={activity.image_url || `https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800`}
-            alt={activity.name}
+            src={activity?.imageUrls?.[0] || `https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800`}
+            alt={activity?.name}
             className="w-full h-full object-cover group-hover:scale-120 opacity-90 bg-black transition-transform duration-700"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           <div className="absolute top-4 left-4 flex gap-2">
-            <Badge className={`${categoryColors[activity.category]} border-0 font-medium`}>
+            <Badge className={`${categoryColors[activity?.category?.name]} border-0 font-medium`}>
               <Icon className="w-3 h-3 mr-1" />
-              {activity.category}
+              {activity.category?.name}
             </Badge>
-            {true && (
-              <Badge className="bg-blue-600 text-white border-0 font-medium">
-                <ShieldCheck className="w-3 h-3 mr-1" />
-                Verified
-              </Badge>
-            )}
           </div>
           {false && (
             <div className="absolute top-4 right-4 bg-white/90 backdrop-blur rounded-full px-2.5 py-1 flex items-center gap-1">
@@ -64,9 +56,9 @@ export default function ActivityCard({ activity, index = 0 }) {
             </div>
           )}
           <div className="absolute bottom-4 left-4 right-4">
-            <h3 className="text-xl font-semibold text-white mb-1">{activity.name}</h3>
+            <h3 className="text-xl font-semibold text-white mb-1">{activity?.name}</h3>
             <div className="flex items-center gap-3 text-white/80 text-sm">
-              {activity.duration && (
+              {activity?.durationMinutes && (
                 <motion.span
                   className="flex items-center gap-1.5 bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-full"
                   initial={{ x: -10, opacity: 0 }}
@@ -74,10 +66,10 @@ export default function ActivityCard({ activity, index = 0 }) {
                   transition={{ delay: index * 0.1 + 0.2 }}
                 >
                   <Clock className="w-4 h-4" />
-                  {activity.duration}
+                  {activity?.durationMinutes} min
                 </motion.span>
               )}
-              {activity.max_guests && (
+              {activity?.maxGuests && (
                 <motion.span
                   className="flex items-center gap-1.5 bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-full"
                   initial={{ x: -10, opacity: 0 }}
@@ -85,7 +77,7 @@ export default function ActivityCard({ activity, index = 0 }) {
                   transition={{ delay: index * 0.1 + 0.25 }}
                 >
                   <Users className="w-4 h-4" />
-                  Up to {activity.max_guests}
+                  Up to {activity?.maxGuests}
                 </motion.span>
               )}
             </div>
@@ -124,21 +116,19 @@ export default function ActivityCard({ activity, index = 0 }) {
               ) : (
                 <>
                   <span className="text-2xl font-bold text-slate-900">
-                    ${activity.price}
+                    ${activity?.price}
                   </span>
                   <span className="text-slate-500 text-sm ml-1">
-                    {activity.billing_type === 'per_hour'
+                    {activity?.billingType === 'PER_HOUR'
                       ? '/ hour'
-                      : activity.billing_type === 'per_group'
-                        ? '/ group'
-                        : activity.billing_type === 'per_unit'
+                        : activity.billing_type === 'PER_UNIT'
                           ? `/ ${activity.unit_name || 'unit'}`
                           : '/ person'}
                   </span>
                 </>
               )}
             </div>
-            <Link href={`activityDetail?id=${activity.id}`} className="shrink-0 cursor-pointer">
+            <Link href={`activityDetail?id=${activity._id}`} className="shrink-0 cursor-pointer">
               <Button
                 className={`
                   ${activity.is_donation_based

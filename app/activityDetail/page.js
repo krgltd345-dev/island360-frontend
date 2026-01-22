@@ -1,17 +1,15 @@
+'use client';
 import ActivityCalendar from "@/components/activitySection/ActivityCalendar";
 import MultiStepBookingForm from "@/components/activitySection/MultiStepForm";
 import LayoutWrapper from "@/components/layout/LayoutWrapper";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useGetActivityByIdQuery } from "@/services/activityApi";
 import { ArrowLeft, Clock, Heart, MessageSquare, Star, Users } from "lucide-react";
 import Link from "next/link";
-
-export const metadata = {
-  title: "My Bookings - Island 360",
-  description: "View your bookings",
-};
-
+import { useSearchParams } from "next/navigation";
 
 
 const activity =
@@ -50,6 +48,46 @@ const activity =
 }
 
 export default function ActivityDetailPage() {
+  const searchParams = useSearchParams();
+  const activityId = searchParams.get('id');
+  const { data: Activity, isLoading } = useGetActivityByIdQuery({ id: activityId }, { skip: !activityId })
+  console.log(activityId, "activityId", Activity);
+
+
+  if (isLoading) {
+    return (
+      <LayoutWrapper>
+        <div className="min-h-[calc(100vh - 154px)] mt-12 bg-slate-50 py-8">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <Skeleton className="h-8 w-32 mb-8" />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+              <Skeleton className="h-96 rounded-2xl" />
+              <div className="space-y-4">
+                <Skeleton className="h-10 w-3/4" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-2/3" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </LayoutWrapper>
+    );
+  }
+
+  if (!Activity) {
+    return (
+      <LayoutWrapper>
+      <div className=" bg-slate-50 flex flex-1 items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-slate-900 mb-4">Activity not found</h2>
+          <Link href={('/')}>
+            <Button>Back to Activities</Button>
+          </Link>
+        </div>
+      </div>
+      </LayoutWrapper>
+    );
+  }
   return (
     <LayoutWrapper>
       <div className="container mt-10 mx-auto px-4 py-8">
@@ -76,31 +114,31 @@ export default function ActivityDetailPage() {
               <div className="space-y-4 mb-6">
                 <div className="relative rounded-2xl overflow-hidden">
                   <img
-                    src={activity.image_url || 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800'}
-                    alt={activity.name}
+                    src={Activity?.data?.imageUrls?.[0] || 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800'}
+                    alt={Activity?.data?.name}
                     className="w-full h-80 object-cover"
                   />
                   <Badge className="absolute top-4 left-4 bg-white/90 backdrop-blur text-slate-800">
-                    {activity.category}
+                    {Activity?.data?.category?.name}
                   </Badge>
                 </div>
 
-                {(activity.image_url_2 || activity.image_url_3) && (
+                {(Activity?.data?.imageUrls?.[1] || Activity?.data?.imageUrls?.[2]) && (
                   <div className="grid grid-cols-2 gap-4">
-                    {activity.image_url_2 && (
+                    {Activity?.data?.imageUrls?.[1] && (
                       <div className="relative rounded-xl overflow-hidden">
                         <img
-                          src={activity.image_url_2}
-                          alt={`${activity.name} - Image 2`}
+                          src={Activity?.data?.imageUrls?.[1]}
+                          alt={`${Activity?.data?.name} - Image 2`}
                           className="w-full h-48 object-cover"
                         />
                       </div>
                     )}
-                    {activity.image_url_3 && (
+                    {Activity?.data?.imageUrls?.[2] && (
                       <div className="relative rounded-xl overflow-hidden">
                         <img
-                          src={activity.image_url_3}
-                          alt={`${activity.name} - Image 3`}
+                          src={Activity?.data?.imageUrls?.[2]}
+                          alt={`${Activity?.data?.name} - Image 3`}
                           className="w-full h-48 object-cover"
                         />
                       </div>
@@ -110,31 +148,31 @@ export default function ActivityDetailPage() {
               </div>
 
               <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-                {activity.name}
+                {Activity?.data?.name}
               </h1>
 
               <div className="flex flex-wrap items-center gap-4 mb-6">
-                {activity.duration && (
+                {Activity?.data?.durationMinutes && (
                   <div className="flex items-center gap-2 text-slate-600">
                     <Clock className="w-5 h-5 text-slate-400" />
-                    <span>{activity.duration}</span>
+                    <span>{Activity?.data?.durationMinutes}</span>
                   </div>
                 )}
-                {activity.max_guests && (
+                {Activity?.data?.maxGuests && (
                   <div className="flex items-center gap-2 text-slate-600">
                     <Users className="w-5 h-5 text-slate-400" />
-                    <span>Up to {activity.max_guests} guests</span>
+                    <span>Up to {Activity?.data?.maxGuests} guests</span>
                   </div>
                 )}
-                {activity.guided_type && (
+                {Activity?.data?.type && (
                   <Badge variant="outline" className="text-slate-700 border-slate-300">
-                    {activity.guided_type === 'guided' ? '👨‍🏫 Guided' : '🗺️ Self-Guided'}
+                    {Activity?.data?.type === 'GUIDED_TOUR' ? '👨‍🏫 Guided' : '🗺️ Self-Guided'}
                   </Badge>
                 )}
               </div>
 
               <p className="text-slate-600 text-lg leading-relaxed mb-8">
-                {activity.description || 'Experience an unforgettable adventure with our professional team. Perfect for all skill levels, this activity offers a unique way to explore and create lasting memories.'}
+                {Activity?.data?.description || 'Experience an unforgettable adventure with our professional team. Perfect for all skill levels, this Activity?.data? offers a unique way to explore and create lasting memories.'}
               </p>
               <div>
                 {true ? (
@@ -165,7 +203,7 @@ export default function ActivityDetailPage() {
                 <div className="mb-6 pb-6 border-b border-slate-100">
                   <div className="flex items-baseline justify-between mb-2">
                     <div>
-                      {activity.is_donation_based ? (
+                      {Activity?.data?.is_donation_based ? (
                         <div className="flex items-center gap-2">
                           <Heart className="w-6 h-6 text-green-600" />
                           <span className="text-2xl font-bold text-green-600">Donation-Based</span>
@@ -173,20 +211,18 @@ export default function ActivityDetailPage() {
                       ) : (
                         <>
                           <span className="text-3xl font-bold text-slate-900">
-                            ${activity.price}
+                            ${Activity?.data?.price}
                           </span>
                           <span className="text-slate-500 ml-1">
-                            {activity.billing_type === 'per_hour'
+                            {Activity?.data?.billingType === 'PER_HOUR'
                               ? '/ hour'
-                              : activity.billing_type === 'per_group'
-                                ? '/ group'
-                                : activity.billing_type === 'per_unit'
-                                  ? `/ ${activity.unit_name || 'unit'}`
+                                : Activity?.data?.billing_type === 'PER_UNIT'
+                                  ? `/ ${Activity?.data?.unit_name || 'unit'}`
                                   : '/ person'}
                           </span>
-                          {activity.billing_type === 'per_hour' && activity.minimum_duration && (
+                          {Activity?.data?.billingType === 'PER_HOUR' && Activity?.data?.minDurationMinutes && (
                             <p className="text-xs text-slate-600 mt-1">
-                              Min. {activity.minimum_duration} {activity.minimum_duration === 1 ? 'hour' : 'hours'}
+                              Min. {Activity?.data?.minDurationMinutes} {Activity?.data?.minDurationMinutes === 1 ? 'hour' : 'hours'}
                             </p>
                           )}
                         </>

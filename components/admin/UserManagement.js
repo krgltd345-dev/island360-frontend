@@ -143,7 +143,7 @@ export default function AdminUserManagement({ admins, user, vendors, userFilter,
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="p-4">
           <p className="text-sm text-slate-600">Total Users</p>
-          <p className="text-3xl font-bold text-slate-900">{admins?.pagination?.total + user?.pagination?.total}</p>
+          <p className="text-3xl font-bold text-slate-900">{ user?.pagination?.total}</p>
         </Card>
         <Card className="p-4">
           <p className="text-sm text-slate-600">Active Vendors</p>

@@ -7,9 +7,7 @@ const Footer = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-2 text-slate-600">
-                <div className="w-8 h-8 bg-pink-100 rounded-lg flex items-center justify-center border-2 border-sky-500">
-                  <TreePalm className="w-6 h-6 text-sky-600" />
-                </div>
+                <img src={"/island_logo.png"} alt="Logo" className="w-8 h-6" />
                 <span className="font-semibold">Island 360</span>
               </div>
               <p className="text-sm text-slate-500">

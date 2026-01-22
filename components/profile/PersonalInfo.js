@@ -30,6 +30,7 @@ export default function PersonalInfoSection({ user }) {
       console.log(formData, "formdata", data);
       const res = await Update(data).unwrap();
       toast.success(res?.message)
+      setIsEditing(false);
       console.log(res, "res");
     } catch (error) {
       console.log(error);
