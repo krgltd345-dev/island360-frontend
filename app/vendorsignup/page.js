@@ -213,11 +213,12 @@ export default function VendorSignup() {
               </div>
 
               <div className="space-y-2">
-                <Label>Business License Number</Label>
+                <Label>Business License Number { !formData?.nonProfitStatus && '*'}</Label>
                 <Input
                   value={formData.businessLicenseNumber}
                   onChange={(e) => setFormData({ ...formData, businessLicenseNumber: e.target.value })}
                   placeholder="License #"
+                  required={!formData?.nonProfitStatus}
                 />
               </div>
 
@@ -294,10 +295,9 @@ export default function VendorSignup() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Tax Document *</Label>
+                    <Label>{`Tax Document (Optional)`}</Label>
                     <Input
                       type="file"
-                      required
                       accept="application/pdf"
                       disabled={uploadingDocs}
                       onChange={(e) => handleDocumentUpload(e.target.files[0], 'taxDoc')}

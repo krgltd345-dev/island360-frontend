@@ -2,13 +2,15 @@
 import { Calendar, List, LogOut, Menu, MessageSquare, Target, TreePalm, Users } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '../ui/sheet';
 import { Button } from '../ui/button';
 import { useGetUserRoleQuery, userApi } from '@/services/userApi';
 import { toast } from 'sonner';
 import { useLogOutMutation } from '@/services/authApi';
 import { useDispatch } from 'react-redux';
+import { deleteCookie, setCookie } from 'cookies-next';
+import { setIsLogin } from '@/services/globalSlice';
 
 const Navbar = () => {
   const router = useRouter()
@@ -28,6 +30,7 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       const res = await Logout().unwrap();
+      deleteCookie('role')
       // dispatch(userApi.util.resetApiState())
       toast.success(res?.message)
       router.push("/login");
@@ -35,6 +38,17 @@ const Navbar = () => {
       toast.error(error?.data?.message)
     }
   }
+
+
+  useEffect(() => {
+    if (userRoleInfo?.data?.user?.role) {
+      const role = userRoleInfo?.data?.user?.vendorId ? 'VENDOR' : userRoleInfo?.data?.user?.role
+      setCookie("role", role)
+      dispatch(setIsLogin(true))
+    }else{
+      dispatch(setIsLogin(false))
+    }
+  }, [userRoleInfo])
 
 
   return (

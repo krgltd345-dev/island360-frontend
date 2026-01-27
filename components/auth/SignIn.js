@@ -8,10 +8,12 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import SocialLogin from './SocialLogin';
 import { useLoginMutation } from '@/services/authApi';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function SignIn({ onSwitchToSignUp, onSwitchToForgotPassword, getGoogleLogin }) {
-    const router = useRouter()
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get('redirect');
+  const router = useRouter()
   const [Login] = useLoginMutation()
   const [formData, setFormData] = useState({
     email: '',
@@ -72,7 +74,7 @@ export default function SignIn({ onSwitchToSignUp, onSwitchToForgotPassword, get
       const res = await Login(formData).unwrap()
       console.log(res, "Login res");
       toast.success(res?.message)
-      router.push("/profile")
+      router.push(redirectUrl || '/');
     } catch (error) {
       console.log(error);
       toast.error(error?.data?.message || 'Failed to sign in. Please try again.');

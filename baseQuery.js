@@ -15,6 +15,17 @@ const baseQuery = fetchBaseQuery({
 let isRefreshing = false
 let refreshPromise = null
 
+// Public routes that don't require authentication
+const publicRoutes = ['/', '/activityDetail', '/login'];
+
+// Check if current route is public
+const isPublicRoute = () => {
+  if (typeof window === 'undefined') return false;
+  const pathname = window.location.pathname;
+  // Check for exact match or if pathname starts with the route (for nested routes)
+  return publicRoutes.some(route => pathname === route || (route !== '/' && pathname.startsWith(route)));
+};
+
 // Custom baseQuery with token refresh logic
 const baseQueryWithReauth = async (args, api, extraOptions) => {
   let result = await baseQuery(args, api, extraOptions)
@@ -28,6 +39,11 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
       args?.url === 'auth/logout' ||
       args?.url === '/auth/logout'
     ) {
+      return result
+    }
+
+    // If we're on a public route, don't redirect - just return the error
+    if (isPublicRoute()) {
       return result
     }
 
@@ -75,8 +91,8 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
         console.error('Logout failed:', logoutError)
       }
       
-      // Redirect to login page
-      if (typeof window !== 'undefined') {
+      // Only redirect to login if we're not on a public route
+      if (typeof window !== 'undefined' && !isPublicRoute()) {
         window.location.href = '/login'
       }
     }

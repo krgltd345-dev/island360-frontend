@@ -20,6 +20,10 @@ import { toast } from 'sonner';
 // import VendorCalendarSync from '@/components/vendor/VendorCalendarSync';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import LayoutWrapper from '@/components/layout/LayoutWrapper';
+import { useUploadImageMutation } from '@/services/upload';
+import { useCreateActivityMutation, useGetAllActivitiesQuery, useGetCategoryQuery, useRemoveActivityMutation, useUpdateActivityMutation } from '@/services/activityApi';
+import { useGetUserRoleQuery } from '@/services/userApi';
+import Link from 'next/link';
 
 
 const user = {
@@ -257,30 +261,51 @@ const bookings = [
   }
 ]
 
+const scale = {
+  m: "Minutes",
+  h: "Hours",
+}
+
 export default function VendorDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editingActivity, setEditingActivity] = useState(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    category: 'other',
-    description: '',
-    price: '',
-    billing_type: 'per_person',
-    group_size: '',
-    duration: '',
-    minimum_duration: '',
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [timeScale, setTimeScale] = useState('m');
+  const { data: categories } = useGetCategoryQuery()
+  const [images, setImages] = useState({
     image_url: '',
     image_url_2: '',
     image_url_3: '',
-    max_guests: '',
-    available: true,
-    operational_days: [],
-    operational_hours_start: '09:00',
-    operational_hours_end: '17:00',
+  })
+  const [formData, setFormData] = useState({
+    name: '',
+    category: '',
+    description: '',
+    type: 'SELF_GUIDED_TOUR',  // GUIDED_TOUR, SELF_GUIDED_TOUR 
+    billingType: 'PER_PERSON', //PER_UNIT, 
+    price: '', //number
+    maxGuests: '', //number
+    availableSpots: '', //n
+    durationMinutes: '', //n
+    minDurationMinutes: '', //n
+    imageUrls: [], //
+    operationalDays: [],
+    operationalHoursStart: '09:00',
+    operationalHoursEnd: '17:00',
+    availableForBooking: true,
+    allowGroupBookings: true,
   });
-  const [uploadingImages, setUploadingImages] = useState(false);
+  const { data: userRoleInfo, isLoading: userRoleInfoFetching } = useGetUserRoleQuery()
+  const { data: Actiities } = useGetAllActivitiesQuery({
+    vendorId: userRoleInfo?.data?.user?.vendorId
+  }, { skip: !userRoleInfo?.data?.user?.vendorId })
+  const [Create] = useCreateActivityMutation()
+  const [Update] = useUpdateActivityMutation()
+  const [Remove] = useRemoveActivityMutation()
+  const [UploadImage] = useUploadImageMutation();
 
   // useEffect(() => {
   //   const checkAuth = async () => {
@@ -340,25 +365,23 @@ export default function VendorDashboard() {
   const resetForm = () => {
     setFormData({
       name: '',
-      category: 'other',
+      category: '',
       description: '',
-      price: '',
-      billing_type: 'per_person',
-      guided_type: 'self_guided',
-      unit_name: '',
-      group_size: '',
-      duration: '',
-      minimum_duration: '',
-      image_url: '',
-      image_url_2: '',
-      image_url_3: '',
-      max_guests: '',
-      default_capacity: '',
-      available: true,
-      operational_days: [],
-      operational_hours_start: '09:00',
-      operational_hours_end: '17:00',
+      type: 'SELF_GUIDED_TOUR',  // GUIDED_TOUR, SELF_GUIDED_TOUR 
+      billingType: 'PER_PERSON', //PER_UNIT, 
+      price: '', //number
+      maxGuests: '', //number
+      availableSpots: '', //n
+      durationMinutes: '', //n
+      minDurationMinutes: '', //n
+      imageUrls: [], //
+      operationalDays: [],
+      operationalHoursStart: '09:00',
+      operationalHoursEnd: '17:00',
+      availableForBooking: true,
+      allowGroupBookings: true,
     });
+    setTimeScale("m")
     setEditingActivity(null);
   };
 
@@ -368,10 +391,13 @@ export default function VendorDashboard() {
 
     setUploadingImages(true);
     try {
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      setFormData({ ...formData, [fieldName]: file_url });
+      const formData = new FormData()
+      formData.append("image", file)
+      const res = await UploadImage({ formData }).unwrap()
+      setImages({ ...images, [fieldName]: res?.data?.url });
       toast.success('Image uploaded successfully');
     } catch (error) {
+      console.log(error, "error");
       toast.error('Failed to upload image');
     }
     setUploadingImages(false);
@@ -380,39 +406,76 @@ export default function VendorDashboard() {
   const handleEdit = (activity) => {
     setEditingActivity(activity);
     setFormData(activity);
+    setImages({
+      image_url: activity?.imageUrls?.[0] || '',
+      image_url_2: activity?.imageUrls?.[1] || '',
+      image_url_3: activity?.imageUrls?.[2] || '',
+    })
     setDialogOpen(true);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = {
-      ...formData,
-      price: parseFloat(formData.price),
-      max_guests: formData.max_guests ? parseInt(formData.max_guests) : null,
-      minimum_duration: formData.minimum_duration ? parseFloat(formData.minimum_duration) : null,
-      group_size: formData.billing_type === 'per_group' && formData.group_size ? parseInt(formData.group_size) : null,
-      unit_name: formData.billing_type === 'per_unit' ? formData.unit_name : null,
-      default_capacity: formData.default_capacity ? parseInt(formData.default_capacity) : null,
-      vendor_id: user?.id,
-    };
+    try {
+      const data = {
+        ...formData,
+        price: parseFloat(formData.price),
+        maxGuests: formData.maxGuests ? parseInt(formData.maxGuests) : null,
+        availableSpots: formData.availableSpots ? parseInt(formData.availableSpots) : null,
+        ...(formData?.allowGroupBookings && { maxGroupSize: parseInt(formData.maxGroupSize) }),
+        minDurationMinutes: (formData.minDurationMinutes && timeScale == "h") ? formData.minDurationMinutes * 60 : (formData.minDurationMinutes && timeScale == "d") ? formData.minDurationMinutes * 60 * 24 : parseFloat(formData.minDurationMinutes),
+        durationMinutes: (formData.durationMinutes && timeScale == "h") ? formData.durationMinutes * 60 : (formData.durationMinutes && timeScale == "d") ? formData.durationMinutes * 60 * 24 : parseFloat(formData.durationMinutes),
+        imageUrls: Object.values(images).filter(Boolean),
+        ...(editingActivity && formData?.category?.name && { category: formData?.category?._id }),
+      };
 
-    if (editingActivity) {
-      updateActivityMutation.mutate({ id: editingActivity.id, data });
-    } else {
-      createActivityMutation.mutate(data);
+      console.log(data, "Create");
+      let res;
+      if (editingActivity) {
+        res = await Update(data).unwrap()
+      } else {
+        res = await Create(data).unwrap()
+      }
+      toast.success(res?.message)
+      setDialogOpen(false);
+      setTimeScale("m")
+    } catch (error) {
+      toast.error(error?.data?.message)
+      console.log(error);
     }
   };
+
+  const handleUpdateActivityStatus = async (status, _id) => {
+    try {
+      const res = await Update({ availableForBooking: !status, _id }).unwrap();
+      toast.success(res?.message)
+    } catch (error) {
+      toast.error(error?.data?.message)
+      console.log(error);
+    }
+  }
+
+  const handleRemove = async () => {
+    try {
+      const res = await Remove({ id: formData?._id }).unwrap();
+      toast.success(res?.message)
+      resetForm()
+    } catch (error) {
+      toast.error(error?.data?.message)
+      console.log(error);
+    }
+  }
 
   const toggleDay = (day) => {
-    const days = formData.operational_days || [];
+    const days = formData.operationalDays || [];
     if (days.includes(day)) {
-      setFormData({ ...formData, operational_days: days.filter(d => d !== day) });
+      setFormData({ ...formData, operationalDays: days.filter(d => d !== day) });
     } else {
-      setFormData({ ...formData, operational_days: [...days, day] });
+      setFormData({ ...formData, operationalDays: [...days, day] });
     }
   };
 
-  const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+  const daysOfWeek = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
   const totalRevenue = myBookings.reduce((sum, b) => sum + (b.total_price || 0), 0);
 
@@ -431,26 +494,27 @@ export default function VendorDashboard() {
   }
 
   if (
-    // !user.is_vendor || !user.vendor_approved
-    false
+    !userRoleInfo?.data?.user?.vendorId
   ) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Card className="p-8 text-center max-w-md">
-          <Shield className="w-16 h-16 text-amber-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Vendor Access Required</h2>
-          <p className="text-slate-600 mb-6">
-            {user.is_vendor
-              ? 'Your vendor application is pending approval'
-              : 'You need to apply for vendor access to use this portal'}
-          </p>
-          {!user.is_vendor && (
-            <Link to={createPageUrl('VendorSignup')}>
-              <Button className="bg-slate-900">Apply as Vendor</Button>
-            </Link>
-          )}
-        </Card>
-      </div>
+      <LayoutWrapper>
+        <div className="flex-1 bg-slate-50 flex items-center justify-center">
+          <Card className="p-8 text-center max-w-md">
+            <Shield className="w-16 h-16 text-amber-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">Vendor Access Required</h2>
+            <p className="text-slate-600 mb-6">
+              {userRoleInfo?.data?.user?.vendorStatus == 'pending'
+                ? 'Your vendor application is pending approval'
+                : 'You need to apply for vendor access to use this portal'}
+            </p>
+            {!userRoleInfo?.data?.user?.vendorStatus && (
+              <Link href={'/vendorsignup'}>
+                <Button className="bg-slate-900">Apply as Vendor</Button>
+              </Link>
+            )}
+          </Card>
+        </div>
+      </LayoutWrapper>
     );
   }
 
@@ -473,7 +537,7 @@ export default function VendorDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-slate-600 text-sm">Total Activities</p>
-                      <p className="text-3xl font-bold text-slate-900">{myActivities.length}</p>
+                      <p className="text-3xl font-bold text-slate-900">{Actiities?.pagination?.total}</p>
                     </div>
                     <div className="w-12 h-12 bg-sky-100 rounded-xl flex items-center justify-center">
                       <Calendar className="w-6 h-6 text-sky-600" />
@@ -526,7 +590,7 @@ export default function VendorDashboard() {
 
             <TabsContent value="activities" className="space-y-6">
               <h2 className="text-xl font-semibold text-slate-900">My Activities</h2>
-              {myActivities.length === 0 ? (
+              {Actiities?.pagination?.total === 0 ? (
                 <Card className="p-12 text-center">
                   <Calendar className="w-16 h-16 text-slate-300 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold text-slate-900 mb-2">No Activities Yet</h3>
@@ -538,41 +602,38 @@ export default function VendorDashboard() {
                 </Card>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {myActivities.map((activity) => (
-                    <Card key={activity.id} className="overflow-hidden py-0">
+                  {Actiities?.data?.map((activity) => (
+                    <Card key={activity?._id} className="overflow-hidden py-0 hover:shadow-lg transition-shadow">
                       <img
-                        src={activity.image_url || 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400'}
-                        alt={activity.name}
+                        src={activity?.imageUrls[0] || 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400'}
+                        alt={activity?.name}
                         className="w-full h-48 object-cover"
                       />
                       <div className="p-4">
                         <h3 className="font-semibold text-lg text-slate-900 mb-2">{activity.name}</h3>
-                        <p className="text-slate-600 text-sm mb-3 line-clamp-2">{activity.description}</p>
+                        <p className="text-slate-600 text-sm mb-3 h-10 line-clamp-2">{activity.description}</p>
                         <div className="space-y-2 mb-3">
                           <div className="flex items-center justify-between">
                             <span className="text-lg font-bold text-slate-900">${activity.price}</span>
                           </div>
-                          {activity.default_capacity && (
+                          {activity.availableSpots && (
                             <p className="text-xs text-slate-500">
-                              {activity.default_capacity} {activity.billing_type === 'per_unit' ? 'units' : 'spots'} per time slot
+                              {activity.availableSpots} {activity.billingType === 'PER_UNIT' ? 'units' : 'spots'} per time slot
                             </p>
                           )}
                           <div className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-lg">
                             <span className="text-sm font-medium text-slate-700">
-                              {activity.available ? 'Active' : 'Inactive'}
+                              {activity.availableForBooking ? 'Active' : 'Inactive'}
                             </span>
                             <button
                               onClick={() => {
-                                updateActivityMutation.mutate({
-                                  id: activity.id,
-                                  data: { available: !activity.available }
-                                });
+                                handleUpdateActivityStatus(activity.availableForBooking, activity?._id)
                               }}
-                              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${activity.available ? 'bg-green-600' : 'bg-slate-300'
+                              className={`relative cursor-pointer inline-flex h-6 w-11 items-center rounded-full transition-colors ${activity.availableForBooking ? 'bg-green-600' : 'bg-slate-300'
                                 }`}
                             >
                               <span
-                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${activity.available ? 'translate-x-6' : 'translate-x-1'
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${activity.availableForBooking ? 'translate-x-6' : 'translate-x-1'
                                   }`}
                               />
                             </button>
@@ -591,7 +652,10 @@ export default function VendorDashboard() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => deleteActivityMutation.mutate(activity.id)}
+                            onClick={() => {
+                              setDeleteDialogOpen(true)
+                              setFormData(activity);
+                            }}
                             className="text-red-600 hover:text-red-700"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -662,17 +726,27 @@ export default function VendorDashboard() {
                   </div>
                   <div className="space-y-2">
                     <Label>Category *</Label>
-                    <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+                    <Select value={editingActivity && formData.category?._id ? formData.category?._id : formData?.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="boating">Boating</SelectItem>
+                        {
+                          categories?.data?.map((item) => {
+                            return (
+                              <SelectItem key={item?._id} value={item?._id}>{item?.name}</SelectItem>
+                            )
+                          })
+                        }
+                        {/* <SelectItem value="boating">Boating</SelectItem>
                         <SelectItem value="scooter">Scooter</SelectItem>
                         <SelectItem value="kayak_paddleboard">Kayak/Paddleboard</SelectItem>
                         <SelectItem value="nature_trails">Nature Trails</SelectItem>
                         <SelectItem value="jet_ski">Jet Ski</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
+                        {false && (
+                          <SelectItem value="non_profit">Non-Profit/Community Service</SelectItem>
+                        )}
+                        <SelectItem value="other">Other</SelectItem> */}
                       </SelectContent>
                     </Select>
                   </div>
@@ -680,13 +754,13 @@ export default function VendorDashboard() {
 
                 <div className="space-y-2">
                   <Label>Activity Type *</Label>
-                  <Select value={formData.guided_type} onValueChange={(value) => setFormData({ ...formData, guided_type: value })}>
+                  <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="guided">Guided (with instructor/guide)</SelectItem>
-                      <SelectItem value="self_guided">Self-Guided (rental/independent)</SelectItem>
+                      <SelectItem value="GUIDED_TOUR">Guided (with instructor/guide)</SelectItem>
+                      <SelectItem value="SELF_GUIDED_TOUR">Self-Guided (rental/independent)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -702,162 +776,121 @@ export default function VendorDashboard() {
 
                 <div className="space-y-2">
                   <Label>Billing Type *</Label>
-                  <Select value={formData.billing_type} onValueChange={(value) => setFormData({ ...formData, billing_type: value })}>
+                  <Select value={formData.billingType} onValueChange={(value) => setFormData({ ...formData, billingType: value })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="per_person">Per Person</SelectItem>
-                      <SelectItem value="per_group">Per Group (Fixed Price)</SelectItem>
-                      <SelectItem value="per_hour">Per Hour</SelectItem>
-                      <SelectItem value="per_unit">Per Unit (Car/Scooter/Kayak/etc.)</SelectItem>
+                      <SelectItem value="PER_PERSON">Per Person</SelectItem>
+                      {/* <SelectItem value="per_group">Per Group (Fixed Price)</SelectItem> */}
+                      <SelectItem value="PER_HOUR">Per Hour</SelectItem>
+                      <SelectItem value="PER_UNIT">Per Unit (Car/Scooter/Kayak/etc.)</SelectItem>
                     </SelectContent>
                   </Select>
-                  {formData.billing_type === 'per_group' && (
-                    <p className="text-xs text-slate-500">
-                      Fixed price regardless of group size
-                    </p>
-                  )}
-                  {formData.billing_type === 'per_hour' && (
-                    <p className="text-xs text-slate-500">
-                      Price is charged per hour booked
-                    </p>
-                  )}
-                  {formData.billing_type === 'per_unit' && (
-                    <p className="text-xs text-slate-500">
-                      Price per rental unit (e.g., per car, scooter, kayak)
-                    </p>
-                  )}
                 </div>
-
-                {formData.billing_type === 'per_unit' && (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={formData.allowGroupBookings}
+                    onChange={(e) => setFormData({ ...formData, allowGroupBookings: e.target.checked })}
+                    className="w-4 h-4"
+                  />
+                  <Label>Allow Group Bookings</Label>
+                </div>
+                {formData?.allowGroupBookings && (
                   <div className="space-y-2">
-                    <Label>Unit Name *</Label>
+                    <Label>Maximum Group Size *</Label>
                     <Input
-                      value={formData.unit_name}
-                      onChange={(e) => setFormData({ ...formData, unit_name: e.target.value })}
-                      placeholder="e.g., car, scooter, kayak, bicycle"
+                      type="number"
+                      value={formData?.maxGroupSize || ''}
+                      onChange={(e) => setFormData({ ...formData, maxGroupSize: e.target.value })}
                       required
                     />
-                    <p className="text-xs text-slate-500">
-                      What are customers renting? (singular form)
-                    </p>
                   </div>
                 )}
-
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Price {formData.billing_type === 'per_person' ? 'per Person' : formData.billing_type === 'per_hour' ? 'per Hour' : 'per Group'} *</Label>
+                    <Label>Price {'*'}</Label>
                     <Input
                       type="number"
                       step="0.01"
                       value={formData.price}
                       onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                      placeholder="99.00"
                       required
                     />
                   </div>
-                  {formData.billing_type === 'per_group' && (
-                    <div className="space-y-2">
-                      <Label>Maximum Group Size *</Label>
-                      <Input
-                        type="number"
-                        value={formData.group_size}
-                        onChange={(e) => setFormData({ ...formData, group_size: e.target.value })}
-                        placeholder="e.g., 8"
-                        required
-                      />
-                      <p className="text-xs text-slate-500">
-                        Maximum number allowed per group booking
-                      </p>
-                    </div>
-                  )}
                   <div className="space-y-2">
-                    <Label>Max Guests {formData.billing_type === 'per_unit' && '(per unit)'}</Label>
+                    <Label>Max Guests</Label>
                     <Input
                       type="number"
-                      value={formData.max_guests}
-                      onChange={(e) => setFormData({ ...formData, max_guests: e.target.value })}
-                      placeholder="8"
+                      value={formData.maxGuests}
+                      onChange={(e) => setFormData({ ...formData, maxGuests: e.target.value })}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Available Units/Spots</Label>
+                    <Label>Available Spots</Label>
                     <Input
                       type="number"
-                      value={formData.default_capacity}
-                      onChange={(e) => setFormData({ ...formData, default_capacity: e.target.value })}
-                      placeholder="10"
+                      value={formData.availableSpots}
+                      onChange={(e) => setFormData({ ...formData, availableSpots: e.target.value })}
                     />
-                    <p className="text-xs text-slate-500">
-                      How many {formData.billing_type === 'per_unit' ? 'units' : formData.billing_type === 'per_person' ? 'people' : 'bookings'} can you accommodate per time slot?
-                    </p>
                   </div>
                 </div>
 
+
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Typical Duration</Label>
-                    <Input
-                      value={formData.duration}
-                      onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                      placeholder="e.g., 2 hours, Half day"
-                    />
+                    <Label>Duration ( in {scale[timeScale]} )</Label>
+                    <div className='flex gap-2 items-center'>
+                      <Select value={timeScale} onValueChange={(value) => setTimeScale(value)}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="m">Minutes</SelectItem>
+                          {/* <SelectItem value="per_group">Per Group (Fixed Price)</SelectItem> */}
+                          <SelectItem value="h">Hours</SelectItem>
+                          {/* <SelectItem value="d">Days</SelectItem> */}
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        type="number"
+                        value={formData.durationMinutes}
+                        onChange={(e) => setFormData({ ...formData, durationMinutes: e.target.value })}
+                        placeholder={timeScale == "m" ? "e.g., 60, 120" : "e.g., 1,2,4.."}
+                      />
+                    </div>
                   </div>
                   <div className="space-y-2">
-                    <Label>Minimum Booking Duration (hours)</Label>
+                    <Label>Min Duration ( in {scale[timeScale]} )</Label>
                     <Input
                       type="number"
-                      step="0.5"
-                      value={formData.minimum_duration}
-                      onChange={(e) => setFormData({ ...formData, minimum_duration: e.target.value })}
-                      placeholder="1"
+                      // step="0.5"
+                      placeholder={timeScale == "m" ? "e.g., 60, 120" : "e.g., 1,2,4.."}
+                      value={formData.minDurationMinutes}
+                      onChange={(e) => setFormData({ ...formData, minDurationMinutes: e.target.value })}
                     />
                   </div>
                 </div>
 
                 <div className="space-y-4">
-                  <Label>Activity Photos (Max 3)</Label>
+                  <Label>Activity Photos</Label>
                   <div className="grid grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-sm">Photo 1</Label>
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleImageUpload(e, 'image_url')}
-                        disabled={uploadingImages}
-                        className="text-sm"
-                      />
-                      {formData.image_url && (
-                        <img src={formData.image_url} alt="Preview 1" className="w-full h-24 object-cover rounded" />
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm">Photo 2</Label>
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleImageUpload(e, 'image_url_2')}
-                        disabled={uploadingImages}
-                        className="text-sm"
-                      />
-                      {formData.image_url_2 && (
-                        <img src={formData.image_url_2} alt="Preview 2" className="w-full h-24 object-cover rounded" />
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-sm">Photo 3</Label>
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleImageUpload(e, 'image_url_3')}
-                        disabled={uploadingImages}
-                        className="text-sm"
-                      />
-                      {formData.image_url_3 && (
-                        <img src={formData.image_url_3} alt="Preview 3" className="w-full h-24 object-cover rounded" />
-                      )}
-                    </div>
+                    {['image_url', 'image_url_2', 'image_url_3'].map((field, idx) => (
+                      <div key={field} className="space-y-2">
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleImageUpload(e, field)}
+                          disabled={uploadingImages}
+                          className="text-sm"
+                        />
+                        {images[field] && (
+                          <img src={images[field]} alt={`Preview ${idx + 1}`} className="w-full h-24 object-cover rounded" />
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
 
@@ -868,7 +901,7 @@ export default function VendorDashboard() {
                   </Label>
                   <div className="flex flex-wrap gap-2">
                     {daysOfWeek.map((day) => {
-                      const isSelected = (formData.operational_days || []).includes(day);
+                      const isSelected = (formData.operationalDays || []).includes(day);
                       return (
                         <button
                           key={day}
@@ -891,16 +924,16 @@ export default function VendorDashboard() {
                     <Label>Operating Hours Start</Label>
                     <Input
                       type="time"
-                      value={formData.operational_hours_start}
-                      onChange={(e) => setFormData({ ...formData, operational_hours_start: e.target.value })}
+                      value={formData.operationalHoursStart}
+                      onChange={(e) => setFormData({ ...formData, operationalHoursStart: e.target.value })}
                     />
                   </div>
                   <div className="space-y-2">
                     <Label>Operating Hours End</Label>
                     <Input
                       type="time"
-                      value={formData.operational_hours_end}
-                      onChange={(e) => setFormData({ ...formData, operational_hours_end: e.target.value })}
+                      value={formData.operationalHoursEnd}
+                      onChange={(e) => setFormData({ ...formData, operationalHoursEnd: e.target.value })}
                     />
                   </div>
                 </div>
@@ -908,13 +941,12 @@ export default function VendorDashboard() {
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
-                    checked={formData.available}
-                    onChange={(e) => setFormData({ ...formData, available: e.target.checked })}
+                    checked={formData.availableForBooking}
+                    onChange={(e) => setFormData({ ...formData, availableForBooking: e.target.checked })}
                     className="w-4 h-4"
                   />
                   <Label>Available for booking</Label>
                 </div>
-
                 <div className="flex gap-3 pt-4 border-t">
                   <Button type="button" variant="outline" onClick={() => { setDialogOpen(false); resetForm(); }} className="flex-1">
                     Cancel
@@ -924,6 +956,23 @@ export default function VendorDashboard() {
                   </Button>
                 </div>
               </form>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            <DialogContent className=" max-w-80! overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>{'Remove Activity'}</DialogTitle>
+              </DialogHeader>
+
+              <div className="flex gap-3 pt-4">
+                <Button type="button" variant="outline" onClick={() => setDeleteDialogOpen(false)} className="flex-1">
+                  Cancel
+                </Button>
+                <Button type="button" onClick={() => handleRemove()} className="flex-1 bg-slate-900">
+                  Remove
+                </Button>
+              </div>
             </DialogContent>
           </Dialog>
         </div>

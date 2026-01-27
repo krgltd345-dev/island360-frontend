@@ -5,12 +5,13 @@ import { FcGoogle } from 'react-icons/fc'
 import { useGoogleLoginMutation } from '@/services/authApi';
 import { Button } from '../ui/button';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const SocialLogin = () => {
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get('redirect');
   const router = useRouter()
   const dispatch = useDispatch()
-
   const [googleLogin] = useGoogleLoginMutation();
 
 
@@ -21,7 +22,7 @@ const SocialLogin = () => {
         const response = await googleLogin({
           code: tokenResponse?.code,
         }).unwrap();
-        router.push('/profile');
+        router.push(redirectUrl || '/');
         toast.success(response?.message)
         // if (response) {
         //   console.log(response?.authToken, "token");

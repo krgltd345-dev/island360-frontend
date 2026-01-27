@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Edit, Save, X, Upload, MessageCircleWarning } from 'lucide-react';
+import { Edit, Save, X, Upload, MessageCircleWarning, Search, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { useUpdateUserMutation } from '@/services/userApi';
 import { useUploadImageMutation } from '@/services/upload';
+import { countries, getCountryByCode } from '@/lib/countries';
 
 export default function PersonalInfoSection({ user }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -17,7 +18,47 @@ export default function PersonalInfoSection({ user }) {
     name: user?.name || '',
     phoneNumber: user?.phoneNumber || '',
     address: user?.address || '',
+    countryCode: user?.countryCode || '',
+    postalCode: user?.postalCode || '',
   });
+  
+  const [countrySearch, setCountrySearch] = useState('');
+  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
+  const countryDropdownRef = useRef(null);
+  const countryInputRef = useRef(null);
+
+  const filteredCountries = countries.filter(country =>
+    country.name.toLowerCase().includes(countrySearch.toLowerCase()) ||
+    country.code.toLowerCase().includes(countrySearch.toLowerCase())
+  );
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (countryDropdownRef.current && !countryDropdownRef.current.contains(event.target)) {
+        setIsCountryDropdownOpen(false);
+      }
+    };
+
+    if (isCountryDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isCountryDropdownOpen]);
+
+  useEffect(() => {
+    if (!isCountryDropdownOpen) {
+      setCountrySearch('');
+    }
+  }, [isCountryDropdownOpen]);
+
+  const handleCountrySelect = (countryCode) => {
+    setFormData({ ...formData, countryCode });
+    setIsCountryDropdownOpen(false);
+    setCountrySearch('');
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,6 +67,8 @@ export default function PersonalInfoSection({ user }) {
         ...(formData?.name !== user?.name && { name: formData?.name }),
         ...(formData?.address !== user?.address && formData?.address !== "" && { address: formData?.address }),
         ...(formData?.phoneNumber !== user?.phoneNumber && formData?.phoneNumber !== "" && { phoneNumber: formData?.phoneNumber }),
+        ...(formData?.countryCode !== user?.countryCode && formData?.countryCode !== "" && { countryCode: formData?.countryCode }),
+        ...(formData?.postalCode !== user?.postalCode && formData?.postalCode !== "" && { postalCode: formData?.postalCode }),
       }
       console.log(formData, "formdata", data);
       const res = await Update(data).unwrap();
@@ -43,6 +86,8 @@ export default function PersonalInfoSection({ user }) {
       name: user?.name || '',
       phoneNumber: user?.phoneNumber || '',
       address: user?.address || '',
+      countryCode: user?.countryCode || '',
+      postalCode: user?.postalCode || '',
     });
     setIsEditing(false);
   };
@@ -169,6 +214,90 @@ export default function PersonalInfoSection({ user }) {
           ) : (
             <p className="text-slate-900 font-medium">{user.address || 'Not provided'}</p>
           )}
+        </div>
+        <div className='flex gap-4 w-full'>
+        <div className="space-y-2 w-full">
+          <Label>Country Code</Label>
+          {isEditing ? (
+            <div className="relative" ref={countryDropdownRef}>
+              <div className="relative">
+                <Input
+                  ref={countryInputRef}
+                  type="text"
+                  value={isCountryDropdownOpen ? countrySearch : (formData.countryCode && getCountryByCode(formData.countryCode) ? `${getCountryByCode(formData.countryCode).flag} ${getCountryByCode(formData.countryCode).code} - ${getCountryByCode(formData.countryCode).name}` : '')}
+                  onChange={(e) => {
+                    setCountrySearch(e.target.value);
+                    setIsCountryDropdownOpen(true);
+                  }}
+                  onFocus={() => {
+                    setIsCountryDropdownOpen(true);
+                    if (formData.countryCode && getCountryByCode(formData.countryCode)) {
+                      setCountrySearch('');
+                    }
+                  }}
+                  placeholder={formData.countryCode ? "Search country..." : "Search country..."}
+                  className="w-full pr-10"
+                />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 pointer-events-none">
+                  <Search className="w-4 h-4 text-slate-400" />
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isCountryDropdownOpen ? 'rotate-180' : ''}`} />
+                </div>
+              </div>
+              
+              {isCountryDropdownOpen && (
+                <div className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-md shadow-lg max-h-[300px] overflow-y-auto">
+                  {filteredCountries.length > 0 ? (
+                    filteredCountries.map((country) => (
+                      <button
+                        key={country.code}
+                        type="button"
+                        onClick={() => handleCountrySelect(country.code)}
+                        className={`w-full px-3 py-2 text-left hover:bg-slate-100 flex items-center gap-2 transition-colors ${
+                          formData.countryCode === country.code ? 'bg-slate-50' : ''
+                        }`}
+                      >
+                        <span className="text-lg">{country.flag}</span>
+                        <span className="font-medium">{country.code}</span>
+                        <span className="text-slate-500 flex-1">- {country.name}</span>
+                        {formData.countryCode === country.code && (
+                          <span className="text-slate-600">✓</span>
+                        )}
+                      </button>
+                    ))
+                  ) : (
+                    <div className="px-3 py-2 text-slate-500 text-sm text-center">
+                      No countries found
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-slate-900 font-medium">
+              {user?.countryCode && getCountryByCode(user.countryCode) ? (
+                <span className="flex items-center gap-2">
+                  <span>{getCountryByCode(user.countryCode).flag}</span>
+                  <span>{getCountryByCode(user.countryCode).code} - {getCountryByCode(user.countryCode).name}</span>
+                </span>
+              ) : (
+                'Not provided'
+              )}
+            </p>
+          )}
+        </div>
+
+        <div className="space-y-2 w-full">
+          <Label>Postal Code</Label>
+          {isEditing ? (
+            <Input
+              value={formData.postalCode}
+              onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
+              placeholder="Postal/ZIP code"
+            />
+          ) : (
+            <p className="text-slate-900 font-medium">{user.postalCode || 'Not provided'}</p>
+          )}
+        </div>
         </div>
 
         {isEditing && (

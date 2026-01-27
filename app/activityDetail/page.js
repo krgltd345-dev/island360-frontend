@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGetActivityByIdQuery } from "@/services/activityApi";
+import { useGetUserRoleQuery } from "@/services/userApi";
 import { ArrowLeft, Clock, Heart, MessageSquare, Star, Users } from "lucide-react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 
 const activity =
@@ -49,12 +50,15 @@ const activity =
 
 export default function ActivityDetailPage() {
   const searchParams = useSearchParams();
+  const router = useRouter()
   const activityId = searchParams.get('id');
   const { data: Activity, isLoading } = useGetActivityByIdQuery({ id: activityId }, { skip: !activityId })
+  const { data: userRoleInfo, isLoading: userRoleInfoFetching } = useGetUserRoleQuery()
+
   console.log(activityId, "activityId", Activity);
 
 
-  if (isLoading) {
+  if (isLoading || userRoleInfoFetching) {
     return (
       <LayoutWrapper>
         <div className="min-h-[calc(100vh - 154px)] mt-12 bg-slate-50 py-8">
@@ -77,14 +81,14 @@ export default function ActivityDetailPage() {
   if (!Activity) {
     return (
       <LayoutWrapper>
-      <div className=" bg-slate-50 flex flex-1 items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-slate-900 mb-4">Activity not found</h2>
-          <Link href={('/')}>
-            <Button>Back to Activities</Button>
-          </Link>
+        <div className=" bg-slate-50 flex flex-1 items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-slate-900 mb-4">Activity not found</h2>
+            <Link href={('/')}>
+              <Button>Back to Activities</Button>
+            </Link>
+          </div>
         </div>
-      </div>
       </LayoutWrapper>
     );
   }
@@ -216,9 +220,9 @@ export default function ActivityDetailPage() {
                           <span className="text-slate-500 ml-1">
                             {Activity?.data?.billingType === 'PER_HOUR'
                               ? '/ hour'
-                                : Activity?.data?.billing_type === 'PER_UNIT'
-                                  ? `/ ${Activity?.data?.unit_name || 'unit'}`
-                                  : '/ person'}
+                              : Activity?.data?.billing_type === 'PER_UNIT'
+                                ? `/ ${Activity?.data?.unit_name || 'unit'}`
+                                : '/ person'}
                           </span>
                           {Activity?.data?.billingType === 'PER_HOUR' && Activity?.data?.minDurationMinutes && (
                             <p className="text-xs text-slate-600 mt-1">
@@ -242,8 +246,21 @@ export default function ActivityDetailPage() {
                       </p>
                     )} */}
                 </div>
+                {
+                  userRoleInfo?.data?.user ?
+                    <MultiStepBookingForm activity={activity} />
+                    :
+                    <Button
+                      onClick={() => {
+                        const currentPath = `/activityDetail?id=${activityId}`;
+                        router.push(`/login?redirect=${encodeURIComponent(currentPath)}`)
+                      }}
+                      type="button" 
+                      className="flex-1 bg-slate-900">
+                      Login to Continue Booking
+                    </Button>
+                }
 
-                <MultiStepBookingForm activity={activity} />
 
                 {/* {vendor && (
                     <div className="mt-4 pt-4 border-t border-slate-100">
