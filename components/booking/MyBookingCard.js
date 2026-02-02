@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Users, MoreHorizontal, Star, CheckCircle, XCircle, Trash2, Edit, Share2 } from 'lucide-react';
+import { Calendar, Clock, Users, MoreHorizontal, Star, CheckCircle, XCircle, Trash2, Edit, Share2, Landmark } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 import {
@@ -13,21 +13,34 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import ShareBookingDialog from './ShareBookingModal';
+import moment from 'moment';
+import { useCreatePaymentMutation } from '@/services/bookingApi';
+import { useRouter } from 'next/navigation';
 
 const statusStyles = {
-  pending: "bg-amber-100 text-amber-700 border-amber-200",
-  confirmed: "bg-emerald-100 text-emerald-700 border-emerald-200",
-  cancelled: "bg-red-100 text-red-700 border-red-200",
-  completed: "bg-slate-100 text-slate-700 border-slate-200"
+  'HOLD': "bg-amber-100 text-amber-700 border-amber-200",
+  'CONFIRMED': "bg-emerald-100 text-emerald-700 border-emerald-200",
+  "CANCELLED": "bg-red-100 text-red-700 border-red-200",
+  "COMPLETED": "bg-slate-100 text-slate-700 border-slate-200"
 };
 
 export default function BookingCard({ booking, index = 0, onCancel, onDelete, onEdit, onReview, hasReview }) {
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
-  const canReview = booking.status === 'completed' && !hasReview;
-  const canEdit = booking.status === 'pending' || booking.status === 'confirmed';
-  const canCancel = booking.status === 'pending' || booking.status === 'confirmed';
-  const canDelete = booking.status === 'cancelled';
-  const canShare = booking.status === 'confirmed' || booking.status === 'pending';
+  const router = useRouter()
+  const [Payment, { data: paymentData }] = useCreatePaymentMutation()
+  const canReview = booking.status === 'COMPLETED' && !hasReview;
+  const canCancel = booking.status === 'HOLD' || booking.status === 'CONFIRMED';
+  const canDelete = booking.status === 'CANCELLED';
+  const canShare = booking.status === 'CONFIRMED' || booking.status === 'HOLD';
+
+  const handlePaymentClick = async (booking) => {
+    try {
+      const payData = await Payment({ id: booking?._id }).unwrap();
+      router.push(`/checkout?id=${payData?.data?.clientSecret}`)
+    } catch (error) {
+      console.log(error, "error");
+    }
+  };
 
   return (
     <>
@@ -46,14 +59,30 @@ export default function BookingCard({ booking, index = 0, onCancel, onDelete, on
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h3 className="text-lg font-semibold text-slate-900 mb-1">
-                  {booking.activity_name}
+                  {booking?.activityId?.name}
                 </h3>
                 <Badge className={`${statusStyles[booking.status]} border font-medium`}>
                   {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                 </Badge>
               </div>
-
-              <DropdownMenu>
+              <div className='flex gap-2'>
+                {
+                  booking?.groupBooking && 
+                  <Button size='sm' variant="outline" className={"cursor-pointer"} onClick={() => setShareDialogOpen(true)}>
+                    <Share2 className="w-4 h-4 mr-2" />
+                    Invite
+                  </Button>
+                }
+                <Button size='sm' variant="destructive" className={"cursor-pointer"} onClick={() => onCancel(booking)}>
+                  <XCircle className="w-4 h-4 mr-2" />
+                  Cancel
+                </Button>
+                {/* <Button size='sm' variant="outline" onClick={() => onReview(booking)}>
+                  <Star className="w-4 h-4 mr-2 text-amber-500" />
+                  Leave a Review
+                </Button> */}
+              </div>
+              {/* <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="text-slate-400 hover:text-slate-600">
                     <MoreHorizontal className="w-5 h-5" />
@@ -63,16 +92,10 @@ export default function BookingCard({ booking, index = 0, onCancel, onDelete, on
                   {canShare && (
                     <DropdownMenuItem onClick={() => setShareDialogOpen(true)}>
                       <Share2 className="w-4 h-4 mr-2" />
-                      Share & Invite
+                      Invite
                     </DropdownMenuItem>
                   )}
-                  {canEdit && (
-                    <DropdownMenuItem onClick={() => onEdit(booking)}>
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit Booking
-                    </DropdownMenuItem>
-                  )}
-                  {(canShare || canEdit) && (canCancel || canDelete) && <DropdownMenuSeparator />}
+                  {(canShare) && (canCancel || canDelete) && <DropdownMenuSeparator />}
                   {canCancel && (
                     <DropdownMenuItem
                       onClick={() => onCancel(booking)}
@@ -91,7 +114,7 @@ export default function BookingCard({ booking, index = 0, onCancel, onDelete, on
                       Delete Booking
                     </DropdownMenuItem>
                   )}
-                  {(canReview || hasReview) && (canEdit || canCancel || canDelete) && <DropdownMenuSeparator />}
+                  {(canReview || hasReview) && (canCancel || canDelete) && <DropdownMenuSeparator />}
                   {canReview && (
                     <DropdownMenuItem onClick={() => onReview(booking)}>
                       <Star className="w-4 h-4 mr-2 text-amber-500" />
@@ -105,34 +128,54 @@ export default function BookingCard({ booking, index = 0, onCancel, onDelete, on
                     </DropdownMenuItem>
                   )}
                 </DropdownMenuContent>
-              </DropdownMenu>
+              </DropdownMenu> */}
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div className="flex items-center gap-2 text-slate-600">
                 <Calendar className="w-4 h-4 text-slate-400" />
-                <span>{format(new Date(booking.booking_date), 'MMM d, yyyy')}</span>
+                <span>{moment(booking?.bookingDate).format('YYYY MM DD')}</span>
               </div>
               <div className="flex items-center gap-2 text-slate-600">
                 <Clock className="w-4 h-4 text-slate-400" />
-                <span>{booking.booking_time}</span>
+                <span>{booking?.slotStartTime}</span>
               </div>
               <div className="flex items-center gap-2 text-slate-600">
                 <Users className="w-4 h-4 text-slate-400" />
-                <span>{booking.guests} {booking.guests === 1 ? 'Guest' : 'Guests'}</span>
+                <span>{booking?.activityId?.billingType === "PER_UNIT" ?
+                  `${booking?.quantity} Units` : booking?.activityId?.billingType === "PER_HOURS" ?
+                    `${booking?.quantity} Hours` : `${booking?.quantity} Guests`
+                }
+                </span>
               </div>
               <div className="text-right">
-                <span className="text-lg font-bold text-slate-900">${booking.total_price}</span>
+                <span className="text-lg font-bold text-slate-900">${booking?.groupShare ? booking?.groupShare : booking?.totalPrice}</span>
               </div>
             </div>
 
-            {booking.special_requests && (
+            {booking?.specialRequests && (
               <div className="mt-4 pt-4 border-t border-slate-100">
                 <p className="text-sm text-slate-500">
-                  <span className="font-medium">Notes:</span> {booking.special_requests}
+                  <span className="font-medium">Notes:</span> {booking?.specialRequests}
                 </p>
               </div>
             )}
+            {
+              booking?.status === "HOLD"
+              && (
+                <div className="bg-amber-50 mt-6 border border-amber-200 rounded-lg p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Landmark className="w-5 h-5 text-amber-600" />
+                    <div>
+                      <p className="text-sm font-medium text-amber-900">Payment Incomplete</p>
+                      <p className="text-xs text-amber-700">Complete your payment to confirm your Booking</p>
+                    </div>
+                  </div>
+                  <Button onClick={() => handlePaymentClick(booking)} size="sm" className="bg-amber-600 hover:bg-amber-700">
+                    Pay Now
+                  </Button>
+                </div>
+              )}
           </div>
         </Card>
       </motion.div>

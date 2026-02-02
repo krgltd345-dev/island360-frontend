@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react';
-import { CalendarIcon, Users, Clock, Loader2, ShoppingCart, ChevronRight, ChevronLeft, Check } from 'lucide-react';
+import { CalendarIcon, Users, Clock, Loader2, ShoppingCart, ChevronRight, ChevronLeft, Check, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { Label } from '../ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
@@ -11,6 +11,13 @@ import { Input } from '../ui/input';
 import { Switch } from '../ui/switch';
 import { Textarea } from '../ui/textarea';
 import { Badge } from '../ui/badge';
+import { useCreateBookingMutation, useCreatePaymentMutation, useGetAvailableSlotsQuery } from '@/services/bookingApi';
+import { useGetFeeQuery } from '@/services/adminApi';
+import { toast } from 'sonner';
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+import CheckoutForm from '../payments/Checkout';
+import { useRouter } from 'next/navigation';
 
 const steps = [
   { id: 1, name: 'Date & Time', icon: CalendarIcon },
@@ -18,117 +25,34 @@ const steps = [
   { id: 3, name: 'Contact', icon: Check },
 ];
 
-export default function MultiStepBookingForm({ activity }) {
+export default function MultiStepBookingForm({ Activity }) {
+  const router = useRouter()
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGroupBooking, setIsGroupBooking] = useState(false);
-  const [groupMembers, setGroupMembers] = useState([]);
 
   const [formData, setFormData] = useState({
-    booking_date: null,
-    booking_time: '',
-    guests: 1,
-    hours: activity.minimum_duration || 1,
-    customer_name: '',
-    customer_email: '',
-    customer_phone: '',
-    special_requests: '',
-    donation_amount: activity.is_donation_based ? 0 : null,
+    activityId: '',
+    bookingDate: null,
+    slotStartTime: '',
+    slotEndTime: '',
+    specialRequests: '',
+    quantity: 1,
+    groupBooking: false,
   });
-
-  // const { data: currentUser } = useQuery({
-  //   queryKey: ['current-user-booking'],
-  //   queryFn: async () => {
-  //     const isAuth = await base44.auth.isAuthenticated();
-  //     if (!isAuth) return null;
-  //     return base44.auth.me();
-  //   },
-  // });
-
-  // const { data: cartItems = [] } = useQuery({
-  //   queryKey: ['cart-items-conflict'],
-  //   queryFn: () => base44.entities.Cart.list(),
-  //   enabled: !!currentUser,
-  // });
-
-  // const { data: userBookings = [] } = useQuery({
-  //   queryKey: ['user-bookings-conflict'],
-  //   queryFn: () => base44.entities.Booking.list(),
-  //   enabled: !!currentUser,
-  // });
-
-  // const { data: allActivitySchedules = [] } = useQuery({
-  //   queryKey: ['all-activity-schedules', activity.id],
-  //   queryFn: async () => {
-  //     const allSchedules = await base44.entities.ActivitySchedule.list();
-  //     return allSchedules.filter(s => s.activity_id === activity.id);
-  //   },
-  // });
-
-  // const { data: schedules = [] } = useQuery({
-  //   queryKey: ['activity-schedules', activity.id, formData.booking_date],
-  //   queryFn: async () => {
-  //     if (!formData.booking_date) return [];
-  //     const allSchedules = await base44.entities.ActivitySchedule.list();
-  //     const dateStr = format(formData.booking_date, 'yyyy-MM-dd');
-  //     const existingSchedules = allSchedules.filter(s =>
-  //       s.activity_id === activity.id &&
-  //       s.date === dateStr &&
-  //       s.available &&
-  //       !s.blocked
-  //     );
-
-  //     if (existingSchedules.length === 0 && activity.operational_hours_start && activity.operational_hours_end) {
-  //       const dayName = format(formData.booking_date, 'EEEE').toLowerCase();
-  //       const isOperational = !activity.operational_days || activity.operational_days.length === 0 || activity.operational_days.includes(dayName);
-
-  //       if (isOperational) {
-  //         const [startHour] = activity.operational_hours_start.split(':').map(Number);
-  //         const [endHour] = activity.operational_hours_end.split(':').map(Number);
-  //         const defaultSlots = [];
-
-  //         for (let hour = startHour; hour < endHour; hour++) {
-  //           const timeSlot = `${hour.toString().padStart(2, '0')}:00`;
-  //           defaultSlots.push({
-  //             time_slot: timeSlot,
-  //             capacity: activity.default_capacity || activity.max_guests || 10,
-  //             booked_count: 0,
-  //             available: true,
-  //             blocked: false
-  //           });
-  //         }
-  //         return defaultSlots;
-  //       }
-  //     }
-
-  //     return existingSchedules;
-  //   },
-  //   enabled: !!formData.booking_date,
-  // });
-
-  // React.useEffect(() => {
-  //   if (currentUser && !formData.customer_name) {
-  //     setFormData(prev => ({
-  //       ...prev,
-  //       customer_name: currentUser.full_name || '',
-  //       customer_email: currentUser.email || '',
-  //       customer_phone: currentUser.phone || '',
-  //     }));
-  //   }
-  // }, [currentUser]);
-
-  React.useEffect(() => {
-    if (isGroupBooking) {
-      setFormData(prev => ({ ...prev, guests: groupMembers.length + 1 }));
-    }
-  }, [groupMembers.length, isGroupBooking]);
-
+  const { data: slots } = useGetAvailableSlotsQuery({ id: Activity?.data?._id, date: formData?.bookingDate ? format(formData?.bookingDate, 'yyyy-MM-dd') : formData?.bookingDate }, { skip: !formData?.bookingDate })
+  const { data: fee, isLoading: feesLoading } = useGetFeeQuery()
+  const [createBooking] = useCreateBookingMutation()
+  const [Payment] = useCreatePaymentMutation()
   const canProceedToStep = (step) => {
     if (step === 2) {
-      return formData.booking_date && formData.booking_time;
+      return formData?.bookingDate && formData?.slotStartTime;
     }
-    if (step === 3) {
-      return true; // Details step is optional
+    // if (step === 3 && isGroupBooking && !Activity?.data?.billingType == "PER_PERSON") {
+    //   return formData?.quantity;
+    // }
+    if (step === 3 && isGroupBooking && Activity?.data?.billingType !== "PER_PERSON") {
+      return formData?.numberOfPersons;
     }
     return true;
   };
@@ -145,162 +69,47 @@ export default function MultiStepBookingForm({ activity }) {
     setCurrentStep(currentStep - 1);
   };
 
-  const checkAuthAndProceed = async (action) => {
-    const isAuthenticated = await base44.auth.isAuthenticated();
-    if (!isAuthenticated) {
-      base44.auth.redirectToLogin(window.location.href);
-      return false;
-    }
-    return true;
-  };
-
-  // const handleAddToCart = async () => {
-  //   if (!formData.booking_date || !formData.booking_time) {
-  //     toast.error('Please select a date and time');
-  //     return;
-  //   }
-
-  //   const canProceed = await checkAuthAndProceed();
-  //   if (!canProceed) return;
-
-  //   await base44.entities.Cart.create({
-  //     activity_id: activity.id,
-  //     activity_name: activity.name,
-  //     activity_price: activity.is_donation_based ? formData.donation_amount : activity.price,
-  //     booking_date: format(formData.booking_date, 'yyyy-MM-dd'),
-  //     booking_time: formData.booking_time,
-  //     guests: (activity.billing_type === 'per_hour' || activity.billing_type === 'per_unit' || activity.is_donation_based) ? 1 : formData.guests,
-  //     subtotal: activity.is_donation_based ? formData.donation_amount : (activity.billing_type === 'per_group' ? activity.price :
-  //       (activity.billing_type === 'per_hour' || activity.billing_type === 'per_unit') ? activity.price * formData.hours :
-  //         activity.price * formData.guests),
-  //   });
-
-  //   toast.success('Added to cart!');
-  // };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!formData.booking_date || !formData.booking_time) {
-      toast.error('Please select a date and time');
-      return;
-    }
-
-    if (!formData.customer_name || !formData.customer_email) {
-      toast.error('Please fill in your contact details');
-      return;
-    }
-
-    const canProceed = await checkAuthAndProceed();
-    if (!canProceed) return;
-
-    setIsSubmitting(true);
-
-    const shareCode = isGroupBooking ? `BOOK-${Math.random().toString(36).substring(2, 10).toUpperCase()}` : null;
-
-    const bookingData = {
-      activity_id: activity.id,
-      activity_name: activity.name,
-      booking_date: format(formData.booking_date, 'yyyy-MM-dd'),
-      booking_time: formData.booking_time,
-      guests: (activity.billing_type === 'per_hour' || activity.billing_type === 'per_unit' || activity.is_donation_based) ? 1 : formData.guests,
-      total_price: activity.is_donation_based ? formData.donation_amount : (activity.billing_type === 'per_group' ? activity.price :
-        (activity.billing_type === 'per_hour' || activity.billing_type === 'per_unit') ? activity.price * formData.hours :
-          activity.price * formData.guests),
-      customer_name: formData.customer_name,
-      customer_email: formData.customer_email,
-      customer_phone: formData.customer_phone,
-      special_requests: formData.special_requests,
-      status: 'confirmed',
-      is_group_booking: isGroupBooking,
-      group_organizer_id: currentUser?.id,
-      share_code: shareCode
-    };
-
-    const booking = await base44.entities.Booking.create(bookingData);
-
-    if (isGroupBooking) {
-      await base44.entities.BookingParticipant.create({
-        booking_id: booking.id,
-        user_id: currentUser?.id,
-        user_email: currentUser?.email,
-        user_name: currentUser?.full_name,
-        status: 'accepted',
-        is_organizer: true,
-        payment_status: 'paid',
-        amount_paid: bookingData.total_price,
-        booking_number: `BK-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
-      });
-
-      for (const member of groupMembers) {
-        await base44.entities.BookingParticipant.create({
-          booking_id: booking.id,
-          user_email: member.email,
-          user_name: member.name,
-          status: 'pending',
-          is_organizer: false,
-          payment_status: 'unpaid'
-        });
-
-        const shareLink = `${window.location.origin}?join_booking=${shareCode}`;
-        await base44.integrations.Core.SendEmail({
-          to: member.email,
-          subject: `You're invited to join a booking - ${activity.name}`,
-          body: `Hi ${member.name},\n\n${currentUser?.full_name} has invited you to join their booking for "${activity.name}".\n\nDate: ${format(formData.booking_date, 'MMMM d, yyyy')}\nTime: ${formData.booking_time}\n\nClick here to accept and pay your share: ${shareLink}\n\nOr use this code: ${shareCode}\n\nThank you!\nIsland 360`
-        });
+    try {
+      setIsSubmitting(true);
+      if (!formData.bookingDate || !formData?.slotStartTime) {
+        toast.error('Please select a date and time');
+        return;
       }
-    }
+      const timeArr = formData?.slotStartTime.split("-")
 
-    const user = await base44.auth.me();
-    if (user.notifications_booking) {
-      await base44.entities.Notification.create({
-        user_id: user.id,
-        type: 'booking_confirmed',
-        title: 'Booking Confirmed!',
-        message: `Your booking for "${activity.name}" on ${format(formData.booking_date, 'MMM d, yyyy')} has been confirmed.`,
-        link_url: '/MyBookings',
-        related_id: booking.id,
-      });
-    }
+      console.log(timeArr, "timeArr");
+      const data = {
+        ...formData,
+        activityId: Activity?.data?._id,
+        bookingDate: format(formData?.bookingDate, 'yyyy-MM-dd'),
+        groupBooking: isGroupBooking,
+        slotStartTime: timeArr[0],
+        slotEndTime: timeArr[1],
 
-    if (user.notifications_email && user.notifications_booking) {
-      await base44.integrations.Core.SendEmail({
-        to: formData.customer_email,
-        subject: `Booking Confirmation - ${activity.name}`,
-        body: `Hi ${formData.customer_name},\n\nYour booking for "${activity.name}" has been confirmed!\n\nDate: ${format(formData.booking_date, 'MMM d, yyyy')}\nTime: ${formData.booking_time}\nGuests: ${formData.guests}\n\nTotal: $${bookingData.total_price}\n\nThank you for booking with Island 360!`,
-      });
-    }
-
-    if (activity.vendor_id) {
-      const allUsers = await base44.entities.User.list();
-      const vendor = allUsers.find(u => u.id === activity.vendor_id);
-
-      if (vendor) {
-        if (vendor.notifications_booking) {
-          await base44.entities.Notification.create({
-            user_id: vendor.id,
-            type: 'vendor_new_booking',
-            title: 'New Booking!',
-            message: `${formData.customer_name} booked "${activity.name}" for ${format(formData.booking_date, 'MMM d, yyyy')} at ${formData.booking_time}`,
-            link_url: '/VendorDashboard',
-            related_id: booking.id,
-          });
-        }
-
-        if (vendor.notifications_email && vendor.notifications_booking) {
-          await base44.integrations.Core.SendEmail({
-            to: vendor.email,
-            subject: `New Booking - ${activity.name}`,
-            body: `Hi ${vendor.vendor_business_name || vendor.full_name},\n\nYou have a new booking!\n\nActivity: ${activity.name}\nCustomer: ${formData.customer_name}\nEmail: ${formData.customer_email}\nPhone: ${formData.customer_phone}\nDate: ${format(formData.booking_date, 'MMM d, yyyy')}\nTime: ${formData.booking_time}\nGuests: ${formData.guests}\nTotal: $${bookingData.total_price}\n\n${formData.special_requests ? `Special Requests: ${formData.special_requests}\n\n` : ''}Manage your bookings at: ${window.location.origin}/VendorDashboard\n\nThank you!\nIsland 360`
-          });
-        }
       }
+      const res = await createBooking(data).unwrap()
+      console.log(res, "booking res");
+      if (res?.data?.bookingId) {
+        const payData = await Payment({ id: res?.data?.bookingId }).unwrap();
+        router.push(`/checkout?id=${payData?.data?.clientSecret}`)
+      }
+      toast.success('Please Wait, redirecting to payment.');
+      // navigate(createPageUrl('MyBookings'));
+    } catch (error) {
+      console.log(error);
+      toast.error(error?.data?.message)
+    } finally {
+      setIsSubmitting(false);
     }
-
-    toast.success('Booking submitted successfully!');
-    navigate(createPageUrl('MyBookings'));
-    setIsSubmitting(false);
   };
+
+  useEffect(() => {
+    if (Activity?.data?.billingType === 'PER_PERSON' && isGroupBooking) {
+      setFormData({ ...formData, numberOfPersons: formData?.quantity })
+    }
+  }, [isGroupBooking, Activity, formData?.quantity])
 
   return (
     <div className="space-y-6">
@@ -351,22 +160,26 @@ export default function MultiStepBookingForm({ activity }) {
                       className="w-full justify-start text-left font-normal h-12 border-slate-200"
                     >
                       <CalendarIcon className="mr-2 h-4 w-4 text-slate-500" />
-                      {formData.booking_date ? format(formData.booking_date, 'PPP') : <span className="text-slate-500">Pick a date</span>}
+                      {formData.bookingDate ? format(formData.bookingDate, 'PPP') : <span className="text-slate-500">Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={formData.booking_date}
-                      onSelect={(date) => setFormData({ ...formData, booking_date: date })}
-                      // disabled={(date) => {
-                      //   if (date < new Date()) return true;
-                      //   const dateStr = format(date, 'yyyy-MM-dd');
-                      //   const daySchedules = allActivitySchedules.filter(s => s.date === dateStr);
-                      //   if (daySchedules.length === 0) return false;
-                      //   const allBlocked = daySchedules.every(s => s.blocked || !s.available);
-                      //   return allBlocked;
-                      // }}
+                      selected={formData?.bookingDate}
+                      onSelect={(date) => setFormData({ ...formData, bookingDate: date })}
+                      disabled={(date) => {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        const selectedDate = new Date(date);
+                        selectedDate.setHours(0, 0, 0, 0);
+                        if (selectedDate < today) return true;
+                        // const dateStr = format(date, 'yyyy-MM-dd');
+                        // const daySchedules = allActivitySchedules.filter(s => s.date === dateStr);
+                        // if (daySchedules.length === 0) return false;
+                        // const allBlocked = daySchedules.every(s => s.blocked || !s.available);
+                        // return allBlocked;
+                      }}
                       initialFocus
                     />
                   </PopoverContent>
@@ -376,22 +189,22 @@ export default function MultiStepBookingForm({ activity }) {
               <div className="space-y-2">
                 <Label className="text-slate-700 font-medium">Select Time</Label>
                 <Select
-                  value={formData.booking_time}
-                  onValueChange={(value) => setFormData({ ...formData, booking_time: value })}
-                  disabled={!formData.booking_date}
+                  value={formData.slotStartTime}
+                  onValueChange={(value) => setFormData({ ...formData, slotStartTime: value })}
+                  disabled={!formData?.bookingDate}
                 >
                   <SelectTrigger className="h-12 border-slate-200">
                     <Clock className="mr-2 h-4 w-4 text-slate-500" />
-                    <SelectValue placeholder={formData.booking_date ? "Pick a time" : "Select a date first"} />
+                    <SelectValue placeholder={formData?.bookingDate ? "Pick a time" : "Select a date first"} />
                   </SelectTrigger>
                   <SelectContent>
                     {
-                      [1, 2, 3, 4, 5, 6].map((item) => {
+                      slots && slots?.data?.slots.map((item, idx) => {
                         return (
-                          <SelectItem key={item} value={item}>
+                          <SelectItem key={idx} value={`${item?.startTime}-${item?.endTime}-${item?.remainingCapacity}`}>
                             <div className="flex items-center justify-between w-full">
-                              <span>{"10:00 AM"}</span>
-                              <Badge variant="outline" className="ml-2 text-xs">{1} left</Badge>
+                              <span>{item?.startTime}</span>
+                              <Badge variant="outline" className="ml-2 text-xs">{item?.remainingCapacity} left</Badge>
                             </div>
                           </SelectItem>
                         )
@@ -432,7 +245,7 @@ export default function MultiStepBookingForm({ activity }) {
           <div className="space-y-6 animate-in fade-in duration-300">
             <h3 className="text-lg font-semibold text-slate-900">Booking Details</h3>
 
-            {activity.is_donation_based && (
+            {/* {activity.is_donation_based && (
               <div className="space-y-2">
                 <Label className="text-slate-700 font-medium">Your Donation Amount</Label>
                 <Input
@@ -446,50 +259,57 @@ export default function MultiStepBookingForm({ activity }) {
                 />
                 <p className="text-xs text-green-600">Your contribution supports this community service.</p>
               </div>
-            )}
+            )} */}
 
-            {!activity.is_donation_based && (activity.billing_type === 'per_hour' || activity.billing_type === 'per_unit') && (
+            {(Activity?.data?.billingType === 'PER_HOUR' || Activity?.data?.billingType === 'PER_UNIT') && (
               <div className="space-y-2">
                 <Label className="text-slate-700 font-medium">
-                  {activity.billing_type === 'per_hour' ? 'Number of Hours' : `Number of ${activity.unit_name || 'Units'}s`}
+                  {Activity?.data?.billingType === 'PER_HOUR' ? 'Number of Hours' : `Number of Units`}
                 </Label>
                 <Select
-                  value={formData.hours.toString()}
-                  onValueChange={(value) => setFormData({ ...formData, hours: parseInt(value) })}
+                  value={formData?.quantity?.toString()}
+                  onValueChange={(value) => setFormData({ ...formData, quantity: parseInt(value) })}
                 >
                   <SelectTrigger className="h-12 border-slate-200">
                     <Clock className="mr-2 h-4 w-4 text-slate-500" />
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {[...Array(activity.billing_type === 'per_unit' ? 20 : 12)].map((_, i) => {
-                      const count = i + 1;
-                      return (
-                        <SelectItem key={count} value={count.toString()}>
-                          {count} {activity.billing_type === 'per_unit'
-                            ? (count === 1 ? (activity.unit_name || 'unit') : `${activity.unit_name || 'unit'}s`)
-                            : (count === 1 ? 'Hour' : 'Hours')}
-                        </SelectItem>
-                      );
-                    })}
+                    {
+                      Activity?.data?.billingType === 'PER_UNIT' ? [...Array(Activity?.data?.availableSpots)].map((_, i) => {
+                        const count = i + 1;
+                        return (
+                          <SelectItem key={count} value={count.toString()}>
+                            {count} {(count === 1 ? 'Unit' : 'Units')}
+                          </SelectItem>
+                        );
+                      }) : [...Array(10)].map((_, i) => {
+                        const count = i + 1;
+                        return (
+                          <SelectItem key={count} value={count.toString()}>
+                            {count} {(count === 1 ? 'Hour' : 'Hours')}
+                          </SelectItem>
+                        );
+                      })
+                    }
                   </SelectContent>
                 </Select>
               </div>
             )}
 
-            {!activity.is_donation_based && activity.billing_type !== 'per_hour' && activity.billing_type !== 'per_unit' && !isGroupBooking && (
+            {Activity?.data?.billingType === 'PER_PERSON' && (
               <div className="space-y-2">
                 <Label className="text-slate-700 font-medium">Number of Guests</Label>
                 <Select
-                  value={formData.guests.toString()}
-                  onValueChange={(value) => setFormData({ ...formData, guests: parseInt(value) })}
+                  value={formData?.quantity?.toString()}
+                  onValueChange={(value) => setFormData({ ...formData, quantity: parseInt(value) })}
                 >
                   <SelectTrigger className="h-12 border-slate-200">
                     <Users className="mr-2 h-4 w-4 text-slate-500" />
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {[...Array(activity.max_guests || 10)].map((_, i) => (
+                    {[...Array(Activity?.data?.maxGuests || 10)].map((_, i) => (
                       <SelectItem key={i + 1} value={(i + 1).toString()}>
                         {i + 1} {i === 0 ? 'Guest' : 'Guests'}
                       </SelectItem>
@@ -498,23 +318,54 @@ export default function MultiStepBookingForm({ activity }) {
                 </Select>
               </div>
             )}
-
-            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-slate-600" />
-                <div>
-                  <Label className="text-slate-700 font-medium">Group Booking</Label>
-                  <p className="text-xs text-slate-500">Invite others and split the booking</p>
+            {
+              Activity?.data?.allowGroupBookings &&
+              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Users className="w-5 h-5 text-slate-600" />
+                  <div>
+                    <Label className="text-slate-700 font-medium">Group Booking</Label>
+                    <p className="text-xs text-slate-500">Invite others and split the booking</p>
+                  </div>
                 </div>
+                <Switch className={"cursor-pointer"} checked={isGroupBooking} onCheckedChange={setIsGroupBooking} />
               </div>
-              <Switch checked={isGroupBooking} onCheckedChange={setIsGroupBooking} />
-            </div>
+            }
+
+            {isGroupBooking && Activity?.data?.allowGroupBookings && Activity?.data?.billingType !== "PER_PERSON" &&
+              <div className="space-y-2">
+                <Label className="text-slate-700 font-medium">
+                  {`Number of Prsons in Group`}
+                </Label>
+                <Select
+                  value={formData?.numberOfPersons?.toString() || Activity?.data?.maxGroupSize}
+                  onValueChange={(value) => setFormData({ ...formData, numberOfPersons: parseInt(value) })}
+                >
+                  <SelectTrigger className="h-12 border-slate-200">
+                    <User className="mr-2 h-4 w-4 text-slate-500" />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {
+                      [...Array(Activity?.data?.maxGroupSize - 1)].map((_, i) => {
+                        const count = i + 2;
+                        return (
+                          <SelectItem key={count} value={count.toString()}>
+                            {count} {'Persons'}
+                          </SelectItem>
+                        );
+                      })
+                    }
+                  </SelectContent>
+                </Select>
+              </div>
+            }
 
             <div className="flex justify-between">
               <Button type="button" variant="outline" onClick={prevStep}>
                 <ChevronLeft className="mr-2 w-4 h-4" /> Back
               </Button>
-              <Button type="button" onClick={nextStep}>
+              <Button type="button" onClick={nextStep} disabled={!canProceedToStep(3)}>
                 Next <ChevronRight className="ml-2 w-4 h-4" />
               </Button>
             </div>
@@ -524,47 +375,14 @@ export default function MultiStepBookingForm({ activity }) {
         {/* Step 3: Contact Information */}
         {currentStep === 3 && (
           <div className="space-y-6 animate-in fade-in duration-300">
-            <h3 className="text-lg font-semibold text-slate-900">Contact Information</h3>
+            <h3 className="text-lg font-semibold text-slate-900">Billing Summary</h3>
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label className="text-slate-700 font-medium">Full Name</Label>
-                <Input
-                  value={formData.customer_name}
-                  onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
-                  className="h-12 border-slate-200"
-                  placeholder="John Doe"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-slate-700 font-medium">Email</Label>
-                  <Input
-                    type="email"
-                    value={formData.customer_email}
-                    onChange={(e) => setFormData({ ...formData, customer_email: e.target.value })}
-                    className="h-12 border-slate-200"
-                    placeholder="john@example.com"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-slate-700 font-medium">Phone</Label>
-                  <Input
-                    type="tel"
-                    value={formData.customer_phone}
-                    onChange={(e) => setFormData({ ...formData, customer_phone: e.target.value })}
-                    className="h-12 border-slate-200"
-                    placeholder="+1 (555) 000-0000"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
                 <Label className="text-slate-700 font-medium">Special Requests (Optional)</Label>
                 <Textarea
-                  value={formData.special_requests}
-                  onChange={(e) => setFormData({ ...formData, special_requests: e.target.value })}
+                  value={formData?.specialRequests}
+                  onChange={(e) => setFormData({ ...formData, specialRequests: e.target.value })}
                   className="border-slate-200 min-h-[100px]"
                   placeholder="Any special requirements or notes..."
                 />
@@ -572,37 +390,34 @@ export default function MultiStepBookingForm({ activity }) {
             </div>
 
             <div className="bg-slate-50 rounded-2xl p-5 space-y-3">
-              {activity.is_donation_based ? (
-                <>
-                  <div className="flex justify-between text-green-700">
-                    <span>Your Donation</span>
-                    <span className="text-2xl font-bold">${formData.donation_amount?.toFixed(2) || '0.00'}</span>
+              <>
+                <div className="flex justify-between text-slate-600">
+                  <span>Subtotal</span>
+                  <span>${formData?.numberOfPersons && isGroupBooking ? ((Activity?.data?.price * formData?.quantity) / formData?.numberOfPersons).toFixed(2) : (Activity?.data?.price * formData?.quantity).toFixed(2)}</span>
+                </div>
+                {
+                  !Activity?.data?.nonProfitStatus && <div className="flex justify-between text-slate-600">
+                    <span>Fees {`(${fee?.data?.fee}%)`}</span>
+                    <span>${formData?.numberOfPersons && isGroupBooking ? (((Activity?.data?.price * formData?.quantity) * (fee?.data?.fee / 100)) / formData?.numberOfPersons).toFixed(2) : ((Activity?.data?.price * formData?.quantity) * (fee?.data?.fee / 100)).toFixed(2)}</span>
                   </div>
-                  <p className="text-xs text-green-600">100% goes to the organization - no platform fee</p>
-                </>
-              ) : (
-                <>
-                  <div className="flex justify-between text-slate-600">
-                    <span>Subtotal</span>
-                    <span>${((activity.billing_type === 'per_hour' || activity.billing_type === 'per_unit') ? activity.price * formData.hours : activity.price * formData.guests).toFixed(2)}</span>
-                  </div>
-                  <div className="border-t border-slate-200 pt-3 flex justify-between">
-                    <span className="font-semibold text-slate-900">Total</span>
-                    <span className="text-2xl font-bold text-slate-900">
-                      ${((activity.billing_type === 'per_hour' || activity.billing_type === 'per_unit') ? activity.price * formData.hours : activity.price * formData.guests).toFixed(2)}
-                    </span>
-                  </div>
-                </>
-              )}
+                }
+                <div className="border-t border-slate-200 pt-3 flex justify-between">
+                  <span className="font-semibold text-slate-900">Total</span>
+                  {
+                    Activity?.data?.nonProfitStatus ?
+                      <span className="text-2xl font-bold text-slate-900">
+                        ${formData?.numberOfPersons && isGroupBooking ? ((Activity?.data?.price * formData?.quantity) / formData?.numberOfPersons).toFixed(2) : ((Activity?.data?.price * formData?.quantity)).toFixed(2)}
+                      </span> : <span className="text-2xl font-bold text-slate-900">
+                        ${formData?.numberOfPersons && isGroupBooking ? (((Activity?.data?.price * formData?.quantity) + ((Activity?.data?.price * formData?.quantity) * (fee?.data?.fee / 100))) / formData?.numberOfPersons).toFixed(2) : ((Activity?.data?.price * formData?.quantity) + ((Activity?.data?.price * formData?.quantity) * (fee?.data?.fee / 100))).toFixed(2)}
+                      </span>
+                  }
+                </div>
+              </>
             </div>
 
             <div className="flex justify-between gap-3">
               <Button type="button" variant="outline" onClick={prevStep} className="flex-1">
                 <ChevronLeft className="mr-2 w-4 h-4" /> Back
-              </Button>
-              <Button type="button"  variant="outline" className="flex-1">
-                <ShoppingCart className="mr-2 h-4 w-4" />
-                Add to Cart
               </Button>
               <Button type="submit" disabled={isSubmitting} className="flex-1 bg-slate-900">
                 {isSubmitting ? (
@@ -611,7 +426,7 @@ export default function MultiStepBookingForm({ activity }) {
                     Processing...
                   </>
                 ) : (
-                  activity.is_donation_based ? 'Confirm Participation' : 'Book Now'
+                  'Book Now'
                 )}
               </Button>
             </div>

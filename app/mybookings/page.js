@@ -1,10 +1,10 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Filter, Inbox, UserPlus, Users as UsersIcon } from 'lucide-react';
+import { Calendar, Filter, Inbox, Landmark, Share2, UserPlus, Users as UsersIcon } from 'lucide-react';
 // import JoinBookingDialog from '@/components/booking/JoinBookingDialog';
 // import ParticipantCheckout from '@/components/booking/ParticipantCheckout';
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,6 +32,10 @@ import {
 import BookingCard from '@/components/booking/MyBookingCard';
 import JoinBookingDialog from '@/components/booking/JoinBookings';
 import LayoutWrapper from '@/components/layout/LayoutWrapper';
+import { useCancelBookingMutation, useGetUserBookingsQuery } from '@/services/bookingApi';
+import { useRouter } from 'next/navigation';
+import Recieved from '@/components/invites/Recieved';
+import SentInvites from '@/components/invites/SentInvites';
 
 const bookings = [
   {
@@ -192,12 +196,14 @@ const bookings = [
 
 
 export default function MyBookings() {
-  const [statusFilter, setStatusFilter] = useState('all');
+  const router = useRouter()
+  const [statusFilter, setStatusFilter] = useState('ALL');
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [bookingToCancel, setBookingToCancel] = useState(null);
   const [bookingToDelete, setBookingToDelete] = useState(null);
+  const [showBookings, setShowBookings] = useState(true);
   const [bookingToEdit, setBookingToEdit] = useState(null);
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [bookingToReview, setBookingToReview] = useState(null);
@@ -213,31 +219,8 @@ export default function MyBookings() {
     special_requests: ''
   });
 
-  // useEffect(() => {
-  //   const checkAuth = async () => {
-  //     const authenticated = await base44.auth.isAuthenticated();
-  //     setIsAuthenticated(authenticated);
-  //     setCheckingAuth(false);
-  //     if (!authenticated) {
-  //       base44.auth.redirectToLogin(window.location.href);
-  //     }
-  //   };
-  //   checkAuth();
-
-  //   // Check for join booking code in URL
-  //   const urlParams = new URLSearchParams(window.location.search);
-  //   const joinCode = urlParams.get('join_booking');
-  //   if (joinCode) {
-  //     setJoinShareCode(joinCode);
-  //     setJoinDialogOpen(true);
-  //   }
-  // }, []);
-
-
-
-  const filteredBookings = statusFilter === 'all'
-    ? bookings
-    : bookings.filter(b => b.status === statusFilter);
+  const { data: userBookings, isLoading } = useGetUserBookingsQuery([statusFilter])
+  const [Cancel] = useCancelBookingMutation()
 
   const handleCancelClick = (booking) => {
     setBookingToCancel(booking);
@@ -258,27 +241,15 @@ export default function MyBookings() {
     setEditDialogOpen(true);
   };
 
-  const confirmCancel = () => {
-    if (bookingToCancel) {
-      cancelMutation.mutate(bookingToCancel);
-    }
-  };
-
-  const confirmDelete = () => {
-    if (bookingToDelete) {
-      deleteMutation.mutate(bookingToDelete.id);
-    }
-  };
-
-  const confirmEdit = () => {
-    if (bookingToEdit) {
-      updateMutation.mutate({
-        id: bookingToEdit.id,
-        data: {
-          guests: editFormData.guests,
-          special_requests: editFormData.special_requests,
-        }
-      });
+  const confirmCancel = async () => {
+    try {
+      if (bookingToCancel) {
+        const res = await Cancel({ id: bookingToCancel?._id }).unwrap()
+        toast.success(res?.message)
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error?.data?.message)
     }
   };
 
@@ -291,36 +262,29 @@ export default function MyBookings() {
     // return existingReviews.some(r => r.booking_id === bookingId);
   };
 
-  const handlePaymentClick = (booking) => {
-    const participation = myParticipations.find(p => p.booking_id === booking.id);
-    if (participation) {
-      setSelectedBooking(booking);
-      setSelectedParticipant(participation);
-      setPaymentDialogOpen(true);
-    }
-  };
-
   // const getParticipantInfo = (booking) => {
   //   const participation = myParticipations.find(p => p.booking_id === booking.id);
   //   return participation;
   // };
 
-  if (false) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 py-8">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-slate-200 rounded w-1/4"></div>
-            <div className="h-32 bg-slate-200 rounded"></div>
+      <LayoutWrapper>
+        <div className="min-h-[calc(100vh-156px)] mt-12 bg-slate-50 py-8">
+          <div className="max-w-4xl mx-auto px-4">
+            <div className="animate-pulse space-y-4">
+              <div className="h-8 bg-slate-200 rounded w-1/4"></div>
+              <div className="h-32 bg-slate-200 rounded"></div>
+            </div>
           </div>
         </div>
-      </div>
+      </LayoutWrapper>
     );
   }
 
   return (
     <LayoutWrapper>
-      <div className="min-h-screen mt-12 bg-slate-50">
+      <div className="min-h-[calc(100vh-156px)] mt-12 bg-slate-50">
         {/* Header */}
         <div className="bg-white border-b border-slate-100">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -335,97 +299,109 @@ export default function MyBookings() {
               </div>
               <h1 className="text-3xl font-bold text-slate-900">My Bookings</h1>
             </motion.div>
-            <Button onClick={() => setJoinDialogOpen(true)} variant="outline" className="mt-4">
-              <UserPlus className="w-4 h-4 mr-2" />
-              Join Group Booking
-            </Button>
+            <div>
+              <Button onClick={() => setShowBookings(true)} variant={showBookings ? 'default' : 'outline'} className="mt-4">
+                <UserPlus className="w-4 h-4 mr-2" />
+                Bookings
+              </Button>
+              <Button onClick={() => setShowBookings(false)} variant={!showBookings ? 'default' : 'outline'} className="mt-4">
+                <Share2 className="w-4 h-4 mr-2" />
+                Invites
+              </Button>
+            </div>
           </div>
         </div>
+        {
+          showBookings ?
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              {/* Filters */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="mb-8"
+              >
+                <div className="flex items-center gap-2 mb-4 text-slate-600">
+                  <Filter className="w-4 h-4" />
+                  <span className="text-sm font-medium">Filter by status</span>
+                </div>
+                <Tabs value={statusFilter} onValueChange={setStatusFilter}>
+                  <TabsList className="bg-white border border-slate-200 p-1">
+                    <TabsTrigger value="ALL" className="rounded-lg">All</TabsTrigger>
+                    <TabsTrigger value="HOLD" className="rounded-lg">Pending</TabsTrigger>
+                    <TabsTrigger value="CONFIRMED" className="rounded-lg">Confirmed</TabsTrigger>
+                    <TabsTrigger value="COMPLETED" className="rounded-lg">Completed</TabsTrigger>
+                    <TabsTrigger value="CANCELLED" className="rounded-lg">Cancelled</TabsTrigger>
+                    <TabsTrigger value="REFUNDED" className="rounded-lg">Refunded</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </motion.div>
 
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Filters */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="mb-8"
-          >
-            <div className="flex items-center gap-2 mb-4 text-slate-600">
-              <Filter className="w-4 h-4" />
-              <span className="text-sm font-medium">Filter by status</span>
-            </div>
-            <Tabs value={statusFilter} onValueChange={setStatusFilter}>
-              <TabsList className="bg-white border border-slate-200 p-1">
-                <TabsTrigger value="all" className="rounded-lg">All</TabsTrigger>
-                <TabsTrigger value="pending" className="rounded-lg">Pending</TabsTrigger>
-                <TabsTrigger value="confirmed" className="rounded-lg">Confirmed</TabsTrigger>
-                <TabsTrigger value="completed" className="rounded-lg">Completed</TabsTrigger>
-                <TabsTrigger value="cancelled" className="rounded-lg">Cancelled</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </motion.div>
-
-          {/* Bookings List */}
-          {filteredBookings.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-16"
-            >
-              <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Inbox className="w-10 h-10 text-slate-400" />
-              </div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-2">No bookings found</h3>
-              <p className="text-slate-600">
-                {statusFilter === 'all'
-                  ? "You haven't made any bookings yet."
-                  : `No ${statusFilter} bookings.`}
-              </p>
-            </motion.div>
-          ) : (
-            <div className="space-y-4">
-              {filteredBookings.map((booking, index) => {
-                // const participantInfo = getParticipantInfo(booking);
-                return (
-                  <div key={booking.id}>
-                    <BookingCard
-                      booking={booking}
-                      index={index}
-                      onCancel={handleCancelClick}
-                      onDelete={handleDeleteClick}
-                      onEdit={handleEditClick}
-                      onReview={handleReviewClick}
-                      hasReview={hasReview(booking.id)}
-                    />
-                    {
-                      // booking.is_group_booking && participantInfo && participantInfo.payment_status === 'unpaid' 
-                      true
-                      && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="mt-2"
-                        >
-                          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <UsersIcon className="w-5 h-5 text-amber-600" />
-                              <div>
-                                <p className="text-sm font-medium text-amber-900">Group Booking - Payment Required</p>
-                                <p className="text-xs text-amber-700">Complete your payment to confirm your spot</p>
-                              </div>
-                            </div>
-                            <Button onClick={() => handlePaymentClick(booking)} size="sm" className="bg-amber-600 hover:bg-amber-700">
-                              Pay Now
-                            </Button>
-                          </div>
-                        </motion.div>
-                      )}
+              {/* Bookings List */}
+              {userBookings?.pagination?.total === 0 ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center py-16"
+                >
+                  <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Inbox className="w-10 h-10 text-slate-400" />
                   </div>
-                );
-              })}
+                  <h3 className="text-xl font-semibold text-slate-900 mb-2">No bookings found</h3>
+                </motion.div>
+              ) : (
+                <div className="space-y-4">
+                  {userBookings?.data?.map((booking, index) => {
+                    // const participantInfo = getParticipantInfo(booking);
+                    return (
+                      <div key={booking._id}>
+                        <BookingCard
+                          booking={booking}
+                          index={index}
+                          onCancel={handleCancelClick}
+                          onDelete={handleDeleteClick}
+                          onEdit={handleEditClick}
+                          onReview={handleReviewClick}
+                          hasReview={hasReview(booking.id)}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-          )}
-        </div>
+            :
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              {/* Filters */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="mb-8"
+              ></motion.div>
+
+              <Tabs defaultValue="received" className="space-y-6">
+                <TabsList className={`grid grid-cols-2 w-full'}`}>
+                  <TabsTrigger value="received">
+                    Received Invites
+                  </TabsTrigger>
+                  <TabsTrigger value="sent">
+                    Sent Invites
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="received">
+                  <Recieved />
+                </TabsContent>
+
+                <TabsContent value="sent">
+                  <SentInvites />
+                </TabsContent>
+              </Tabs>
+            </div>
+
+        }
+
 
         {/* Cancel Confirmation Dialog */}
         <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
@@ -447,82 +423,6 @@ export default function MyBookings() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-
-        {/* Delete Confirmation Dialog */}
-        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete Booking?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete this booking? This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={confirmDelete}
-                className="bg-red-600 hover:bg-red-700"
-              >
-                Delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-
-        {/* Edit Booking Dialog */}
-        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Edit Booking</DialogTitle>
-            </DialogHeader>
-            {bookingToEdit && (
-              <div className="space-y-4">
-                <div>
-                  <p className="text-sm font-medium text-slate-700 mb-1">{bookingToEdit.activity_name}</p>
-                  <p className="text-xs text-slate-500">
-                    {bookingToEdit.booking_date} at {bookingToEdit.booking_time}
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Number of Guests</Label>
-                  <Input
-                    type="number"
-                    min="1"
-                    value={editFormData.guests}
-                    onChange={(e) => setEditFormData({ ...editFormData, guests: parseInt(e.target.value) })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Special Requests</Label>
-                  <Textarea
-                    value={editFormData.special_requests}
-                    onChange={(e) => setEditFormData({ ...editFormData, special_requests: e.target.value })}
-                    placeholder="Any special requirements..."
-                    rows={3}
-                  />
-                </div>
-
-                <div className="flex gap-3 pt-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setEditDialogOpen(false)}
-                    className="flex-1"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={confirmEdit}
-                    className="flex-1 bg-slate-900"
-                  >
-                    Save Changes
-                  </Button>
-                </div>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
 
         {/* Review Dialog */}
         <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>

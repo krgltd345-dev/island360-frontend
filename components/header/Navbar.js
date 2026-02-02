@@ -11,6 +11,8 @@ import { useLogOutMutation } from '@/services/authApi';
 import { useDispatch } from 'react-redux';
 import { deleteCookie, setCookie } from 'cookies-next';
 import { setIsLogin } from '@/services/globalSlice';
+import { bookingApi } from '@/services/bookingApi';
+import { ROLES } from '@/lib/utils';
 
 const Navbar = () => {
   const router = useRouter()
@@ -31,9 +33,10 @@ const Navbar = () => {
     try {
       const res = await Logout().unwrap();
       deleteCookie('role')
-      // dispatch(userApi.util.resetApiState())
-      toast.success(res?.message)
+      deleteCookie('authKey')
       router.push("/login");
+      dispatch(bookingApi.util.resetApiState())
+      toast.success(res?.message)
     } catch (error) {
       toast.error(error?.data?.message)
     }
@@ -42,10 +45,11 @@ const Navbar = () => {
 
   useEffect(() => {
     if (userRoleInfo?.data?.user?.role) {
-      const role = userRoleInfo?.data?.user?.vendorId ? 'VENDOR' : userRoleInfo?.data?.user?.role
+      console.log(userRoleInfo, "userRoleInfo");
+      const role = userRoleInfo?.data?.user?.role === ROLES.supAdmin || userRoleInfo?.data?.user?.role === ROLES.admin ? userRoleInfo?.data?.user?.role : userRoleInfo?.data?.user?.vendorId ? 'VENDOR' : userRoleInfo?.data?.user?.role
       setCookie("role", role)
       dispatch(setIsLogin(true))
-    }else{
+    } else {
       dispatch(setIsLogin(false))
     }
   }, [userRoleInfo])
@@ -66,7 +70,7 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-2">
-            {navItems.map((item) => {
+            {userRoleInfo?.data?.user && navItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathName === item.page;
               return (

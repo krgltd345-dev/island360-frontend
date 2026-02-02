@@ -3,11 +3,12 @@ import { ROLES } from './lib/utils';
 
 export function middleware(request) {
   const jwt = request.cookies.get("accessToken");
+  const key = request.cookies.get("authKey");
   const roleCookie = request.cookies.get("role");
   const role = roleCookie?.value || null;
-  const isAuthenticated = !!jwt?.value;
+  const isAuthenticated = !!key?.value;
   const { pathname, searchParams } = request.nextUrl;
-
+  console.log(key, "key");
   const createRedirectUrl = (targetPath) => {
     const url = new URL(targetPath, request.url);
     searchParams.forEach((value, key) => {
@@ -20,7 +21,7 @@ export function middleware(request) {
   const publicRoutes = ['/', '/login', '/activityDetail', ];
 
   // Protected routes by role
-  const userRoutes = ['/mybookings', '/profile', '/vendorsignup'];
+  const userRoutes = ['/mybookings', '/profile', '/vendorsignup', '/checkout'];
   const adminRoutes = ['/adminpanel'];
   const vendorRoutes = ['/vendordashboard', '/activitymanagement', '/myactivities'];
 
@@ -72,7 +73,7 @@ export function middleware(request) {
 
   // Vendor routes: only accessible by VENDOR (and optionally ADMIN/SUPER_ADMIN for oversight)
   if (isVendorRoute) {
-    if (role === ROLES.vendor) {
+    if (role !== ROLES.user) {
       return NextResponse.next();
     }
     // Redirect non-vendor users to their appropriate page

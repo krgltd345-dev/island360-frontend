@@ -9,6 +9,7 @@ import SocialLogin from './SocialLogin';
 import { useLoginMutation } from '@/services/authApi';
 import { toast } from 'sonner';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { setCookie } from 'cookies-next';
 
 export default function SignIn({ onSwitchToSignUp, onSwitchToForgotPassword, getGoogleLogin }) {
   const searchParams = useSearchParams();
@@ -72,6 +73,7 @@ export default function SignIn({ onSwitchToSignUp, onSwitchToForgotPassword, get
     try {
       console.log('Signing in:', formData);
       const res = await Login(formData).unwrap()
+      setCookie("authKey", "valid")
       console.log(res, "Login res");
       toast.success(res?.message)
       router.push(redirectUrl || '/');

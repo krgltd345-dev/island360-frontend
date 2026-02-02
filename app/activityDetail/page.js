@@ -13,41 +13,6 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
 
-const activity =
-{
-  "name": "Island Hopping Adventure",
-  "category": "other",
-  "description": "Experience true island adventure with our Cayman Brac Getaway. Enjoy seamless island hopping, an overnight stay in a cozy cottage, and your own rental car or Scooter to explore at your pace. We include a free GPS loaded with marked points of interest, hidden gems, and top activities—making your Brac escape effortless, exciting, and unforgettable.”\n********Packages include********\nAirfare & Airport pickup and drop (Brac)\nCottage rental\nCar or Scooter Rental\n",
-  "price": 275,
-  "billing_type": "per_person",
-  "group_size": null,
-  "duration": "2 Days 1 Night",
-  "minimum_duration": null,
-  "image_url": "https://base44.app/api/apps/692d3a33918f94eb9f4221f4/files/public/692d3a33918f94eb9f4221f4/9d407e5a9_islandhoping.png",
-  "image_url_2": "https://base44.app/api/apps/692d3a33918f94eb9f4221f4/files/public/692d3a33918f94eb9f4221f4/ba993174b_Studio-Project.png",
-  "image_url_3": "",
-  "max_guests": 8,
-  "default_capacity": null,
-  "available": true,
-  "vendor_id": "69366107c7d0c0c9b0d8fb7c",
-  "operational_days": [
-    "monday",
-    "tuesday",
-    "wednesday",
-    "thursday",
-    "friday",
-    "saturday",
-    "sunday"
-  ],
-  "operational_hours_start": "07:00",
-  "operational_hours_end": "17:00",
-  "id": "69378504d1f250f2a450257e",
-  "created_date": "2025-12-09T02:10:12.103000",
-  "updated_date": "2025-12-09T02:10:12.103000",
-  "created_by_id": "69366107c7d0c0c9b0d8fb7c",
-  "is_sample": false
-}
-
 export default function ActivityDetailPage() {
   const searchParams = useSearchParams();
   const router = useRouter()
@@ -220,7 +185,7 @@ export default function ActivityDetailPage() {
                           <span className="text-slate-500 ml-1">
                             {Activity?.data?.billingType === 'PER_HOUR'
                               ? '/ hour'
-                              : Activity?.data?.billing_type === 'PER_UNIT'
+                              : Activity?.data?.billingType === 'PER_UNIT'
                                 ? `/ ${Activity?.data?.unit_name || 'unit'}`
                                 : '/ person'}
                           </span>
@@ -248,7 +213,7 @@ export default function ActivityDetailPage() {
                 </div>
                 {
                   userRoleInfo?.data?.user ?
-                    <MultiStepBookingForm activity={activity} />
+                    <MultiStepBookingForm Activity={Activity} />
                     :
                     <Button
                       onClick={() => {

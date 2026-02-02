@@ -48,6 +48,12 @@ export default function ActivityCard({ activity, index = 0 }) {
               <Icon className="w-3 h-3 mr-1" />
               {activity.category?.name}
             </Badge>
+            {
+              activity?.nonProfitStatus &&
+              <Badge className={`bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700  border-0 font-medium`}>
+                {"Non-Profit"}
+              </Badge>
+            }
           </div>
           {false && (
             <div className="absolute top-4 right-4 bg-white/90 backdrop-blur rounded-full px-2.5 py-1 flex items-center gap-1">
@@ -105,11 +111,11 @@ export default function ActivityCard({ activity, index = 0 }) {
             </div>
           )}
 
-          <p className="text-slate-600 text-sm line-clamp-2 mb-4 min-h-[40px]">
+          <p className="text-slate-600 text-sm line-clamp-2 mb-2 min-h-[40px]">
             {activity.description || "Experience an unforgettable adventure with us."}
           </p>
 
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col items-start gap-2 ">
             <div>
               {activity.is_donation_based ? (
                 <span className="text-xl font-bold text-green-600">Donation-Based</span>
@@ -121,25 +127,23 @@ export default function ActivityCard({ activity, index = 0 }) {
                   <span className="text-slate-500 text-sm ml-1">
                     {activity?.billingType === 'PER_HOUR'
                       ? '/ hour'
-                        : activity.billing_type === 'PER_UNIT'
-                          ? `/ ${activity.unit_name || 'unit'}`
-                          : '/ person'}
+                      : activity.billingType === 'PER_UNIT'
+                        ? `/ ${activity.unit_name || 'unit'}`
+                        : '/ person'}
                   </span>
                 </>
               )}
             </div>
-            <Link href={`activityDetail?id=${activity._id}`} className="shrink-0 cursor-pointer">
+            <Link href={`activityDetail?id=${activity._id}`} className="shrink-0 w-full cursor-pointer">
               <Button
                 className={`
-                  ${activity.is_donation_based
-                    ? "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-                    : "bg-gradient-to-r from-slate-900 to-slate-800 hover:from-slate-800 hover:to-slate-700"
+                  ${"bg-gradient-to-r from-slate-900 w-full to-slate-800 hover:from-green-600 hover:to-emerald-600"
                   } 
                   text-white rounded-xl px-6 py-2.5 cursor-pointer font-semibold shadow-lg hover:shadow-xl transition-all duration-300 group/btn
                 `}
               >
                 <span className="flex items-center gap-2">
-                  {activity.is_donation_based ? 'Donate' : 'Book Now'}
+                  {'Book Now'}
                   <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                 </span>
               </Button>

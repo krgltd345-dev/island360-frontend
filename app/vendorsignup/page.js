@@ -4,13 +4,15 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Store, CheckCircle, Clock } from 'lucide-react';
+import { Store, CheckCircle, Clock, Router } from 'lucide-react';
 import { toast } from 'sonner';
 import LayoutWrapper from '@/components/layout/LayoutWrapper';
 import { useGetUserRoleQuery, useVendorApplicationMutation } from '@/services/userApi';
 import { useUploadDocumentMutation } from '@/services/upload';
+import { useRouter } from 'next/navigation';
 
 export default function VendorSignup() {
+  const router = useRouter()
   const { data: userRoleInfo, isLoading: userRoleInfoFetching } = useGetUserRoleQuery()
   const [UploadFile] = useUploadDocumentMutation()
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -49,15 +51,19 @@ export default function VendorSignup() {
 
   const handleDocumentUpload = async (file, docType) => {
     if (!file) return;
-
-    setUploadingDocs(true);
     try {
+      const MAX_FILE_SIZE = 5 * 1024 * 1024;
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error('File size must be less than 5 MB');
+        return;
+      }
+      setUploadingDocs(true);
       const formData = new FormData()
       formData.append("document", file)
       const res = await UploadFile({ formData }).unwrap()
 
       console.log(res, "UploadFile", docType);
-      setFormData((prev) => ({...prev, [docType] : res?.data?.url}))
+      setFormData((prev) => ({ ...prev, [docType]: res?.data?.url }))
       toast.success('Document uploaded securely');
     } catch (error) {
       toast.error('Failed to upload document');
@@ -117,7 +123,7 @@ export default function VendorSignup() {
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-slate-900 mb-2">You're All Set!</h2>
             <p className="text-slate-600 mb-6">Your vendor account is active</p>
-            <Button onClick={() => ""} className="w-full bg-slate-900">
+            <Button onClick={() => router.push("/vendordashboard")} className="w-full bg-slate-900">
               Go to Vendor Dashboard
             </Button>
           </Card>
@@ -213,7 +219,7 @@ export default function VendorSignup() {
               </div>
 
               <div className="space-y-2">
-                <Label>Business License Number { !formData?.nonProfitStatus && '*'}</Label>
+                <Label>Business License Number {!formData?.nonProfitStatus && '*'}</Label>
                 <Input
                   value={formData.businessLicenseNumber}
                   onChange={(e) => setFormData({ ...formData, businessLicenseNumber: e.target.value })}

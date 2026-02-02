@@ -17,6 +17,7 @@ import AdminActivityOversight from '@/components/admin/ActivityManagement';
 import { useGetAllUserQuery, useGetUserRoleQuery } from '@/services/userApi';
 import { useGetAdminsQuery, useGetVendorRequestsQuery, useGetVendorsQuery } from '@/services/adminApi';
 import { Skeleton } from '@/components/ui/skeleton';
+import AdminSiteSettings from '@/components/admin/AdminSiteSettings';
 // import AdminVendorApprovals from '@/components/admin/AdminVendorApprovals';
 // import AdminVendorVerification from '@/components/admin/AdminVendorVerification';
 // import AdminUserManagement from '@/components/admin/AdminUserManagement';
@@ -217,7 +218,7 @@ export default function AdminPanel() {
             </TabsContent>
 
             <TabsContent value="settings">
-              {/* <AdminSiteSettings /> */}
+              <AdminSiteSettings />
             </TabsContent>
           </Tabs>
         </div>

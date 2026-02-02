@@ -26,7 +26,7 @@ export default function RootLayout({ children }) {
       >
         <ReduxProvider>
         {children}
-        <Toaster />
+        <Toaster richColors position="top-center"/>
         </ReduxProvider>
       </body>
     </html>

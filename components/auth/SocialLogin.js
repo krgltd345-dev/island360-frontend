@@ -6,6 +6,7 @@ import { useGoogleLoginMutation } from '@/services/authApi';
 import { Button } from '../ui/button';
 import { toast } from 'sonner';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { setCookie } from 'cookies-next';
 
 const SocialLogin = () => {
   const searchParams = useSearchParams();
@@ -22,6 +23,7 @@ const SocialLogin = () => {
         const response = await googleLogin({
           code: tokenResponse?.code,
         }).unwrap();
+        setCookie("authKey", "valid")
         router.push(redirectUrl || '/');
         toast.success(response?.message)
         // if (response) {

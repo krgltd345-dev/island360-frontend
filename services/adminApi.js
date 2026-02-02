@@ -11,6 +11,10 @@ export const adminApi = baseApi.injectEndpoints({
       query: () => '/vendor',
       providesTags: ["VENDOR"]
     }),
+    getFee: builder.query({
+      query: () => '/settings/fee',
+      // providesTags: ["VENDOR"]
+    }),
     getAdmins: builder.query({
       query: (data) => ({
         url: '/admin',
@@ -45,14 +49,20 @@ export const adminApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["ADMIN"]
     }),
-    // vendorApplication: builder.mutation({
-    //   query: (body) => ({
-    //     url: '/user/vendor-application',
-    //     method: 'POST',
-    //     body,
-    //   }),
-    //   invalidatesTags: ["USER"]
-    // }),
+    getSettings: builder.query({
+      query: () => '/settings',
+      providesTags: ["SETTINGS"]
+    }),
+    updateSettings: builder.mutation({
+      query: (body) => ({
+        url: `/settings/${body?.id}`,
+        method: 'PATCH',
+        body: {
+          value: body?.value
+        }
+      }),
+      invalidatesTags: ["SETTINGS"]
+    }),
   }),
 })
 
@@ -62,5 +72,8 @@ export const {
   useGetVendorsQuery,
   useGetAdminsQuery,
   useAddAdminMutation,
-  useRemoveAdminMutation
+  useRemoveAdminMutation,
+  useGetFeeQuery,
+  useGetSettingsQuery,
+  useUpdateSettingsMutation
 } = adminApi
