@@ -18,6 +18,7 @@ import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import CheckoutForm from '../payments/Checkout';
 import { useRouter } from 'next/navigation';
+import { ConvertCentToDollar } from '@/lib/utils';
 
 const steps = [
   { id: 1, name: 'Date & Time', icon: CalendarIcon },
@@ -393,12 +394,12 @@ export default function MultiStepBookingForm({ Activity }) {
               <>
                 <div className="flex justify-between text-slate-600">
                   <span>Subtotal</span>
-                  <span>${formData?.numberOfPersons && isGroupBooking ? ((Activity?.data?.price * formData?.quantity) / formData?.numberOfPersons).toFixed(2) : (Activity?.data?.price * formData?.quantity).toFixed(2)}</span>
+                  <span>${formData?.numberOfPersons && isGroupBooking ? ((ConvertCentToDollar(Activity?.data?.price) * formData?.quantity) / formData?.numberOfPersons).toFixed(2) : (ConvertCentToDollar(Activity?.data?.price) * formData?.quantity).toFixed(2)}</span>
                 </div>
                 {
                   !Activity?.data?.nonProfitStatus && <div className="flex justify-between text-slate-600">
                     <span>Fees {`(${fee?.data?.fee}%)`}</span>
-                    <span>${formData?.numberOfPersons && isGroupBooking ? (((Activity?.data?.price * formData?.quantity) * (fee?.data?.fee / 100)) / formData?.numberOfPersons).toFixed(2) : ((Activity?.data?.price * formData?.quantity) * (fee?.data?.fee / 100)).toFixed(2)}</span>
+                    <span>${formData?.numberOfPersons && isGroupBooking ? (((ConvertCentToDollar(Activity?.data?.price) * formData?.quantity) * (fee?.data?.fee / 100)) / formData?.numberOfPersons).toFixed(2) : ((ConvertCentToDollar(Activity?.data?.price) * formData?.quantity) * (fee?.data?.fee / 100)).toFixed(2)}</span>
                   </div>
                 }
                 <div className="border-t border-slate-200 pt-3 flex justify-between">
@@ -406,9 +407,9 @@ export default function MultiStepBookingForm({ Activity }) {
                   {
                     Activity?.data?.nonProfitStatus ?
                       <span className="text-2xl font-bold text-slate-900">
-                        ${formData?.numberOfPersons && isGroupBooking ? ((Activity?.data?.price * formData?.quantity) / formData?.numberOfPersons).toFixed(2) : ((Activity?.data?.price * formData?.quantity)).toFixed(2)}
+                        ${formData?.numberOfPersons && isGroupBooking ? ((ConvertCentToDollar(Activity?.data?.price) * formData?.quantity) / formData?.numberOfPersons).toFixed(2) : ((ConvertCentToDollar(Activity?.data?.price) * formData?.quantity)).toFixed(2)}
                       </span> : <span className="text-2xl font-bold text-slate-900">
-                        ${formData?.numberOfPersons && isGroupBooking ? (((Activity?.data?.price * formData?.quantity) + ((Activity?.data?.price * formData?.quantity) * (fee?.data?.fee / 100))) / formData?.numberOfPersons).toFixed(2) : ((Activity?.data?.price * formData?.quantity) + ((Activity?.data?.price * formData?.quantity) * (fee?.data?.fee / 100))).toFixed(2)}
+                        ${formData?.numberOfPersons && isGroupBooking ? (((ConvertCentToDollar(Activity?.data?.price) * formData?.quantity) + ((ConvertCentToDollar(Activity?.data?.price) * formData?.quantity) * (fee?.data?.fee / 100))) / formData?.numberOfPersons).toFixed(2) : ((ConvertCentToDollar(Activity?.data?.price) * formData?.quantity) + ((ConvertCentToDollar(Activity?.data?.price) * formData?.quantity) * (fee?.data?.fee / 100))).toFixed(2)}
                       </span>
                   }
                 </div>

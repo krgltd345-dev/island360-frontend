@@ -45,7 +45,6 @@ const Navbar = () => {
 
   useEffect(() => {
     if (userRoleInfo?.data?.user?.role) {
-      console.log(userRoleInfo, "userRoleInfo");
       const role = userRoleInfo?.data?.user?.role === ROLES.supAdmin || userRoleInfo?.data?.user?.role === ROLES.admin ? userRoleInfo?.data?.user?.role : userRoleInfo?.data?.user?.vendorId ? 'VENDOR' : userRoleInfo?.data?.user?.role
       setCookie("role", role)
       dispatch(setIsLogin(true))

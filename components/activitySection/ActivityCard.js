@@ -7,6 +7,7 @@ import { Card } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import Link from 'next/link';
+import { ConvertCentToDollar } from '@/lib/utils';
 
 const categoryIcons = {
   Boating: Anchor,
@@ -122,7 +123,7 @@ export default function ActivityCard({ activity, index = 0 }) {
               ) : (
                 <>
                   <span className="text-2xl font-bold text-slate-900">
-                    ${activity?.price}
+                    ${ConvertCentToDollar(activity?.price)}
                   </span>
                   <span className="text-slate-500 text-sm ml-1">
                     {activity?.billingType === 'PER_HOUR'

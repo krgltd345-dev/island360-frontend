@@ -49,6 +49,17 @@ export const userApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["USER"]
     }),
+    submitReview: builder.mutation({
+      query: (body) => ({
+        url: `/reviews/${body?.id}`,
+        method: 'POST',
+        body,
+      }),
+      // invalidatesTags: ["USER"]
+    }),
+    getActivityReviews: builder.query({
+      query: (body) => `/reviews/${body?.id}`,
+    }),
   }),
 })
 
@@ -60,5 +71,7 @@ export const {
   useUpdateUserMutation,
   useGetNotificationsQuery,
   useUpdateNotificationsMutation,
-  useVendorApplicationMutation
+  useVendorApplicationMutation,
+  useSubmitReviewMutation,
+  useGetActivityReviewsQuery
 } = userApi

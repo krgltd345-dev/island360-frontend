@@ -1,13 +1,15 @@
 'use client';
 import ActivityCalendar from "@/components/activitySection/ActivityCalendar";
 import MultiStepBookingForm from "@/components/activitySection/MultiStepForm";
+import ReviewCard from "@/components/booking/ReviewCard";
 import LayoutWrapper from "@/components/layout/LayoutWrapper";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ConvertCentToDollar } from "@/lib/utils";
 import { useGetActivityByIdQuery } from "@/services/activityApi";
-import { useGetUserRoleQuery } from "@/services/userApi";
+import { useGetActivityReviewsQuery, useGetUserRoleQuery } from "@/services/userApi";
 import { ArrowLeft, Clock, Heart, MessageSquare, Star, Users } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -18,12 +20,16 @@ export default function ActivityDetailPage() {
   const router = useRouter()
   const activityId = searchParams.get('id');
   const { data: Activity, isLoading } = useGetActivityByIdQuery({ id: activityId }, { skip: !activityId })
+  const { data: reviews, isLoading: reviewsLoading } = useGetActivityReviewsQuery({ id: activityId }, { skip: !activityId })
   const { data: userRoleInfo, isLoading: userRoleInfoFetching } = useGetUserRoleQuery()
 
-  console.log(activityId, "activityId", Activity);
+
+  console.log(reviews, "reviews");
 
 
-  if (isLoading || userRoleInfoFetching) {
+
+
+  if (isLoading || userRoleInfoFetching || reviewsLoading) {
     return (
       <LayoutWrapper>
         <div className="min-h-[calc(100vh - 154px)] mt-12 bg-slate-50 py-8">
@@ -144,7 +150,7 @@ export default function ActivityDetailPage() {
                 {Activity?.data?.description || 'Experience an unforgettable adventure with our professional team. Perfect for all skill levels, this Activity?.data? offers a unique way to explore and create lasting memories.'}
               </p>
               <div>
-                {true ? (
+                {reviews?.data?.length < 1 ? (
                   <div className="text-center py-12">
                     <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
                       <MessageSquare className="w-8 h-8 text-slate-400" />
@@ -154,8 +160,8 @@ export default function ActivityDetailPage() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {reviews.map((review, index) => (
-                      <ReviewCard key={review.id} review={review} index={index} />
+                    {reviews?.data?.map((review, index) => (
+                      <ReviewCard key={review._id} review={review} index={index} />
                     ))}
                   </div>
                 )}
@@ -180,7 +186,7 @@ export default function ActivityDetailPage() {
                       ) : (
                         <>
                           <span className="text-3xl font-bold text-slate-900">
-                            ${Activity?.data?.price}
+                            ${ConvertCentToDollar(Activity?.data?.price)}
                           </span>
                           <span className="text-slate-500 ml-1">
                             {Activity?.data?.billingType === 'PER_HOUR'
@@ -220,7 +226,7 @@ export default function ActivityDetailPage() {
                         const currentPath = `/activityDetail?id=${activityId}`;
                         router.push(`/login?redirect=${encodeURIComponent(currentPath)}`)
                       }}
-                      type="button" 
+                      type="button"
                       className="flex-1 bg-slate-900">
                       Login to Continue Booking
                     </Button>

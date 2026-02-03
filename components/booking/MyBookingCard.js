@@ -16,6 +16,7 @@ import ShareBookingDialog from './ShareBookingModal';
 import moment from 'moment';
 import { useCreatePaymentMutation } from '@/services/bookingApi';
 import { useRouter } from 'next/navigation';
+import { ConvertCentToDollar } from '@/lib/utils';
 
 const statusStyles = {
   'HOLD': "bg-amber-100 text-amber-700 border-amber-200",
@@ -42,6 +43,20 @@ export default function BookingCard({ booking, index = 0, onCancel, onDelete, on
     }
   };
 
+
+  const calculateAmount = (booking) => {
+    if (booking?.status === "CANCELLED" || booking?.status === "REFUNDED") {
+
+    } else {
+      if (booking?.groupShare) {
+        return ConvertCentToDollar(booking?.groupShare)
+      } else {
+        ConvertCentToDollar(booking?.totalPrice)
+      }
+    }
+
+  }
+
   return (
     <>
       <ShareBookingDialog
@@ -65,23 +80,35 @@ export default function BookingCard({ booking, index = 0, onCancel, onDelete, on
                   {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                 </Badge>
               </div>
-              <div className='flex gap-2'>
-                {
-                  booking?.groupBooking && 
-                  <Button size='sm' variant="outline" className={"cursor-pointer"} onClick={() => setShareDialogOpen(true)}>
-                    <Share2 className="w-4 h-4 mr-2" />
-                    Invite
-                  </Button>
-                }
-                <Button size='sm' variant="destructive" className={"cursor-pointer"} onClick={() => onCancel(booking)}>
-                  <XCircle className="w-4 h-4 mr-2" />
-                  Cancel
-                </Button>
-                {/* <Button size='sm' variant="outline" onClick={() => onReview(booking)}>
+              {
+                (booking.status === 'CONFIRMED' || booking.status === 'PARTIALLY_CONFIRMED') &&
+                <div className='flex gap-2'>
+                  {
+                    <Button size='sm' variant="outline" className={"cursor-pointer"} onClick={() => onReview(booking)}>
+                      <Star className="w-4 h-4 mr-2 text-amber-500" />
+                      Leave a Review
+                    </Button>
+                  }
+                  {
+                    booking?.groupBooking &&
+                    <Button size='sm' variant="outline" className={"cursor-pointer"} onClick={() => setShareDialogOpen(true)}>
+                      <Share2 className="w-4 h-4 mr-2" />
+                      Invite
+                    </Button>
+                  }
+                  {
+                    booking?.activityId?.allowCancellations &&
+                    <Button size='sm' variant="destructive" className={"cursor-pointer"} onClick={() => onCancel(booking)}>
+                      <XCircle className="w-4 h-4 mr-2" />
+                      Cancel
+                    </Button>
+                  }
+                  {/* <Button size='sm' variant="outline" onClick={() => onReview(booking)}>
                   <Star className="w-4 h-4 mr-2 text-amber-500" />
                   Leave a Review
                 </Button> */}
-              </div>
+                </div>
+              }
               {/* <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="text-slate-400 hover:text-slate-600">
@@ -149,7 +176,10 @@ export default function BookingCard({ booking, index = 0, onCancel, onDelete, on
                 </span>
               </div>
               <div className="text-right">
-                <span className="text-lg font-bold text-slate-900">${booking?.groupShare ? booking?.groupShare : booking?.totalPrice}</span>
+                {
+                  booking?.status === "CANCELLED" ? <span className="text-lg font-bold text-slate-900">${booking?.groupShare ? ConvertCentToDollar(booking?.groupShare) - ConvertCentToDollar(booking?.fees) / booking?.numberOfPersons : ConvertCentToDollar(booking?.totalPrice)}</span> :
+                    <span className="text-lg font-bold text-slate-900">${booking?.groupShare ? ConvertCentToDollar(booking?.groupShare) : ConvertCentToDollar(booking?.totalPrice)}</span>
+                }
               </div>
             </div>
 

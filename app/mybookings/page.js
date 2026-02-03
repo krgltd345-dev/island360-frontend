@@ -36,6 +36,7 @@ import { useCancelBookingMutation, useGetUserBookingsQuery } from '@/services/bo
 import { useRouter } from 'next/navigation';
 import Recieved from '@/components/invites/Recieved';
 import SentInvites from '@/components/invites/SentInvites';
+import ReviewForm from '@/components/booking/ReviewForm';
 
 const bookings = [
   {
@@ -433,13 +434,12 @@ export default function MyBookings() {
             {bookingToReview && (
               <div>
                 <p className="text-sm text-slate-500 mb-4">
-                  Share your experience with <span className="font-medium text-slate-700">{bookingToReview.activity_name}</span>
+                  Share your experience with <span className="font-medium text-slate-700">{bookingToReview?.activityId?.name}</span>
                 </p>
                 <ReviewForm
                   booking={bookingToReview}
                   onSuccess={() => {
                     setReviewDialogOpen(false);
-                    queryClient.invalidateQueries({ queryKey: ['my-reviews'] });
                   }}
                   onCancel={() => setReviewDialogOpen(false)}
                 />
