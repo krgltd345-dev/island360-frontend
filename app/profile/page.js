@@ -150,7 +150,7 @@ export default function ProfilePage() {
           </Card>
 
           <Tabs defaultValue="personal" className="space-y-6">
-            <TabsList className={`grid w-full ${user.is_vendor && user.vendor_approved ? 'grid-cols-5' : 'grid-cols-4'}`}>
+            <TabsList className={`grid w-full ${user.is_vendor && user.vendor_approved ? 'grid-cols-4' : 'grid-cols-3'}`}>
               <TabsTrigger value="personal">
                 <User className="w-4 h-4 mr-2" />
                 Personal Info
@@ -162,10 +162,6 @@ export default function ProfilePage() {
               <TabsTrigger value="notifications">
                 <Bell className="w-4 h-4 mr-2" />
                 Notifications
-              </TabsTrigger>
-              <TabsTrigger value="payment">
-                <CreditCard className="w-4 h-4 mr-2" />
-                Payment
               </TabsTrigger>
               {user.is_vendor && user.vendor_approved && (
                 <TabsTrigger value="business">
@@ -185,17 +181,6 @@ export default function ProfilePage() {
 
             <TabsContent value="notifications">
               <NotificationSettings user={user} />
-            </TabsContent>
-
-            <TabsContent value="payment">
-              <Card className="p-6">
-                <h3 className="text-xl font-semibold text-slate-900 mb-4">Payment Methods</h3>
-                {/* <div className="text-center py-12">
-                <CreditCard className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                <p className="text-slate-600 mb-4">No payment methods saved</p>
-                <p className="text-sm text-slate-500">Payment methods will be added during checkout</p>
-              </div> */}
-              </Card>
             </TabsContent>
 
             {user.is_vendor && user.vendor_approved && (

@@ -9,16 +9,9 @@ import moment from 'moment';
 import { useRouter } from 'next/navigation';
 import { useCreateInvitePaymentMutation, useInviteActionMutation, useRemoveInviteMutation } from '@/services/inviteApi';
 import { toast } from 'sonner';
+import { ConvertCentToDollar, statusStyles } from '@/lib/utils';
 
-const statusStyles = {
-  'PENDING': "bg-amber-100 text-amber-700 border-amber-200",
-  'CONFIRMED': "bg-emerald-100 text-emerald-700 border-emerald-200",
-  'ACCEPTED': "bg-emerald-100 text-emerald-700 border-emerald-200",
-  'PAID': "bg-emerald-100 text-emerald-700 border-emerald-200",
-  "CANCELLED": "bg-red-100 text-red-700 border-red-200",
-  "COMPLETED": "bg-slate-100 text-slate-700 border-slate-200",
-  "EXPIRED": "bg-red-100 text-red-700 border-red-200",
-};
+
 
 export default function ReceiveInviteCard({ invite }) {
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
@@ -76,7 +69,10 @@ export default function ReceiveInviteCard({ invite }) {
                   </Badge>
                 </div>
                 <div className="text-right">
-                  <span className="text-3xl font-bold text-slate-900">${invite?.bookingId?.groupShare}</span>
+                  {
+                    invite?.status == "REFUNDED" && <p>Refund Amount</p>
+                  }
+                  <span className="text-3xl font-bold text-slate-900">${ConvertCentToDollar(invite?.refundAmount ? invite?.refundAmount : invite?.bookingId?.groupShare)}</span>
                 </div>
               </div>
             </div>

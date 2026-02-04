@@ -32,10 +32,12 @@ export default function ReviewForm({ booking, onSuccess, onCancel }) {
         ...(reviewText?.length > 2 && { description: reviewText })
       }).unwrap()
       toast.success('Review submitted!');
-      setIsSubmitting(false);
       onSuccess?.();
     } catch (error) {
-
+      toast.error(error?.data?.message);
+      console.log(error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

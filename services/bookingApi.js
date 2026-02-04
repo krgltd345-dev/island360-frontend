@@ -44,6 +44,30 @@ export const bookingApi = baseApi.injectEndpoints({
         method: 'POST',
       }),
     }),
+
+
+    getVendorBookings: builder.query({
+      query: (data) => ({
+        url: `/bookings/vendor`,
+      }),
+      providesTags: ["BOOKING"]
+
+    }),
+    getBookingsCount: builder.query({
+      query: (data) => ({
+        url: `/bookings/count`,
+      }),
+      providesTags: ["BOOKING"]
+
+    }),
+    completeBooking: builder.mutation({
+      query: (body) => ({
+        url: `/bookings/${body?.id}`,
+        method: 'PATCH',
+      }),
+      invalidatesTags: ["BOOKING"]
+    }),
+
   }),
 })
 
@@ -52,6 +76,10 @@ export const {
   useCreateBookingMutation,
   useCreatePaymentMutation,
   useGetUserBookingsQuery,
-  useCancelBookingMutation
+  useCancelBookingMutation,
+  useGetVendorBookingsQuery,
+  useGetBookingsCountQuery,
+  useCompleteBookingMutation,
+
 
 } = bookingApi

@@ -4,12 +4,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Share2, Mail, Plus, X } from 'lucide-react';
+import { Share2, Mail, Plus, X, User, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import { useInviteFriendsMutation } from '@/services/inviteApi';
+import { useGetSentInvitesQuery, useInviteFriendsMutation, useRemoveInviteMutation } from '@/services/inviteApi';
+import SentInviteCard from '../invites/SentCard';
+import { Badge } from '../ui/badge';
+import { statusStyles } from '@/lib/utils';
+import { Card } from '../ui/card';
 
 export default function ShareBookingDialog({ booking, open, onOpenChange }) {
   const [emailFields, setEmailFields] = useState([{ id: 1, value: '' }]);
+  const [filteredInvites, setFilteredInvites] = useState([]);
+  const { data: Invites } = useGetSentInvitesQuery()
+  const [Remove, { isLoading }] = useRemoveInviteMutation()
   const [emails, setEmails] = useState([]);
   const [invite] = useInviteFriendsMutation()
 
@@ -50,6 +57,16 @@ export default function ShareBookingDialog({ booking, open, onOpenChange }) {
     return emailRegex.test(email);
   };
 
+  const handleCancel = async (id) => {
+    try {
+      const res = await Remove({ id }).unwrap()
+      toast.success(res?.message)
+    } catch (error) {
+      toast.error(error?.data?.message)
+      console.log(error, "error");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -84,6 +101,17 @@ export default function ShareBookingDialog({ booking, open, onOpenChange }) {
       toast.error(error?.data?.message)
     }
   };
+  // console.log(booking, "booking");
+  useEffect(() => {
+    console.log(booking, Invites?.data?.length > 0, "booking && Invites?.data?.length > 0");
+    if (booking && Invites?.data?.invitations?.length > 0) {
+      const filtered = Invites?.data?.invitations?.filter((invite) => invite?.bookingId?._id === booking?._id)
+      console.log(filtered, "filteredfiltered");
+      setFilteredInvites(filtered)
+    }
+
+
+  }, [booking, Invites, open])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -120,7 +148,7 @@ export default function ShareBookingDialog({ booking, open, onOpenChange }) {
                     onClick={() => removeEmailField(field.id)}
                     className="shrink-0"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-5 h-5" />
                   </Button>
                 )}
               </div>
@@ -146,6 +174,32 @@ export default function ShareBookingDialog({ booking, open, onOpenChange }) {
               Send Invitations
             </Button>
           </div>
+          {
+            filteredInvites?.length > 0 &&
+            <div className='grid grid-cols-1 gap-2 max-h-50 overflow-auto '>
+              {
+                filteredInvites?.map((invite) => (
+                  <Card key={invite?._id} className="overflow-hidden h-full bg-white border-0 py-0 shadow-sm hover:shadow-md transition-all duration-300">
+                    <div className="flex items-center justify-between p-3">
+                      <div className='flex items-center gap-2'>
+                        <User className="w-4 h-4 mr-2" />
+                        {invite?.inviteeEmail}
+                        <Badge className={`${statusStyles[invite?.status]} border h-6 font-medium`}>
+                          {invite?.status.charAt(0).toUpperCase() + invite?.status.slice(1)}
+                        </Badge>
+                      </div>
+                      {
+                        invite?.status == "PENDING" &&
+                        <Button className={""} disabled={isLoading} variant="destructive" onClick={() => handleCancel(invite?._id)}>
+                          <XCircle className="w-4 h-4" />
+                        </Button>
+                      }
+                    </div>
+                  </Card>
+                ))
+              }
+            </div>
+          }
         </form>
       </DialogContent>
     </Dialog>

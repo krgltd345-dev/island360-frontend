@@ -35,7 +35,7 @@ const Navbar = () => {
       deleteCookie('role')
       deleteCookie('authKey')
       router.push("/login");
-      dispatch(bookingApi.util.resetApiState())
+      // dispatch(bookingApi.util.resetApiState())
       toast.success(res?.message)
     } catch (error) {
       toast.error(error?.data?.message)

@@ -1,10 +1,14 @@
 'use client';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import SignIn from './SignIn'
 import SignUp from './SignUp'
 import ForgotPassword from './ForgotPassword'
+import { useDispatch } from 'react-redux';
+import { bookingApi } from '@/services/bookingApi';
+import { userApi } from '@/services/userApi';
 
 const CardComponent = ({getGoogleLogin}) => {
+  const dispatch = useDispatch()
   const [view, setView] = useState('signin'); // 'signin', 'signup', 'forgot'
 
   const getTitle = () => {
@@ -28,6 +32,11 @@ const CardComponent = ({getGoogleLogin}) => {
         return 'Sign in to continue';
     }
   };
+
+  useEffect(() => {
+    dispatch(bookingApi.util.resetApiState())
+    dispatch(userApi.util.resetApiState())
+  },[])
   return (
     <>
       <div className="relative z-10">

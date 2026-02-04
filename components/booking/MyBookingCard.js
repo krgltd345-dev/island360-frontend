@@ -25,14 +25,10 @@ const statusStyles = {
   "COMPLETED": "bg-slate-100 text-slate-700 border-slate-200"
 };
 
-export default function BookingCard({ booking, index = 0, onCancel, onDelete, onEdit, onReview, hasReview }) {
+export default function BookingCard({ booking, index = 0, onCancel, onDelete, onEdit, onReview, hasReview, calculateAmount }) {
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const router = useRouter()
-  const [Payment, { data: paymentData }] = useCreatePaymentMutation()
-  const canReview = booking.status === 'COMPLETED' && !hasReview;
-  const canCancel = booking.status === 'HOLD' || booking.status === 'CONFIRMED';
-  const canDelete = booking.status === 'CANCELLED';
-  const canShare = booking.status === 'CONFIRMED' || booking.status === 'HOLD';
+  const [Payment] = useCreatePaymentMutation()
 
   const handlePaymentClick = async (booking) => {
     try {
@@ -44,18 +40,7 @@ export default function BookingCard({ booking, index = 0, onCancel, onDelete, on
   };
 
 
-  const calculateAmount = (booking) => {
-    if (booking?.status === "CANCELLED" || booking?.status === "REFUNDED") {
 
-    } else {
-      if (booking?.groupShare) {
-        return ConvertCentToDollar(booking?.groupShare)
-      } else {
-        ConvertCentToDollar(booking?.totalPrice)
-      }
-    }
-
-  }
 
   return (
     <>
@@ -80,35 +65,32 @@ export default function BookingCard({ booking, index = 0, onCancel, onDelete, on
                   {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                 </Badge>
               </div>
-              {
-                (booking.status === 'CONFIRMED' || booking.status === 'PARTIALLY_CONFIRMED') &&
-                <div className='flex gap-2'>
+              <div className='flex gap-2'>
+                {
+                  (booking.status === 'CANCELLED' || booking.status === 'REFUNDED') &&
+                  <Button size='sm' variant="outline" className={"cursor-pointer"} onClick={() => onReview(booking)}>
+                    <Star className="w-4 h-4 mr-2 text-amber-500" />
+                    Leave a Review
+                  </Button>
+                }
+                <>
                   {
-                    <Button size='sm' variant="outline" className={"cursor-pointer"} onClick={() => onReview(booking)}>
-                      <Star className="w-4 h-4 mr-2 text-amber-500" />
-                      Leave a Review
-                    </Button>
-                  }
-                  {
+                    (booking.status === 'CONFIRMED' || booking.status === 'PARTIALLY_CONFIRMED') &&
                     booking?.groupBooking &&
                     <Button size='sm' variant="outline" className={"cursor-pointer"} onClick={() => setShareDialogOpen(true)}>
                       <Share2 className="w-4 h-4 mr-2" />
                       Invite
                     </Button>
                   }
-                  {
+                  {(booking.status === 'CONFIRMED' || booking.status === 'PARTIALLY_CONFIRMED') &&
                     booking?.activityId?.allowCancellations &&
                     <Button size='sm' variant="destructive" className={"cursor-pointer"} onClick={() => onCancel(booking)}>
                       <XCircle className="w-4 h-4 mr-2" />
                       Cancel
                     </Button>
                   }
-                  {/* <Button size='sm' variant="outline" onClick={() => onReview(booking)}>
-                  <Star className="w-4 h-4 mr-2 text-amber-500" />
-                  Leave a Review
-                </Button> */}
-                </div>
-              }
+                </>
+              </div>
               {/* <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="text-slate-400 hover:text-slate-600">
@@ -176,10 +158,7 @@ export default function BookingCard({ booking, index = 0, onCancel, onDelete, on
                 </span>
               </div>
               <div className="text-right">
-                {
-                  booking?.status === "CANCELLED" ? <span className="text-lg font-bold text-slate-900">${booking?.groupShare ? ConvertCentToDollar(booking?.groupShare) - ConvertCentToDollar(booking?.fees) / booking?.numberOfPersons : ConvertCentToDollar(booking?.totalPrice)}</span> :
-                    <span className="text-lg font-bold text-slate-900">${booking?.groupShare ? ConvertCentToDollar(booking?.groupShare) : ConvertCentToDollar(booking?.totalPrice)}</span>
-                }
+                <span className="text-lg font-bold text-slate-900">{calculateAmount(booking)}</span>
               </div>
             </div>
 
@@ -208,7 +187,7 @@ export default function BookingCard({ booking, index = 0, onCancel, onDelete, on
               )}
           </div>
         </Card>
-      </motion.div>
+      </motion.div >
     </>
   );
 }

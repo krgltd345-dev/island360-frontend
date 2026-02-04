@@ -124,12 +124,12 @@ export default function PersonalInfoSection({ user }) {
               <Edit className="w-4 h-4 mr-2" />
               Edit
             </Button>
-            <Button variant="destructive" onClick={() => {
+            {/* <Button variant="destructive" onClick={() => {
               toast.warning('Delete account will be available soon')
             }}>
               <MessageCircleWarning className="w-4 h-4 mr-2" />
               Delete Account
-            </Button>
+            </Button> */}
           </div>
         )}
       </div>

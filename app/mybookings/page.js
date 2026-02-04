@@ -37,6 +37,8 @@ import { useRouter } from 'next/navigation';
 import Recieved from '@/components/invites/Recieved';
 import SentInvites from '@/components/invites/SentInvites';
 import ReviewForm from '@/components/booking/ReviewForm';
+import { ConvertCentToDollar } from '@/lib/utils';
+import ReviewDialog from '@/components/booking/ReviewDialog';
 
 const bookings = [
   {
@@ -268,6 +270,23 @@ export default function MyBookings() {
   //   return participation;
   // };
 
+
+  const calculateAmount = (booking, cancel) => {
+    if (booking?.status === "CANCELLED" || booking?.status === "REFUNDED" || cancel) {
+      if (booking?.groupShare) {
+        return `Refund Amount $${ConvertCentToDollar(booking?.groupShare) * booking?.activityId?.refundOnCancellations / 100}`
+      } else {
+        return `Refund Amount $${ConvertCentToDollar(booking?.totalPrice) * booking?.activityId?.refundOnCancellations / 100}`
+      }
+    } else {
+      if (booking?.groupShare) {
+        return `$${ConvertCentToDollar(booking?.groupShare)}`
+      } else {
+        return `$${ConvertCentToDollar(booking?.totalPrice)}`
+      }
+    }
+  }
+
   if (isLoading) {
     return (
       <LayoutWrapper>
@@ -363,6 +382,7 @@ export default function MyBookings() {
                           onDelete={handleDeleteClick}
                           onEdit={handleEditClick}
                           onReview={handleReviewClick}
+                          calculateAmount={calculateAmount}
                           hasReview={hasReview(booking.id)}
                         />
                       </div>
@@ -410,7 +430,11 @@ export default function MyBookings() {
             <AlertDialogHeader>
               <AlertDialogTitle>Cancel Booking?</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to cancel this booking? This action cannot be undone.
+                <>
+                  Are you sure you want to cancel this booking? This action cannot be undone.
+                  All accepted and paid invitees will also be cancelled and refunded.<br/>
+                  <span className='text-black font-semibold'>{calculateAmount(bookingToCancel, true)}</span>
+                </>
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -426,27 +450,11 @@ export default function MyBookings() {
         </AlertDialog>
 
         {/* Review Dialog */}
-        <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Leave a Review</DialogTitle>
-            </DialogHeader>
-            {bookingToReview && (
-              <div>
-                <p className="text-sm text-slate-500 mb-4">
-                  Share your experience with <span className="font-medium text-slate-700">{bookingToReview?.activityId?.name}</span>
-                </p>
-                <ReviewForm
-                  booking={bookingToReview}
-                  onSuccess={() => {
-                    setReviewDialogOpen(false);
-                  }}
-                  onCancel={() => setReviewDialogOpen(false)}
-                />
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
+        <ReviewDialog
+        reviewDialogOpen={reviewDialogOpen}
+        setReviewDialogOpen={setReviewDialogOpen}
+        bookingToReview={bookingToReview}
+        />
 
         {/* Join Booking Dialog */}
         <JoinBookingDialog

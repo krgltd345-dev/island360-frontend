@@ -55,10 +55,32 @@ export const userApi = baseApi.injectEndpoints({
         method: 'POST',
         body,
       }),
-      // invalidatesTags: ["USER"]
+      invalidatesTags: ["REVIEWS"]
     }),
     getActivityReviews: builder.query({
       query: (body) => `/reviews/${body?.id}`,
+      providesTags: ["REVIEWS"]
+
+    }),
+    getUserActivityReviews: builder.query({
+      query: (body) => `/reviews/user/${body?.id}`,
+      providesTags: ["REVIEWS"]
+
+    }),
+    removeReview: builder.mutation({
+      query: (body) => ({
+        url: `/reviews/${body?.id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ["REVIEWS"]
+    }),
+    getVendorStats: builder.query({
+      query: (body) => `/reviews/vendor-stats`,
+
+    }),
+    getVendorReviews: builder.query({
+      query: (body) => `/reviews/vendor`,
+
     }),
   }),
 })
@@ -73,5 +95,9 @@ export const {
   useUpdateNotificationsMutation,
   useVendorApplicationMutation,
   useSubmitReviewMutation,
-  useGetActivityReviewsQuery
+  useGetActivityReviewsQuery,
+  useGetUserActivityReviewsQuery,
+  useRemoveReviewMutation,
+  useGetVendorStatsQuery,
+  useGetVendorReviewsQuery
 } = userApi

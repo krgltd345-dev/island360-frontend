@@ -11,7 +11,7 @@ import { useSearchParams } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_51SsOqtSPozStWdecIVu59xFNWpqwbETE7usnA27Tk6LiBPn8OQSgRL3fKlk2W19DkA5EyebYyogmcckzHJ8ec5P5000j0sBrHK');
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
 const Checkout = () => {
   const searchParams = useSearchParams();
