@@ -10,7 +10,8 @@ import LayoutWrapper from '@/components/layout/LayoutWrapper';
 import PersonalInfoSection from '@/components/profile/PersonalInfo';
 import BookingInfo from '@/components/profile/BookingInfo';
 import NotificationSettings from '@/components/profile/NotificationSettings';
-import { useGetUserProfileQuery, useGetUserRoleQuery } from '@/services/userApi';
+import { useGetUserProfileQuery, useGetUserRoleQuery, useGetVendorDetailsQuery } from '@/services/userApi';
+import VendorBusinessSection from '@/components/profile/VendorBusinessSection';
 
 const user = {
   "profile_photo_url": "https://base44.app/api/apps/692d3a33918f94eb9f4221f4/files/public/692d3a33918f94eb9f4221f4/9773e46e9_borrower4.jpg",
@@ -54,11 +55,11 @@ const user = {
 
 export default function ProfilePage() {
   const { data: userData, isLoading: userDataFetching } = useGetUserProfileQuery()
+  const { data: VendorData, isLoading: vendorDataFetching } = useGetVendorDetailsQuery()
   const { data: userRoleInfo, isLoading: userRoleInfoFetching } = useGetUserRoleQuery()
 
-
   if (
-    userDataFetching || userDataFetching
+    userDataFetching || vendorDataFetching || userRoleInfoFetching
   ) {
     return (
       <LayoutWrapper>
@@ -141,7 +142,7 @@ export default function ProfilePage() {
 
           <Tabs defaultValue="personal" className="space-y-6 ">
             <div className='scrollbar-hide overflow-x-scroll'>
-              <TabsList className={`grid w-full max-md:w-3xl ${user.is_vendor && user.vendor_approved ? 'grid-cols-4' : 'grid-cols-3'}`}>
+              <TabsList className={`grid w-full max-md:w-3xl ${VendorData?.data ? 'grid-cols-4' : 'grid-cols-3'}`}>
                 <TabsTrigger value="personal">
                   <User className="w-4 h-4 mr-2" />
                   Personal Info
@@ -154,7 +155,7 @@ export default function ProfilePage() {
                   <Bell className="w-4 h-4 mr-2" />
                   Notifications
                 </TabsTrigger>
-                {user.is_vendor && user.vendor_approved && (
+                {VendorData?.data && (
                   <TabsTrigger value="business">
                     <Store className="w-4 h-4 mr-2" />
                     Business
@@ -174,9 +175,9 @@ export default function ProfilePage() {
               <NotificationSettings user={user} />
             </TabsContent>
 
-            {user.is_vendor && user.vendor_approved && (
+            {VendorData?.data && (
               <TabsContent value="business">
-                {/* <VendorBusinessSection user={user} /> */}
+                <VendorBusinessSection vendor={VendorData?.data} />
               </TabsContent>
             )}
           </Tabs>

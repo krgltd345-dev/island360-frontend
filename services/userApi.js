@@ -11,6 +11,9 @@ export const userApi = baseApi.injectEndpoints({
       query: () => '/auth/me',
       providesTags: ["USER", 'VENDOR']
     }),
+    getVendorDetails: builder.query({
+      query: () => '/vendor/user',
+    }),
     getAllUser: builder.query({
       query: (data) => ({
         url: '/user',
@@ -99,5 +102,6 @@ export const {
   useGetUserActivityReviewsQuery,
   useRemoveReviewMutation,
   useGetVendorStatsQuery,
-  useGetVendorReviewsQuery
+  useGetVendorReviewsQuery,
+  useGetVendorDetailsQuery
 } = userApi
