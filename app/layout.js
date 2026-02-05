@@ -27,9 +27,9 @@ export default function RootLayout({ children }) {
       >
         <ReduxProvider>
           <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
-            {children}
+        {children}
           </Suspense>
-          <Toaster richColors position="top-center"/>
+        <Toaster richColors position="top-center"/>
         </ReduxProvider>
       </body>
     </html>

@@ -44,15 +44,15 @@ export default function ActivityManagement() {
       <div className="min-h-screen mt-12 bg-slate-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-4">
+          <div className="flex max-sm:flex-col gap-4 sm:items-center justify-between mb-8">
+            <div className="flex items-center sm:gap-4">
               <Link href={('/myactivities')}>
                 <Button variant="ghost" size="icon">
                   <ArrowLeft className="w-5 h-5" />
                 </Button>
               </Link>
               <div>
-                <h1 className="text-xl sm:text-3xl font-bold text-slate-900">{Activity?.data?.name}</h1>
+                <h1 className="text-3xl font-bold text-slate-900">{Activity?.data?.name}</h1>
                 <div className="flex items-center gap-2 mt-2">
                   <Badge variant="outline">{Activity?.data?.category?.name}</Badge>
                   <Badge variant={Activity?.data?.availableForBooking ? "default" : "secondary"}>
@@ -72,7 +72,7 @@ export default function ActivityManagement() {
           </div>
 
           {/* Activity Images */}
-          <div className="grid grid-cols-3 gap-4 mb-8">
+          <div className="grid sm:grid-cols-3 gap-4 mb-8">
             {Activity?.data?.imageUrls.length > 0 && Activity?.data?.imageUrls.map((item, idx) => (
               <img key={idx} src={item} alt={'activity_image'} className="w-full h-48 object-cover rounded-lg" />
             ))}

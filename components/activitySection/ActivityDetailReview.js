@@ -14,10 +14,7 @@ const ActivityDetailReview = ({reviews, hideClass}) => {
           <p className="text-slate-500 text-sm">Be the first to share your experience!</p>
         </div>
       ) : (
-        <div className="space-y-4 max-h-100 overflow-y-auto">
-          {reviews?.data?.map((review, index) => (
-            <ReviewCard key={review._id} review={review} index={index} />
-          ))}
+        <div className="space-y-4 max-h-100 scrollbar-hide overflow-y-auto">
           {reviews?.data?.map((review, index) => (
             <ReviewCard key={review._id} review={review} index={index} />
           ))}

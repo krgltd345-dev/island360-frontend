@@ -53,22 +53,9 @@ const user = {
 }
 
 export default function ProfilePage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [checkingAuth, setCheckingAuth] = useState(true);
   const { data: userData, isLoading: userDataFetching } = useGetUserProfileQuery()
   const { data: userRoleInfo, isLoading: userRoleInfoFetching } = useGetUserRoleQuery()
 
-  // useEffect(() => {
-  //   const checkAuth = async () => {
-  //     const authenticated = await base44.auth.isAuthenticated();
-  //     setIsAuthenticated(authenticated);
-  //     setCheckingAuth(false);
-  //     if (!authenticated) {
-  //       base44.auth.redirectToLogin(window.location.href);
-  //     }
-  //   };
-  //   checkAuth();
-  // }, []);
 
   if (
     userDataFetching || userDataFetching
@@ -96,9 +83,9 @@ export default function ProfilePage() {
 
           {/* Profile Header Card */}
           <Card className="p-4 sm:p-6 mb-8">
-            <div className="flex items-center max-sm:flex-col gap-4">
+            <div className="flex items-center sm:justify-between max-sm:flex-col gap-4">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full overflow-hidden bg-slate-900 flex items-center justify-center text-white text-2xl font-bold">
+                <div className="h-10 w-10 sm:w-16 sm:h-16 rounded-full overflow-hidden bg-slate-900 flex items-center justify-center text-white text-2xl font-bold">
                   {userData?.data?.profileImage ? (
                     <img src={userData?.data?.profileImage} alt="Profile" className="w-full h-full object-cover" />
                   ) : (
@@ -106,7 +93,7 @@ export default function ProfilePage() {
                   )}
                 </div>
                 <div className="flex-1">
-                  <h2 className="text-2xl font-bold text-slate-900">{userRoleInfo?.data?.user?.name}</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold text-slate-900">{userRoleInfo?.data?.user?.name}</h2>
                   <p className="text-slate-600">{userRoleInfo?.data?.user?.email}</p>
                   <div className="flex items-center gap-2 mt-2">
                     {(userRoleInfo?.data?.user?.role === 'SUPER_ADMIN' || userRoleInfo?.data?.user?.role === 'ADMIN') && (

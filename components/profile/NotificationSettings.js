@@ -66,11 +66,11 @@ export default function NotificationSettings() {
   }
 
   return (
-    <Card className="p-6">
+    <Card className="p-4 sm:p-6">
       <div className="flex items-center gap-3 mb-6">
         <Bell className="w-6 h-6 text-slate-700" />
         <div>
-          <h3 className="text-xl font-semibold text-slate-900">Notification Preferences</h3>
+          <h3 className="text-lg sm:text-xl font-semibold text-slate-900">Notification Preferences</h3>
           <p className="text-sm text-slate-600">Manage how you receive notifications</p>
         </div>
       </div>

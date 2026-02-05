@@ -43,6 +43,7 @@ export default function AdminSiteSettings() {
     try {
       const res = await AddCategory({name: category}).unwrap()
       toast.success(res?.message)
+      setcategory("")
     } catch (error) {
       console.log(error);
       toast.error(error?.data?.message)
@@ -106,7 +107,7 @@ export default function AdminSiteSettings() {
         </div>
         <div className='mt-4 flex flex-col gap-3'>
           <Label>Categories</Label>
-          <div className='flex gap-2'>
+          <div className='flex flex-wrap gap-2'>
             {
               categories?.data.map((category) => (
                 <Badge className={"text-base bg-blue-100 border-blue-500 text-blue-500"} key={category?._id}>

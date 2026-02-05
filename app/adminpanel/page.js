@@ -40,7 +40,7 @@ export default function AdminPanel() {
   })
   const { data: admins, isLoading: adminsLoading } = useGetAdminsQuery({
     ...(userFilter && { key: userFilter })
-  }, { skip: userRoleInfo?.data?.user?.role !== "SUPER_ADMIN"  })
+  }, { skip: userRoleInfo?.data?.user?.role !== "SUPER_ADMIN" })
   const [activeTab, setActiveTab] = useState('vendors');
   console.log(users, "users");
 
@@ -91,9 +91,9 @@ export default function AdminPanel() {
           </div>
 
           {/* Stats Overview */}
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-4 mb-8">
             <Card
-              className="p-4 cursor-pointer hover:shadow-lg transition-shadow"
+              className="p-4 cursor-pointer hover:shadow-lg max-sm:gap-2 transition-shadow"
               onClick={() => {
                 setActiveTab('users');
               }}
@@ -106,7 +106,7 @@ export default function AdminPanel() {
             </Card>
 
             <Card
-              className="p-4 cursor-pointer hover:shadow-lg transition-shadow"
+              className="p-4 cursor-pointer hover:shadow-lg max-sm:gap-2 transition-shadow"
               onClick={() => {
                 setActiveTab('users');
               }}
@@ -119,7 +119,7 @@ export default function AdminPanel() {
             </Card>
 
             <Card
-              className="p-4 cursor-pointer hover:shadow-lg transition-shadow"
+              className="p-4 cursor-pointer hover:shadow-lg max-sm:gap-2 transition-shadow"
               onClick={() => setActiveTab('bookings')}
             >
               <div className="flex items-center gap-2 mb-2">
@@ -130,7 +130,7 @@ export default function AdminPanel() {
             </Card>
 
             <Card
-              className="p-4 cursor-pointer hover:shadow-lg transition-shadow"
+              className="p-4 cursor-pointer hover:shadow-lg max-sm:gap-2 transition-shadow"
               onClick={() => setActiveTab('settings')}
             >
               <div className="flex items-center gap-2 mb-2">
@@ -141,7 +141,7 @@ export default function AdminPanel() {
             </Card>
 
             <Card
-              className="p-4 cursor-pointer hover:shadow-lg transition-shadow"
+              className="p-4 cursor-pointer hover:shadow-lg max-sm:gap-2 transition-shadow"
               onClick={() => setActiveTab('payouts')}
             >
               <div className="flex items-center gap-2 mb-2">
@@ -152,7 +152,7 @@ export default function AdminPanel() {
             </Card>
 
             <Card
-              className="p-4 cursor-pointer hover:shadow-lg transition-shadow"
+              className="p-4 cursor-pointer hover:shadow-lg max-sm:gap-2 transition-shadow"
               onClick={() => setActiveTab('activities')}
             >
               <div className="flex items-center gap-2 mb-2">
@@ -184,20 +184,21 @@ export default function AdminPanel() {
           )}
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-6 text-sm">
-              <TabsTrigger value="vendors">
-                Approvals
-                {vendorRequest?.data?.length > 0 && (
-                  <Badge className="ml-2 bg-amber-500 text-xs">{vendorRequest?.data?.length}</Badge>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="users">Users</TabsTrigger>
-              <TabsTrigger value="activities">Activities</TabsTrigger>
-              <TabsTrigger value="bookings">Bookings</TabsTrigger>
-              <TabsTrigger value="payouts">Payouts</TabsTrigger>
-              <TabsTrigger value="settings">Settings</TabsTrigger>
-            </TabsList>
-
+            <div className='scrollbar-hide overflow-x-scroll'>
+              <TabsList className="grid w-full max-md:w-3xl grid-cols-6 text-sm">
+                <TabsTrigger value="vendors">
+                  Approvals
+                  {vendorRequest?.data?.length > 0 && (
+                    <Badge className="ml-2 bg-amber-500 text-xs">{vendorRequest?.data?.length}</Badge>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="users">Users</TabsTrigger>
+                <TabsTrigger value="activities">Activities</TabsTrigger>
+                <TabsTrigger value="bookings">Bookings</TabsTrigger>
+                <TabsTrigger value="payouts">Payouts</TabsTrigger>
+                <TabsTrigger value="settings">Settings</TabsTrigger>
+              </TabsList>
+            </div>
             <TabsContent value="vendors">
               <AdminVendorApprovals vendors={vendors} vendorRequest={vendorRequest} />
             </TabsContent>

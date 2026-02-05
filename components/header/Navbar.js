@@ -111,32 +111,10 @@ const Navbar = () => {
                 >
                   <LogOut className="w-5 h-5" />
                 </Button> : <Link href={"/login"}>
-                  <Button variant="outline" size="sm">
-                    Sign In
+                  <Button className={"bg-amber-300 hover:bg-black hover:text-white border-0 px-6 py-4"} variant="outline" size="sm">
+                     SIGN IN
                   </Button>
                 </Link>
-            }
-            {/* <CartButton /> */}
-            {
-              // isAuthenticated && (
-              //   <>
-              //     <NotificationBell />
-              //     {/* <Link to={createPageUrl('VendorSignup')}>
-              //       <Button variant="outline" size="sm">
-              //         Join as Vendor
-              //       </Button>
-              //     </Link> */}
-              //     <Button
-              //       variant="ghost"
-              //       size="icon"
-              //       onClick={() => base44.auth.logout()}
-              //       title="Logout"
-              //       className="text-slate-600 hover:text-slate-900"
-              //     >
-              //       <LogOut className="w-5 h-5" />
-              //     </Button>
-              //   </>
-              // )
             }
           </div>
 

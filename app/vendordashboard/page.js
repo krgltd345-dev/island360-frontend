@@ -114,7 +114,7 @@ export default function VendorDashboard() {
   const handleEdit = (activity) => {
     setEditingActivity(activity);
     setFormData(activity);
-    setFormData({...activity, price: ConvertCentToDollar(activity?.price)})
+    setFormData({ ...activity, price: ConvertCentToDollar(activity?.price) })
     setImages({
       image_url: activity?.imageUrls?.[0] || '',
       image_url_2: activity?.imageUrls?.[1] || '',
@@ -228,7 +228,7 @@ export default function VendorDashboard() {
     <LayoutWrapper>
       <div className="min-h-screen mt-12 bg-slate-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex justify-between items-center mb-4 sm:mb-8">
             <h1 className="text-3xl font-bold text-slate-900">Vendor Dashboard</h1>
             <Button onClick={() => {
               resetForm();
@@ -241,8 +241,8 @@ export default function VendorDashboard() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             <div className="lg:col-span-3">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-6">
+                <Card className="p-4 sm:p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-slate-600 text-sm">Total Activities</p>
@@ -254,7 +254,7 @@ export default function VendorDashboard() {
                   </div>
                 </Card>
 
-                <Card className="p-6">
+                <Card className="p-4 sm:p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-slate-600 text-sm">Total Bookings</p>
@@ -266,7 +266,7 @@ export default function VendorDashboard() {
                   </div>
                 </Card>
 
-                <Card className="p-6">
+                <Card className="p-4 sm:p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-slate-600 text-sm">Total Revenue</p>
@@ -286,15 +286,16 @@ export default function VendorDashboard() {
           </div>
 
           <Tabs defaultValue="activities" className="mb-8">
-            <TabsList className="grid w-full grid-cols-6">
-              <TabsTrigger value="activities">Activities</TabsTrigger>
-              <TabsTrigger value="bookings">Bookings</TabsTrigger>
-              <TabsTrigger value="reviews">Reviews</TabsTrigger>
-              <TabsTrigger value="earnings">Earnings</TabsTrigger>
-              <TabsTrigger value="payouts">Payouts</TabsTrigger>
-              <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            </TabsList>
-
+            <div className='scrollbar-hide overflow-x-scroll'>
+              <TabsList className="grid w-full max-md:w-3xl grid-cols-5">
+                <TabsTrigger value="activities">Activities</TabsTrigger>
+                <TabsTrigger value="bookings">Bookings</TabsTrigger>
+                <TabsTrigger value="reviews">Reviews</TabsTrigger>
+                <TabsTrigger value="earnings">Earnings</TabsTrigger>
+                <TabsTrigger value="payouts">Payouts</TabsTrigger>
+                {/* <TabsTrigger value="analytics">Analytics</TabsTrigger> */}
+              </TabsList>
+            </div>
             <TabsContent value="activities" className="space-y-6">
               <h2 className="text-xl font-semibold text-slate-900">My Activities</h2>
               {Actiities?.pagination?.total === 0 ? (
@@ -395,10 +396,10 @@ export default function VendorDashboard() {
               {/* <VendorPayoutManagement bookings={myBookings} user={user} /> */}
             </TabsContent>
 
-            <TabsContent value="analytics" className="space-y-6">
+            {/* <TabsContent value="analytics" className="space-y-6">
               <h2 className="text-xl font-semibold text-slate-900">Analytics & Insights</h2>
-              {/* <VendorAnalytics activities={myActivities} bookings={myBookings} /> */}
-            </TabsContent>
+              <VendorAnalytics activities={myActivities} bookings={myBookings} />
+            </TabsContent> */}
           </Tabs>
 
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -407,7 +408,7 @@ export default function VendorDashboard() {
                 <DialogTitle>{editingActivity ? 'Edit Activity' : 'Add New Activity'}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Activity Name *</Label>
                     <Input
@@ -430,15 +431,6 @@ export default function VendorDashboard() {
                             )
                           })
                         }
-                        {/* <SelectItem value="boating">Boating</SelectItem>
-                        <SelectItem value="scooter">Scooter</SelectItem>
-                        <SelectItem value="kayak_paddleboard">Kayak/Paddleboard</SelectItem>
-                        <SelectItem value="nature_trails">Nature Trails</SelectItem>
-                        <SelectItem value="jet_ski">Jet Ski</SelectItem>
-                        {false && (
-                          <SelectItem value="non_profit">Non-Profit/Community Service</SelectItem>
-                        )}
-                        <SelectItem value="other">Other</SelectItem> */}
                       </SelectContent>
                     </Select>
                   </div>
@@ -531,7 +523,7 @@ export default function VendorDashboard() {
 
 
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Duration ( in {scale[timeScale]} )</Label>
                     <div className='flex gap-2 items-center'>
@@ -568,7 +560,7 @@ export default function VendorDashboard() {
 
                 <div className="space-y-4">
                   <Label>Activity Photos</Label>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     {['image_url', 'image_url_2', 'image_url_3'].map((field, idx) => (
                       <div key={field} className="space-y-2">
                         <Input
