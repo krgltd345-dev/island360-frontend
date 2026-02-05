@@ -43,7 +43,7 @@ export default function CategoryFilter({ categories, selected, onChange }) {
         {"All Activities"}
       </Button>
       {categories.map((cat) => {
-        const Icon = iconMap[cat.name];
+        const Icon = iconMap[cat?.name] ||  Sparkles;
         const isActive = selected?._id === cat._id;
 
         return (

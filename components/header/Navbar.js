@@ -35,7 +35,6 @@ const Navbar = () => {
       deleteCookie('role')
       deleteCookie('authKey')
       router.push("/login");
-      // dispatch(bookingApi.util.resetApiState())
       toast.success(res?.message)
     } catch (error) {
       toast.error(error?.data?.message)
@@ -60,9 +59,6 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-14">
           {/* Logo */}
           <Link href={"/"} className="flex items-center gap-2">
-            {/* <div className="w-10 h-10 bg-pink-100 rounded-xl flex items-center justify-center border-2 border-sky-500">
-              <TreePalm className="w-8 h-8 text-sky-600" />
-            </div> */}
             <img src={"/island_logo.png"} alt="Logo" className="w-12 h-10" />
             <span className="font-bold text-xl text-slate-900 hidden sm:block">Island 360</span>
           </Link>

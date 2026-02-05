@@ -18,34 +18,18 @@ import { useSearchParams } from 'next/navigation';
 import { useGetActivityByIdQuery } from '@/services/activityApi';
 import LayoutWrapper from '@/components/layout/LayoutWrapper';
 import ActivityPerformanceMetrics from '@/components/activityManagement/ActivityMetrix';
-import { useGetVendorStatsQuery } from '@/services/userApi';
+import { useGetActivityReviewsQuery, useGetVendorStatsQuery } from '@/services/userApi';
 
 export default function ActivityManagement() {
   const searchParams = useSearchParams();
   const activityId = searchParams.get('id');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [checkingAuth, setCheckingAuth] = useState(true);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [uploadingImages, setUploadingImages] = useState(false);
 
   const { data: Activity, isLoading } = useGetActivityByIdQuery({ id: activityId }, { skip: !activityId })
-  const { data: vendorStats } = useGetVendorStatsQuery()
-  console.log(vendorStats, "vendorStats");
-  console.log(activityId, "activityId", Activity);
-  // useEffect(() => {
-  //   const checkAuth = async () => {
-  //     const authenticated = await base44.auth.isAuthenticated();
-  //     setIsAuthenticated(authenticated);
-  //     setCheckingAuth(false);
-  //     if (!authenticated) {
-  //       base44.auth.redirectToLogin(window.location.href);
-  //     }
-  //   };
-  //   checkAuth();
-  // }, []);
+  const { data: reviews, isLoading: reviewsLoading } = useGetActivityReviewsQuery({ id: activityId }, { skip: !activityId })
 
 
-  if (isLoading) {
+
+  if (isLoading || reviewsLoading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <Card className="p-8 text-center">
@@ -139,7 +123,7 @@ export default function ActivityManagement() {
               <TrendingUp className="w-5 h-5 text-slate-700" />
               <h2 className="text-2xl font-bold text-slate-900">Performance Metrics</h2>
             </div>
-            <ActivityPerformanceMetrics />
+            <ActivityPerformanceMetrics reviews={reviews}/>
           </div>
         </div>
       </div>

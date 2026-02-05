@@ -15,6 +15,15 @@ export const activityApi = baseApi.injectEndpoints({
     }),
     getCategory: builder.query({
       query: (body) => `/categories`,
+      providesTags: ["CATEGORY"]
+    }),
+    createCategory: builder.mutation({
+      query: (body) => ({
+        url: '/categories',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ["CATEGORY"]
     }),
     createActivity: builder.mutation({
       query: (body) => ({
@@ -53,6 +62,7 @@ export const {
   useGetActivityCountQuery,
   useUpdateActivityMutation,
   useRemoveActivityMutation,
-  useGetCategoryQuery
+  useGetCategoryQuery,
+  useCreateCategoryMutation
 
 } = activityApi

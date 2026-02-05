@@ -24,8 +24,6 @@ export default function ActivityDetailPage() {
   const { data: userRoleInfo, isLoading: userRoleInfoFetching } = useGetUserRoleQuery()
 
 
-  console.log(reviews, "reviews");
-
 
 
 

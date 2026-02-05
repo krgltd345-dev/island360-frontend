@@ -15,6 +15,7 @@ import Link from 'next/link';
 import { useCreateActivityMutation, useGetAllActivitiesQuery, useGetCategoryQuery, useRemoveActivityMutation, useUpdateActivityMutation } from '@/services/activityApi';
 import { useGetUserRoleQuery } from '@/services/userApi';
 import { useUploadImageMutation } from '@/services/upload';
+import { ConvertCentToDollar } from '@/lib/utils';
 
 
 const scale = {
@@ -63,19 +64,6 @@ export default function MyActivities() {
   const [Remove] = useRemoveActivityMutation()
   const [UploadImage] = useUploadImageMutation();
 
-  // useEffect(() => {
-  //   const checkAuth = async () => {
-  //     const authenticated = await base44.auth.isAuthenticated();
-  //     setIsAuthenticated(authenticated);
-  //     setCheckingAuth(false);
-  //     if (!authenticated) {
-  //       base44.auth.redirectToLogin(window.location.href);
-  //     }
-  //   };
-  //   checkAuth();
-  // }, []);
-
-
   const resetForm = () => {
     setFormData({
       name: '',
@@ -95,6 +83,11 @@ export default function MyActivities() {
       availableForBooking: true,
       allowGroupBookings: true,
     });
+    setImages({
+      image_url: '',
+      image_url_2: '',
+      image_url_3: '',
+    })
     setTimeScale("m")
     setEditingActivity(null);
   };
@@ -120,6 +113,7 @@ export default function MyActivities() {
   const handleEdit = (activity) => {
     setEditingActivity(activity);
     setFormData(activity);
+    setFormData({ ...activity, price: ConvertCentToDollar(activity?.price) })
     setImages({
       image_url: activity?.imageUrls?.[0] || '',
       image_url_2: activity?.imageUrls?.[1] || '',
@@ -228,14 +222,17 @@ export default function MyActivities() {
 
   return (
     <LayoutWrapper>
-      <div className="min-h-screen mt-12 bg-slate-50 py-8">
+      <div className="min-h-[calc(100vh-156px)] mt-12 bg-slate-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-8">
             <div>
               <h1 className="text-3xl font-bold text-slate-900">My Activities</h1>
               <p className="text-slate-600 mt-1">Manage your activity listings</p>
             </div>
-            <Button onClick={() => setDialogOpen(true)} className="bg-slate-900">
+            <Button onClick={() => {
+              resetForm();
+              setDialogOpen(true)
+            }} className="bg-slate-900">
               <Plus className="w-4 h-4 mr-2" />
               Add Activity
             </Button>
@@ -271,7 +268,7 @@ export default function MyActivities() {
                       <p className="text-slate-600 text-sm mb-3 h-10 line-clamp-2">{activity.description}</p>
                       <div className="space-y-2 mb-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-lg font-bold text-slate-900">${activity.price}</span>
+                          <span className="text-lg font-bold text-slate-900">${ConvertCentToDollar(activity.price)}</span>
                         </div>
                         {activity.availableSpots && (
                           <p className="text-xs text-slate-500">
