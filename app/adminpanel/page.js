@@ -91,7 +91,7 @@ export default function AdminPanel() {
           </div>
 
           {/* Stats Overview */}
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-4 mb-8">
+          {/* <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-4 mb-8">
             <Card
               className="p-4 cursor-pointer hover:shadow-lg max-sm:gap-2 transition-shadow"
               onClick={() => {
@@ -161,7 +161,7 @@ export default function AdminPanel() {
               </div>
               <p className="text-2xl font-bold text-slate-900">{4.5}</p>
             </Card>
-          </div>
+          </div> */}
 
           {/* Pending Vendor Alerts */}
           {vendorRequest?.data?.length > 0 && (

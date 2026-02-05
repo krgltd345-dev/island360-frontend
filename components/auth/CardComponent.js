@@ -3,16 +3,17 @@ import React, { useEffect, useState } from 'react'
 import SignIn from './SignIn'
 import SignUp from './SignUp'
 import ForgotPassword from './ForgotPassword'
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { bookingApi } from '@/services/bookingApi';
 import { userApi } from '@/services/userApi';
+import { setSignUp } from '@/services/globalSlice';
 
-const CardComponent = ({getGoogleLogin}) => {
+const CardComponent = ({ getGoogleLogin }) => {
+  const { signUp } = useSelector((state) => state.global);
   const dispatch = useDispatch()
-  const [view, setView] = useState('signin'); // 'signin', 'signup', 'forgot'
 
   const getTitle = () => {
-    switch (view) {
+    switch (signUp) {
       case 'signup':
         return 'Sign Up';
       case 'forgot':
@@ -23,7 +24,7 @@ const CardComponent = ({getGoogleLogin}) => {
   };
 
   const getDescription = () => {
-    switch (view) {
+    switch (signUp) {
       case 'signup':
         return 'Sign up to start booking activities';
       case 'forgot':
@@ -36,7 +37,7 @@ const CardComponent = ({getGoogleLogin}) => {
   useEffect(() => {
     dispatch(bookingApi.util.resetApiState())
     dispatch(userApi.util.resetApiState())
-  },[])
+  }, [])
   return (
     <>
       <div className="relative z-10">
@@ -50,20 +51,20 @@ const CardComponent = ({getGoogleLogin}) => {
         )}
       </div>
       <div className="relative z-10">
-        {view === 'signin' && (
+        {signUp === 'signin' && (
           <SignIn
             getGoogleLogin={getGoogleLogin}
-            onSwitchToSignUp={() => setView('signup')}
-            onSwitchToForgotPassword={() => setView('forgot')}
+            onSwitchToSignUp={() => dispatch(setSignUp('signup'))}
+            onSwitchToForgotPassword={() => dispatch(setSignUp('forgot'))}
           />
         )}
 
-        {view === 'signup' && (
-          <SignUp onSwitchToSignIn={() => setView('signin')} />
+        {signUp === 'signup' && (
+          <SignUp onSwitchToSignIn={() => dispatch(setSignUp('signin'))} />
         )}
 
-        {view === 'forgot' && (
-          <ForgotPassword onSwitchToSignIn={() => setView('signin')} />
+        {signUp === 'forgot' && (
+          <ForgotPassword onSwitchToSignIn={() => dispatch(setSignUp('signin'))} />
         )}
       </div>
     </>

@@ -139,7 +139,7 @@ export default function VendorSignup() {
     return (
       <LayoutWrapper>
         <div className="flex-1 mt-12 bg-slate-50 flex items-center justify-center">
-          <Card className="p-8 text-center max-w-md">
+          <Card className="sm:p-8 p-4 text-center max-w-md">
             <Clock className="w-16 h-16 text-amber-500 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-slate-900 mb-2">Application Pending</h2>
             <p className="text-slate-600 mb-2">Your vendor application is under review</p>
@@ -245,7 +245,7 @@ export default function VendorSignup() {
                   className="w-4 h-4"
                 />
                 <Label className="text-yellow-700">
-                  Endable Booking Cancellation
+                  Enable Booking Cancellation
                 </Label>
               </div>
               {

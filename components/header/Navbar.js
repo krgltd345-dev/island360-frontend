@@ -1,5 +1,5 @@
 "use client";
-import { Calendar, List, LogOut, Menu, MessageSquare, Target, TreePalm, Users } from 'lucide-react';
+import { Calendar, List, LogIn, LogOut, Menu, MessageSquare, Target, TreePalm, Users } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react'
@@ -10,9 +10,11 @@ import { toast } from 'sonner';
 import { useLogOutMutation } from '@/services/authApi';
 import { useDispatch } from 'react-redux';
 import { deleteCookie, setCookie } from 'cookies-next';
-import { setIsLogin } from '@/services/globalSlice';
+import { setIsLogin, setSignUp } from '@/services/globalSlice';
 import { bookingApi } from '@/services/bookingApi';
 import { ROLES } from '@/lib/utils';
+import { RiUserAddLine } from "react-icons/ri";
+
 
 const Navbar = () => {
   const router = useRouter()
@@ -110,11 +112,27 @@ const Navbar = () => {
                   className="text-slate-600 hover:text-slate-900"
                 >
                   <LogOut className="w-5 h-5" />
-                </Button> : <Link href={"/login"}>
-                  <Button className={"bg-amber-300 hover:bg-black hover:text-white border-0 px-6 py-4"} variant="outline" size="sm">
-                     SIGN IN
+                </Button> :
+                <div className='flex items-center gap-2'>
+                  <Button
+                    onClick={() => {
+                      dispatch(setSignUp("signin"))
+                      router.push("/login")
+                    }}
+                    className={"bg-amber-300 hover:bg-black h-9  hover:text-white border-0 px-7 py-4"} variant="outline" size="sm">
+                    <LogIn className="w-5 h-5" />
+                    Login
                   </Button>
-                </Link>
+                  <Button
+                    onClick={() => {
+                      dispatch(setSignUp("signup"))
+                      router.push("/login")
+                    }}
+                    className={"bg-amber-300 hover:bg-black h-9 hover:text-white border-0 px-7 py-4"} variant="outline" size="sm">
+                    <RiUserAddLine className="w-5 h-5" />
+                    Signup
+                  </Button>
+                </div>
             }
           </div>
 
@@ -131,7 +149,22 @@ const Navbar = () => {
               <SheetContent side="right" className="w-72">
                 <SheetTitle className={"hidden"}>Mobile navigation</SheetTitle>
                 <div className="flex flex-col gap-2 px-5 mt-12">
-                  {navItems.map((item) => {
+                  {!userRoleInfo?.data?.user &&
+                    <Link
+                      href={"/"}
+                      className={`
+              flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all
+              ${pathName == "/"
+                          ? 'bg-slate-900 text-white'
+                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                        }
+            `}
+                    >
+                      <Target className="w-4 h-4" />
+                      Home
+                    </Link>
+                  }
+                  {userRoleInfo?.data?.user && navItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = pathName === item.page;
                     return (
@@ -182,25 +215,6 @@ const Navbar = () => {
                         </Button>
                       </Link>
                   }
-
-
-                  {/* {isAuthenticated && (
-                    <>
-                      <Link to={createPageUrl('VendorSignup')} onClick={() => setMobileMenuOpen(false)}>
-                        <Button variant="outline" className="w-full">
-                          Join as Vendor
-                        </Button>
-                      </Link>
-                      <Button
-                        variant="ghost"
-                        className="w-full justify-start text-slate-600 hover:text-slate-900"
-                        onClick={() => base44.auth.logout()}
-                      >
-                        <LogOut className="w-4 h-4 mr-2" />
-                        Logout
-                      </Button>
-                    </>
-                  )} */}
                 </div>
               </SheetContent>
             </Sheet>

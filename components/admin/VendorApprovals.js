@@ -510,11 +510,13 @@ export default function AdminVendorApprovals({ vendorRequest, vendors }) {
               <Card key={vendor._id} className="p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
-                      <Store className="w-5 h-5 text-slate-600" />
-                      <h4 className="text-lg font-semibold text-slate-900">
-                        {vendor.vendorId.businessName || 'Business Name Not Provided'}
-                      </h4>
+                    <div className="flex max-sm:flex-col items-center gap-3 mb-3">
+                      <div className='flex gap-2 items-center'>
+                        <Store className="w-5 h-5 text-slate-600" />
+                        <h4 className="text-lg font-semibold text-slate-900">
+                          {vendor.vendorId.businessName || 'Business Name Not Provided'}
+                        </h4>
+                      </div>
                       <Badge className="bg-amber-100 text-amber-700">Pending</Badge>
                     </div>
                     <div className="space-y-2 text-sm text-slate-600 mb-4">
@@ -553,7 +555,7 @@ export default function AdminVendorApprovals({ vendorRequest, vendors }) {
                         </div>
                       )}
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex max-sm:flex-col gap-2">
                       <Button
                         size="sm"
                         onClick={() => handleApprove(vendor)}
