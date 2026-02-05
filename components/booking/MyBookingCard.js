@@ -54,8 +54,8 @@ export default function BookingCard({ booking, index = 0, onCancel, onDelete, on
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: index * 0.1 }}
       >
-        <Card className="overflow-hidden bg-white border-0 shadow-sm hover:shadow-md transition-all duration-300">
-          <div className="p-6">
+        <Card className="overflow-hidden max-sm:py-0 bg-white border-0 shadow-sm hover:shadow-md transition-all duration-300">
+          <div className="p-4 sm:p-6">
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h3 className="text-lg font-semibold text-slate-900 mb-1">

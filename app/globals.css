@@ -172,6 +172,14 @@
   .slide-out-to-bottom {
     animation-name: slide-out-to-bottom;
   }
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* IE & Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari */
+  }
 }
 
 /* ===========================
@@ -266,4 +274,14 @@
   to {
     transform: translateY(100%);
   }
+}
+
+.hide-scrollbar {
+  overflow: auto; /* keep scrolling enabled */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
 }

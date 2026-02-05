@@ -56,11 +56,12 @@ export default function ReceiveInviteCard({ invite }) {
                 {invite?.inviterUserId?.name}
               </div>
               <div className='flex items-center gap-2 mb-4'>
-                <span className='text-black/50'>Organiser Email: </span>
+                <span className='text-black/50 hidden sm:block'>Organiser Email: </span>
+                <span className='text-black/50 sm:hidden block'> Email: </span>
                 {invite?.inviterUserId?.email}
               </div>
               <div className='flex justify-between w-full  gap-2'>
-                <div className='flex gap-1'>
+                <div className='flex max-sm:flex-col gap-1'>
                   <h3 className="text-2xl font-semibold text-slate-900 mb-1">
                     {invite?.activityId?.name}
                   </h3>

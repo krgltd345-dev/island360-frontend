@@ -115,7 +115,7 @@ export default function PersonalInfoSection({ user }) {
   };
 
   return (
-    <Card className="p-6">
+    <Card className="p-4 sm:p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-semibold text-slate-900">Personal Information</h3>
         {!isEditing && (
@@ -221,7 +221,7 @@ export default function PersonalInfoSection({ user }) {
             <p className="text-slate-900 font-medium">{user.address || 'Not provided'}</p>
           )}
         </div>
-        <div className='flex gap-4 w-full'>
+        <div className='flex max-sm:flex-col gap-4 w-full'>
           <div className="space-y-2 w-full">
             <Label>Country Code</Label>
             {isEditing ? (

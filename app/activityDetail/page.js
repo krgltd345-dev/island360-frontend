@@ -1,5 +1,6 @@
 'use client';
 import ActivityCalendar from "@/components/activitySection/ActivityCalendar";
+import ActivityDetailReview from "@/components/activitySection/ActivityDetailReview";
 import MultiStepBookingForm from "@/components/activitySection/MultiStepForm";
 import ReviewCard from "@/components/booking/ReviewCard";
 import LayoutWrapper from "@/components/layout/LayoutWrapper";
@@ -63,9 +64,9 @@ export default function ActivityDetailPage() {
   }
   return (
     <LayoutWrapper>
-      <div className="container mt-10 mx-auto px-4 py-8">
+      <div className="container mt-10 mx-auto sm:px-4 py-8">
         <div className="">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="max-w-6xl mx-auto px-2 sm:px-6 lg:px-8 py-0 sm:py-2">
             <Link href={'/'}>
               <Button variant="ghost" className="text-slate-600 cursor-pointer hover:text-slate-900 -ml-2">
                 <ArrowLeft className="w-4 h-4 mr-2" />
@@ -75,8 +76,8 @@ export default function ActivityDetailPage() {
           </div>
         </div>
 
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-12">
             {/* Left Column - Details */}
             <div
               initial={{ opacity: 0, x: -20 }}
@@ -89,7 +90,7 @@ export default function ActivityDetailPage() {
                   <img
                     src={Activity?.data?.imageUrls?.[0] || 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800'}
                     alt={Activity?.data?.name}
-                    className="w-full h-80 object-cover"
+                    className="w-full h-50  sm:h-80 object-cover"
                   />
                   <Badge className="absolute top-4 left-4 bg-white/90 backdrop-blur text-slate-800">
                     {Activity?.data?.category?.name}
@@ -103,7 +104,7 @@ export default function ActivityDetailPage() {
                         <img
                           src={Activity?.data?.imageUrls?.[1]}
                           alt={`${Activity?.data?.name} - Image 2`}
-                          className="w-full h-48 object-cover"
+                          className="w-full h-30 sm:h-48 object-cover"
                         />
                       </div>
                     )}
@@ -112,7 +113,7 @@ export default function ActivityDetailPage() {
                         <img
                           src={Activity?.data?.imageUrls?.[2]}
                           alt={`${Activity?.data?.name} - Image 3`}
-                          className="w-full h-48 object-cover"
+                          className="w-full h-30 sm:h-48 object-cover"
                         />
                       </div>
                     )}
@@ -147,23 +148,7 @@ export default function ActivityDetailPage() {
               <p className="text-slate-600 text-lg leading-relaxed mb-8">
                 {Activity?.data?.description || 'Experience an unforgettable adventure with our professional team. Perfect for all skill levels, this Activity?.data? offers a unique way to explore and create lasting memories.'}
               </p>
-              <div>
-                {reviews?.data?.length < 1 ? (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <MessageSquare className="w-8 h-8 text-slate-400" />
-                    </div>
-                    <h3 className="font-semibold text-slate-900 mb-1">No reviews yet</h3>
-                    <p className="text-slate-500 text-sm">Be the first to share your experience!</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {reviews?.data?.map((review, index) => (
-                      <ReviewCard key={review._id} review={review} index={index} />
-                    ))}
-                  </div>
-                )}
-              </div>
+              <ActivityDetailReview reviews={reviews} hideClass="sm:block hidden" />
             </div>
 
             {/* Right Column - Booking Form */}
@@ -204,8 +189,8 @@ export default function ActivityDetailPage() {
                     {false && (
                       <div className="flex items-center gap-1 text-amber-500">
                         <Star className="w-4 h-4 fill-current" />
-                        <span className="font-medium">{average.toFixed(1)}</span>
-                        <span className="text-slate-400 text-sm">({count})</span>
+                        <span className="font-medium">{(4).toFixed(1)}</span>
+                        <span className="text-slate-400 text-sm">({10})</span>
                       </div>
                     )}
                   </div>
@@ -249,6 +234,7 @@ export default function ActivityDetailPage() {
                   )} */}
               </div>
             </div>
+            <ActivityDetailReview reviews={reviews} hideClass="block sm:hidden" />
           </div>
         </div>
       </div>

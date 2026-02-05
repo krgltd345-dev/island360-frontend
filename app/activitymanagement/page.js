@@ -52,7 +52,7 @@ export default function ActivityManagement() {
                 </Button>
               </Link>
               <div>
-                <h1 className="text-3xl font-bold text-slate-900">{Activity?.data?.name}</h1>
+                <h1 className="text-xl sm:text-3xl font-bold text-slate-900">{Activity?.data?.name}</h1>
                 <div className="flex items-center gap-2 mt-2">
                   <Badge variant="outline">{Activity?.data?.category?.name}</Badge>
                   <Badge variant={Activity?.data?.availableForBooking ? "default" : "secondary"}>

@@ -42,10 +42,10 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
       return result
     }
 
-    // If we're on a public route, don't redirect - just return the error
-    if (isPublicRoute()) {
-      return result
-    }
+    // // If we're on a public route, don't redirect - just return the error
+    // if (isPublicRoute()) {
+    //   return result
+    // }
 
     // If we're already refreshing, wait for that promise
     if (isRefreshing && refreshPromise) {

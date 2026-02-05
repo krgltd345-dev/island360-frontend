@@ -81,8 +81,9 @@ export default function MultiStepBookingForm({ Activity }) {
       const timeArr = formData?.slotStartTime.split("-")
 
       console.log(timeArr, "timeArr");
+      const { numberOfPersons, ...restFormData } = formData;
       const data = {
-        ...formData,
+        ...(isGroupBooking ? formData : restFormData),
         activityId: Activity?.data?._id,
         bookingDate: format(formData?.bookingDate, 'yyyy-MM-dd'),
         groupBooking: isGroupBooking,
@@ -125,18 +126,18 @@ export default function MultiStepBookingForm({ Activity }) {
             return (
               <React.Fragment key={step.id}>
                 <div className="flex flex-col items-center">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-all ${isCompleted ? 'bg-green-600 text-white' :
+                  <div className={`w-8 h-8 sm:w-12 sm:h-12 rounded-full flex items-center justify-center mb-2 transition-all ${isCompleted ? 'bg-green-600 text-white' :
                     isActive ? 'bg-slate-900 text-white' :
                       'bg-slate-200 text-slate-400'
                     }`}>
-                    {isCompleted ? <Check className="w-6 h-6" /> : <Icon className="w-6 h-6" />}
+                    {isCompleted ? <Check className="w-4 h-4 sm:w-6 sm:h-6" /> : <Icon className="w-4 h-4 sm:w-6 sm:h-6" />}
                   </div>
                   <p className={`text-xs font-medium ${isActive ? 'text-slate-900' : 'text-slate-500'}`}>
                     {step.name}
                   </p>
                 </div>
                 {index < steps.length - 1 && (
-                  <div className={`flex-1 h-1 mx-4 rounded transition-all ${isCompleted ? 'bg-green-600' : 'bg-slate-200'
+                  <div className={`flex-1 h-1 mx-2 sm:mx-4 rounded transition-all ${isCompleted ? 'bg-green-600' : 'bg-slate-200'
                     }`} />
                 )}
               </React.Fragment>

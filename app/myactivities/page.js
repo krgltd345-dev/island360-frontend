@@ -336,7 +336,7 @@ export default function MyActivities() {
                 <DialogTitle>{editingActivity ? 'Edit Activity' : 'Add New Activity'}</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Activity Name *</Label>
                     <Input
@@ -460,7 +460,7 @@ export default function MyActivities() {
 
 
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Duration ( in {scale[timeScale]} )</Label>
                     <div className='flex gap-2 items-center'>
@@ -497,7 +497,7 @@ export default function MyActivities() {
 
                 <div className="space-y-4">
                   <Label>Activity Photos</Label>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     {['image_url', 'image_url_2', 'image_url_3'].map((field, idx) => (
                       <div key={field} className="space-y-2">
                         <Input

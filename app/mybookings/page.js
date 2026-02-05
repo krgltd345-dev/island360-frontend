@@ -345,7 +345,7 @@ export default function MyBookings() {
                   <Filter className="w-4 h-4" />
                   <span className="text-sm font-medium">Filter by status</span>
                 </div>
-                <Tabs value={statusFilter} onValueChange={setStatusFilter}>
+                <Tabs value={statusFilter} className={"w-full scrollbar-hide overflow-x-scroll"} onValueChange={setStatusFilter}>
                   <TabsList className="bg-white border border-slate-200 p-1">
                     <TabsTrigger value="ALL" className="rounded-lg">All</TabsTrigger>
                     <TabsTrigger value="HOLD" className="rounded-lg">Pending</TabsTrigger>
@@ -393,13 +393,6 @@ export default function MyBookings() {
             </div>
             :
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-              {/* Filters */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="mb-8"
-              ></motion.div>
 
               <Tabs defaultValue="received" className="space-y-6">
                 <TabsList className={`grid grid-cols-2 w-full'}`}>
