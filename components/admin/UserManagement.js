@@ -4,9 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Users, Search, Trash2, Shield, Store, Mail, Eye, Edit, Phone, MapPin } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Users, Search, Trash2, Shield, Store, Mail, Eye, Phone } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, parseISO } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,13 +15,10 @@ import { debounce } from 'lodash';
 import clsx from 'clsx';
 
 
-export default function AdminUserManagement({ admins, user, vendors, userFilter, setUserFilter, page, setPage, limit,  }) {
+export default function AdminUserManagement({ userRoleInfo, admins, user, vendors, userFilter, setUserFilter, page, setPage, limit,  }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [editFormData, setEditFormData] = useState({});
-  const [activeFilter, setActiveFilter] = useState(userFilter);
   const [email, setEmail] = useState('');
   const [Add, { isLoading: AddAdminLoading }] = useAddAdminMutation();
   const [Remove, { isLoading }] = useRemoveAdminMutation();
@@ -79,7 +75,7 @@ export default function AdminUserManagement({ admins, user, vendors, userFilter,
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
-            {user?.role === 'ADMIN' ? (
+            {(user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN') ? (
               <Shield className="w-4 h-4 text-purple-600" />
             ) : user?.vendorId ? (
               <Store className="w-4 h-4 text-blue-600" />
@@ -89,7 +85,7 @@ export default function AdminUserManagement({ admins, user, vendors, userFilter,
             <h4 className="font-semibold text-slate-900">
               {user?.name}
             </h4>
-            {user?.role === 'ADMIN' && (
+            {(user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN') && (
               <Badge className="bg-purple-100 text-purple-700">Admin</Badge>
             )}
             {user?.vendorId && (
@@ -171,7 +167,7 @@ export default function AdminUserManagement({ admins, user, vendors, userFilter,
       </Card>
 
       <div className="space-y-6">
-        {(
+        { userRoleInfo?.data?.user?.role === "SUPER_ADMIN" && (
           <div>
             <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
               <Shield className="w-5 h-5 text-purple-600" />

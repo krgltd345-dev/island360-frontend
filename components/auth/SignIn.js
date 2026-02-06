@@ -74,6 +74,7 @@ export default function SignIn({ onSwitchToSignUp, onSwitchToForgotPassword, get
       const res = await Login(formData).unwrap()
       setCookie("authKey", "valid")
       toast.success(res?.message)
+      console.log(redirectUrl, "redirectUrl");
       router.push(redirectUrl || '/');
     } catch (error) {
       console.log(error);

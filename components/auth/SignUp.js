@@ -27,8 +27,8 @@ export default function SignUp({ onSwitchToSignIn }) {
     if (name.trim().length < 2) {
       return 'Name must be at least 2 characters';
     }
-    if (name.length > 30) {
-      return 'Name must not exceed 30 characters';
+    if (name.length > 50) {
+      return 'Name must not exceed 50 characters';
     }
     return '';
   };
@@ -163,7 +163,7 @@ export default function SignUp({ onSwitchToSignIn }) {
               value={formData.name}
               onChange={handleChange}
               onBlur={handleBlur}
-              maxLength={20}
+              maxLength={50}
               className={`pl-10 backdrop-blur-sm bg-white/20 border-white/30 text-black/80 placeholder:text-black/60 ${errors.name ? 'border-red-400 focus-visible:ring-red-400/20' : ''}`}
               aria-invalid={errors.name ? 'true' : 'false'}
             />

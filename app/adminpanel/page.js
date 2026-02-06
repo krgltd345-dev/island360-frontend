@@ -1,14 +1,9 @@
 'use client'
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Shield, Users, Store, Calendar, DollarSign, Star, Settings, CheckCircle, XCircle, Search, TrendingUp } from 'lucide-react';
-import { toast } from 'sonner';
-import { format, parseISO } from 'date-fns';
+import { Shield, Store } from 'lucide-react';
 import LayoutWrapper from '@/components/layout/LayoutWrapper';
 import AdminUserManagement from '@/components/admin/UserManagement';
 import AdminVendorApprovals from '@/components/admin/VendorApprovals';
@@ -18,13 +13,6 @@ import { useGetAllUserQuery, useGetUserRoleQuery } from '@/services/userApi';
 import { useGetAdminsQuery, useGetVendorRequestsQuery, useGetVendorsQuery } from '@/services/adminApi';
 import { Skeleton } from '@/components/ui/skeleton';
 import AdminSiteSettings from '@/components/admin/AdminSiteSettings';
-// import AdminVendorApprovals from '@/components/admin/AdminVendorApprovals';
-// import AdminVendorVerification from '@/components/admin/AdminVendorVerification';
-// import AdminUserManagement from '@/components/admin/AdminUserManagement';
-// import AdminActivityOversight from '@/components/admin/AdminActivityOversight';
-// import AdminBookingOversight from '@/components/admin/AdminBookingOversight';
-// import AdminPayoutManagement from '@/components/admin/AdminPayoutManagement';
-// import AdminSiteSettings from '@/components/admin/AdminSiteSettings';
 
 export default function AdminPanel() {
   const [userFilter, setUserFilter] = useState();
@@ -42,7 +30,7 @@ export default function AdminPanel() {
     ...(userFilter && { key: userFilter })
   }, { skip: userRoleInfo?.data?.user?.role !== "SUPER_ADMIN" })
   const [activeTab, setActiveTab] = useState('vendors');
-  console.log(users, "users");
+
 
 
   if (
@@ -203,7 +191,7 @@ export default function AdminPanel() {
               <AdminVendorApprovals vendors={vendors} vendorRequest={vendorRequest} />
             </TabsContent>
             <TabsContent value="users">
-              <AdminUserManagement admins={admins} user={users} page={userPage} setPage={setUserPage} limit={limit} vendors={vendors} userFilter={userFilter} setUserFilter={setUserFilter} />
+              <AdminUserManagement userRoleInfo={userRoleInfo} admins={admins} user={users} page={userPage} setPage={setUserPage} limit={limit} vendors={vendors} userFilter={userFilter} setUserFilter={setUserFilter} />
             </TabsContent>
 
             <TabsContent value="activities">
