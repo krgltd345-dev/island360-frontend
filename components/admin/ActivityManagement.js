@@ -57,10 +57,6 @@ export default function AdminActivityOversight() {
                 <TabsTrigger key={item?._id} className={""} value={item}>{item?.name}</TabsTrigger>
               ))
             }
-
-            {/* <TabsTrigger value="COMPLETED">COMPLETED</TabsTrigger>
-            <TabsTrigger value="REFUNDED">REFUNDED</TabsTrigger>
-            <TabsTrigger value="CANCELLED">CANCELLED</TabsTrigger> */}
           </TabsList>
         </div>
       </Tabs>
@@ -94,7 +90,8 @@ export default function AdminActivityOversight() {
               </div>
               <div className="space-y-1 text-sm text-slate-600">
                 <p className="font-medium text-slate-900">${ConvertCentToDollar(activity?.price)}</p>
-                <p>Vendor: {activity?.created_by}</p>
+                <p>Vendor: {activity?.vendorId?.businessName}</p>
+                <p>Vendor email: {activity?.vendorId?.email}</p>
                 <p className="capitalize">Category: {activity?.category?.name?.replace('_', ' ')}</p>
               </div>
               {/* <div className="flex gap-2 mt-3">

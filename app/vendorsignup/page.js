@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,8 +15,6 @@ export default function VendorSignup() {
   const router = useRouter()
   const { data: userRoleInfo, isLoading: userRoleInfoFetching } = useGetUserRoleQuery()
   const [UploadFile] = useUploadDocumentMutation()
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [checkingAuth, setCheckingAuth] = useState(true);
   const [Application] = useVendorApplicationMutation()
   const [formData, setFormData] = useState({
     businessName: '',
@@ -36,18 +34,6 @@ export default function VendorSignup() {
   });
   const [uploadingDocs, setUploadingDocs] = useState(false);
   const [documents, setDocuments] = useState([]);
-
-  // useEffect(() => {
-  //   const checkAuth = async () => {
-  //     const authenticated = await base44.auth.isAuthenticated();
-  //     setIsAuthenticated(authenticated);
-  //     setCheckingAuth(false);
-  //     if (!authenticated) {
-  //       base44.auth.redirectToLogin(window.location.href);
-  //     }
-  //   };
-  //   checkAuth();
-  // }, []);
 
   const handleDocumentUpload = async (file, docType) => {
     if (!file) return;

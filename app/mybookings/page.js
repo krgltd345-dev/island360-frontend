@@ -1,18 +1,10 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Filter, Inbox, Landmark, Share2, UserPlus, Users as UsersIcon } from 'lucide-react';
-// import JoinBookingDialog from '@/components/booking/JoinBookingDialog';
-// import ParticipantCheckout from '@/components/booking/ParticipantCheckout';
+import { Calendar, Filter, Inbox, Share2, UserPlus, Users as UsersIcon } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
-// import BookingCard from '@/components/booking/BookingCard';
-// import ReviewForm from '@/components/reviews/ReviewForm';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,179 +15,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import BookingCard from '@/components/booking/MyBookingCard';
-import JoinBookingDialog from '@/components/booking/JoinBookings';
 import LayoutWrapper from '@/components/layout/LayoutWrapper';
 import { useCancelBookingMutation, useGetUserBookingsQuery } from '@/services/bookingApi';
 import { useRouter } from 'next/navigation';
 import Recieved from '@/components/invites/Recieved';
 import SentInvites from '@/components/invites/SentInvites';
-import ReviewForm from '@/components/booking/ReviewForm';
 import { ConvertCentToDollar } from '@/lib/utils';
 import ReviewDialog from '@/components/booking/ReviewDialog';
 
-const bookings = [
-  {
-    "activity_id": "695b72ec812c781af2aff0ba",
-    "activity_name": "Mountain Climbing",
-    "booking_date": "2026-01-21",
-    "booking_time": "12:00 PM",
-    "guests": 1,
-    "total_price": 100,
-    "status": "confirmed",
-    "customer_name": "yogesh.sahu",
-    "customer_email": "yogesh.sahu@oodles.io",
-    "customer_phone": "",
-    "special_requests": null,
-    "vendor_notes": null,
-    "is_group_booking": false,
-    "group_organizer_id": null,
-    "share_code": null,
-    "id": "695baeb8dfb8438b5c070388",
-    "created_date": "2026-01-05T12:29:44.436000",
-    "updated_date": "2026-01-05T12:29:44.436000",
-    "created_by_id": "693ae5d7a333edaf661db503",
-    "is_sample": false
-  },
-  {
-    "activity_id": "6938b281afe54abb13fb53ea",
-    "activity_name": "Guided Tours ",
-    "booking_date": "2026-01-08",
-    "booking_time": "09:00 AM",
-    "guests": 1,
-    "total_price": 65,
-    "status": "confirmed",
-    "customer_name": "Mohd Yasar",
-    "customer_email": "mohd.yasar@oodles.io",
-    "customer_phone": "122322333",
-    "special_requests": "",
-    "vendor_notes": null,
-    "is_group_booking": true,
-    "group_organizer_id": "695b5e0f96e04eb587d04581",
-    "share_code": "BOOK-Z4T88ORO",
-    "id": "695ba5dc0c34e929ac71e28b",
-    "created_date": "2026-01-05T11:51:56.216000",
-    "updated_date": "2026-01-05T11:51:56.216000",
-    "created_by_id": "695b5e0f96e04eb587d04581",
-    "is_sample": false
-  },
-  {
-    "activity_id": "695b72ec812c781af2aff0ba",
-    "activity_name": "Mountain Climbing",
-    "booking_date": "2026-01-21",
-    "booking_time": "12:00 PM",
-    "guests": 1,
-    "total_price": 100,
-    "status": "confirmed",
-    "customer_name": "yogesh.sahu",
-    "customer_email": "yogesh.sahu@oodles.io",
-    "customer_phone": "",
-    "special_requests": "",
-    "vendor_notes": null,
-    "is_group_booking": true,
-    "group_organizer_id": "693ae5d7a333edaf661db503",
-    "share_code": "BOOK-PLDLO6BZ",
-    "id": "695ba5b63add22b90c491f4c",
-    "created_date": "2026-01-05T11:51:18.068000",
-    "updated_date": "2026-01-05T11:51:18.068000",
-    "created_by_id": "693ae5d7a333edaf661db503",
-    "is_sample": false
-  },
-  {
-    "activity_id": "695b72ec812c781af2aff0ba",
-    "activity_name": "Mountain Climbing",
-    "booking_date": "2026-01-10",
-    "booking_time": "09:00 AM",
-    "guests": 1,
-    "total_price": 100,
-    "status": "cancelled",
-    "customer_name": "yogesh.sahu",
-    "customer_email": "yogesh.sahu@oodles.io",
-    "customer_phone": "+918287940985",
-    "special_requests": "",
-    "vendor_notes": null,
-    "is_group_booking": false,
-    "group_organizer_id": "693ae5d7a333edaf661db503",
-    "share_code": null,
-    "id": "695b7516399c8e7d89f116ec",
-    "created_date": "2026-01-05T08:23:50.621000",
-    "updated_date": "2026-01-05T08:24:19.280000",
-    "created_by_id": "693ae5d7a333edaf661db503",
-    "is_sample": false
-  },
-  {
-    "activity_id": "695b72ec812c781af2aff0ba",
-    "activity_name": "Mountain Climbing",
-    "booking_date": "2026-01-07",
-    "booking_time": "10:00 AM",
-    "guests": 1,
-    "total_price": 200,
-    "status": "completed",
-    "customer_name": "Mohd Yasar",
-    "customer_email": "mohd.yasar@oodles.io",
-    "customer_phone": "",
-    "special_requests": "",
-    "vendor_notes": "thanks for your booking",
-    "is_group_booking": false,
-    "group_organizer_id": "695b5e0f96e04eb587d04581",
-    "share_code": null,
-    "id": "695b73246c61b503d6c8b736",
-    "created_date": "2026-01-05T08:15:32.454000",
-    "updated_date": "2026-01-05T09:28:20.539000",
-    "created_by_id": "695b5e0f96e04eb587d04581",
-    "is_sample": false
-  },
-  {
-    "activity_id": "69366bfc48655942149af007",
-    "activity_name": "Private Boat Charter ",
-    "booking_date": "2026-01-10",
-    "booking_time": "11:00 AM",
-    "guests": 1,
-    "total_price": 1050,
-    "status": "confirmed",
-    "customer_name": "Yakshap Tyagi",
-    "customer_email": "yakshap.tyagi@oodles.io",
-    "customer_phone": "",
-    "special_requests": "",
-    "vendor_notes": null,
-    "is_group_booking": false,
-    "group_organizer_id": "695b5d4d9e7a6d8e1b644ebd",
-    "share_code": null,
-    "id": "695b6db73e8f573ee2f2d56d",
-    "created_date": "2026-01-05T07:52:23.176000",
-    "updated_date": "2026-01-05T07:52:23.176000",
-    "created_by_id": "695b5d4d9e7a6d8e1b644ebd",
-    "is_sample": false
-  },
-  {
-    "activity_id": "69366720e3f100c5df8f5725",
-    "activity_name": "Kayak Eco Tours",
-    "booking_date": "2026-01-10",
-    "booking_time": "11:00 AM",
-    "guests": 1,
-    "total_price": 75,
-    "status": "cancelled",
-    "customer_name": "Mohd Yasar",
-    "customer_email": "mohd.yasar@oodles.io",
-    "customer_phone": "",
-    "special_requests": "",
-    "vendor_notes": null,
-    "is_group_booking": false,
-    "group_organizer_id": "695b5e0f96e04eb587d04581",
-    "share_code": null,
-    "id": "695b67adaefda376e641405f",
-    "created_date": "2026-01-05T07:26:37.451000",
-    "updated_date": "2026-01-05T07:27:23.970000",
-    "created_by_id": "695b5e0f96e04eb587d04581",
-    "is_sample": false
-  }
-]
 
 
 export default function MyBookings() {
@@ -210,13 +38,6 @@ export default function MyBookings() {
   const [bookingToEdit, setBookingToEdit] = useState(null);
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [bookingToReview, setBookingToReview] = useState(null);
-  const [joinDialogOpen, setJoinDialogOpen] = useState(false);
-  const [joinShareCode, setJoinShareCode] = useState('');
-  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
-  const [selectedParticipant, setSelectedParticipant] = useState(null);
-  const [selectedBooking, setSelectedBooking] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [checkingAuth, setCheckingAuth] = useState(true);
   const [editFormData, setEditFormData] = useState({
     guests: 1,
     special_requests: ''
@@ -319,7 +140,7 @@ export default function MyBookings() {
               </div>
               <h1 className="text-3xl font-bold text-slate-900">My Bookings</h1>
             </motion.div>
-            <div>
+            <div className='flex items-center gap-2'>
               <Button onClick={() => setShowBookings(true)} variant={showBookings ? 'default' : 'outline'} className="mt-4">
                 <UserPlus className="w-4 h-4 mr-2" />
                 Bookings
@@ -450,11 +271,11 @@ export default function MyBookings() {
         />
 
         {/* Join Booking Dialog */}
-        <JoinBookingDialog
+        {/* <JoinBookingDialog
           shareCode={joinShareCode}
           open={joinDialogOpen}
           onOpenChange={setJoinDialogOpen}
-        />
+        /> */}
 
         {/* Participant Payment Dialog */}
         {/* <ParticipantCheckout

@@ -1,25 +1,15 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Plus, TrendingUp, Edit, Eye } from 'lucide-react';
-// import { Link, useNavigate } from 'react-router-dom';
-// import { createPageUrl } from '@/utils';
-// import ActivityPerformanceMetrics from '@/components/vendor/ActivityPerformanceMetrics';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from 'sonner';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useGetActivityByIdQuery, useGetActivityMetricsQuery } from '@/services/activityApi';
 import LayoutWrapper from '@/components/layout/LayoutWrapper';
 import ActivityPerformanceMetrics from '@/components/activityManagement/ActivityMetrix';
-import { useGetActivityReviewsQuery, useGetVendorStatsQuery } from '@/services/userApi';
-import { Spinner } from "@/components/ui/spinner"
+import { useGetActivityReviewsQuery } from '@/services/userApi';
 import LoadingScreen from '@/components/loader/Loading';
 
 export default function ActivityManagement() {

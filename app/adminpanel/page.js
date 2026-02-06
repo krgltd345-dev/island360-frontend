@@ -11,7 +11,6 @@ import AdminBookingOversight from '@/components/admin/BookingsManagement';
 import AdminActivityOversight from '@/components/admin/ActivityManagement';
 import { useGetAllUserQuery, useGetUserRoleQuery } from '@/services/userApi';
 import { useGetAdminsQuery, useGetVendorRequestsQuery, useGetVendorsQuery } from '@/services/adminApi';
-import { Skeleton } from '@/components/ui/skeleton';
 import AdminSiteSettings from '@/components/admin/AdminSiteSettings';
 import LoadingScreen from '@/components/loader/Loading';
 

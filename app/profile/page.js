@@ -1,6 +1,6 @@
 'use client'
-import React, { useState, useEffect } from 'react';
-import { User, CreditCard, Calendar, Store, Bell } from 'lucide-react';
+import React from 'react';
+import { User, Calendar, Store, Bell } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card } from '@/components/ui/card';
 import Link from 'next/link';
@@ -13,45 +13,6 @@ import NotificationSettings from '@/components/profile/NotificationSettings';
 import { useGetUserProfileQuery, useGetUserRoleQuery, useGetVendorDetailsQuery } from '@/services/userApi';
 import VendorBusinessSection from '@/components/profile/VendorBusinessSection';
 
-const user = {
-  "profile_photo_url": "https://base44.app/api/apps/692d3a33918f94eb9f4221f4/files/public/692d3a33918f94eb9f4221f4/9773e46e9_borrower4.jpg",
-  "is_vendor": true,
-  "vendor_approved": true,
-  "is_non_profit": false,
-  "verification_documents": [],
-  "verification_status": "verified",
-  "vendor_business_name": "Oodles Adventures",
-  "vendor_phone": "+91 6397288879",
-  "vendor_email": "yakshap.tyagi@oodles.io",
-  "vendor_address": "117-120, welldone, Delhi",
-  "vendor_business_license": "12",
-  "vendor_tax_id": "1234567",
-  "vendor_insurance_doc_url": "",
-  "vendor_license_doc_url": "",
-  "vendor_verified": true,
-  "vendor_description": "",
-  "payment_method": "paypal",
-  "bank_account": "",
-  "routing_number": "",
-  "paypal_email": "yakshap.tyagi@oodles.io",
-  "onboarding_completed": true,
-  "verification_notes": "",
-  "verified_at": "2026-01-05T08:09:39.619Z",
-  "verified_by": "mohd.yasar@oodles.io",
-  "id": "695b5d4d9e7a6d8e1b644ebd",
-  "created_date": "2026-01-05T06:42:21.514000",
-  "updated_date": "2026-01-08T11:50:55.075000",
-  "email": "yakshap.tyagi@oodles.io",
-  "full_name": "Yakshap Tyagi",
-  "disabled": null,
-  "is_verified": true,
-  "app_id": "692d3a33918f94eb9f4221f4",
-  "is_service": false,
-  "granted_by_support_access": false,
-  "support_access_expires_at": null,
-  "_app_role": "admin",
-  "role": "admin"
-}
 
 export default function ProfilePage() {
   const { data: userData, isLoading: userDataFetching } = useGetUserProfileQuery()
@@ -172,7 +133,7 @@ export default function ProfilePage() {
             </TabsContent>
 
             <TabsContent value="notifications">
-              <NotificationSettings user={user} />
+              <NotificationSettings />
             </TabsContent>
 
             {VendorData?.data && (

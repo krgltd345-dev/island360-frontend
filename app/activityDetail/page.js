@@ -1,17 +1,14 @@
 'use client';
-import ActivityCalendar from "@/components/activitySection/ActivityCalendar";
 import ActivityDetailReview from "@/components/activitySection/ActivityDetailReview";
 import MultiStepBookingForm from "@/components/activitySection/MultiStepForm";
-import ReviewCard from "@/components/booking/ReviewCard";
 import LayoutWrapper from "@/components/layout/LayoutWrapper";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ConvertCentToDollar } from "@/lib/utils";
 import { useGetActivityByIdQuery } from "@/services/activityApi";
 import { useGetActivityReviewsQuery, useGetUserRoleQuery } from "@/services/userApi";
-import { ArrowLeft, Clock, Heart, MessageSquare, Star, Users } from "lucide-react";
+import { ArrowLeft, Clock, Heart, Star, Users } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 

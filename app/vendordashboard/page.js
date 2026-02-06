@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Edit, Trash2, DollarSign, Calendar, Shield, Clock, Upload, X } from 'lucide-react';
+import { Plus, Edit, Trash2, DollarSign, Calendar, Shield, Clock, } from 'lucide-react';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import LayoutWrapper from '@/components/layout/LayoutWrapper';
@@ -16,7 +16,7 @@ import { useCreateActivityMutation, useGetAllActivitiesQuery, useGetCategoryQuer
 import { useGetUserRoleQuery } from '@/services/userApi';
 import Link from 'next/link';
 import VendorBookingManagement from '@/components/vendor/VendorBookingManagement';
-import { useGetBookingsCountQuery, useGetVendorBookingsQuery } from '@/services/bookingApi';
+import { useGetVendorBookingsQuery } from '@/services/bookingApi';
 import { ConvertCentToDollar } from '@/lib/utils';
 import VendorReviewsManagement from '@/components/vendor/VendorReviewsManagement';
 import LoadingScreen from '@/components/loader/Loading';
