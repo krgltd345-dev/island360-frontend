@@ -42,7 +42,7 @@ export default function AdminActivityOversight() {
       </div>
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
         <div className='scrollbar-hide overflow-x-scroll'>
-          <TabsList className={`grid w-full max-xl:w-6xl grid-cols-${categories?.data ? categories?.data?.length + 1 : 7}`}>
+          <TabsList className={`grid w-full max-xl:w-6xl grid-cols-7`}>
             <TabsTrigger className={""} value={
               {
                 name: "all",
