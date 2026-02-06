@@ -48,7 +48,7 @@ export const bookingApi = baseApi.injectEndpoints({
 
     getVendorBookings: builder.query({
       query: (data) => ({
-        url: `/bookings/vendor`,
+        url: `/bookings/vendor/?state=${data?.state}`,
       }),
       providesTags: ["BOOKING"]
 

@@ -12,11 +12,10 @@ export default async function LoginPage() {
       { cache: "no-store" }
     );
 
-    if (!res.ok) {
+    if (res.ok) {
       // throw new Error(`API failed with status ${res.status}`);
+      getGoogleLogin = await res.json();
     }
-
-    getGoogleLogin = await res.json();
   } catch (error) {
     console.error("Google login API error:", error);
   }

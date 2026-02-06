@@ -71,10 +71,8 @@ export default function SignIn({ onSwitchToSignUp, onSwitchToForgotPassword, get
 
     setIsLoading(true);
     try {
-      console.log('Signing in:', formData);
       const res = await Login(formData).unwrap()
       setCookie("authKey", "valid")
-      console.log(res, "Login res");
       toast.success(res?.message)
       router.push(redirectUrl || '/');
     } catch (error) {

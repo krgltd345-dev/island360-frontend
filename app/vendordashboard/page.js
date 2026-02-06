@@ -27,6 +27,7 @@ const scale = {
 
 export default function VendorDashboard() {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [state, setState] = useState("CONFIRMED");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editingActivity, setEditingActivity] = useState(null);
   const [uploadingImages, setUploadingImages] = useState(false);
@@ -59,7 +60,7 @@ export default function VendorDashboard() {
   const { data: Actiities } = useGetAllActivitiesQuery({
     vendorId: userRoleInfo?.data?.user?.vendorId
   }, { skip: !userRoleInfo?.data?.user?.vendorId })
-  const { data: bookings, isLoading: bookingsLoading } = useGetVendorBookingsQuery()
+  const { data: bookings, isLoading: bookingsLoading } = useGetVendorBookingsQuery({ state })
   const [Create] = useCreateActivityMutation()
   const [Update] = useUpdateActivityMutation()
   const [Remove] = useRemoveActivityMutation()
@@ -378,7 +379,7 @@ export default function VendorDashboard() {
 
             <TabsContent value="bookings" className="space-y-6">
               <h2 className="text-xl font-semibold text-slate-900">Booking Management</h2>
-              <VendorBookingManagement bookings={bookings} />
+              <VendorBookingManagement bookings={bookings} state={state} setState={setState}/>
             </TabsContent>
 
             <TabsContent value="reviews" className="space-y-6">
