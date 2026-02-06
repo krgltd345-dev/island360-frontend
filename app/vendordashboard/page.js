@@ -19,6 +19,7 @@ import VendorBookingManagement from '@/components/vendor/VendorBookingManagement
 import { useGetBookingsCountQuery, useGetVendorBookingsQuery } from '@/services/bookingApi';
 import { ConvertCentToDollar } from '@/lib/utils';
 import VendorReviewsManagement from '@/components/vendor/VendorReviewsManagement';
+import LoadingScreen from '@/components/loader/Loading';
 
 const scale = {
   m: "Minutes",
@@ -192,11 +193,7 @@ export default function VendorDashboard() {
     bookingsLoading || userRoleInfoFetching
   ) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Card className="p-8 text-center">
-          <p className="text-slate-600">Loading...</p>
-        </Card>
-      </div>
+      <LoadingScreen/>
     );
   }
 

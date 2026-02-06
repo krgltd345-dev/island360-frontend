@@ -15,10 +15,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useGetActivityByIdQuery } from '@/services/activityApi';
+import { useGetActivityByIdQuery, useGetActivityMetricsQuery } from '@/services/activityApi';
 import LayoutWrapper from '@/components/layout/LayoutWrapper';
 import ActivityPerformanceMetrics from '@/components/activityManagement/ActivityMetrix';
 import { useGetActivityReviewsQuery, useGetVendorStatsQuery } from '@/services/userApi';
+import { Spinner } from "@/components/ui/spinner"
+import LoadingScreen from '@/components/loader/Loading';
 
 export default function ActivityManagement() {
   const searchParams = useSearchParams();
@@ -26,16 +28,11 @@ export default function ActivityManagement() {
 
   const { data: Activity, isLoading } = useGetActivityByIdQuery({ id: activityId }, { skip: !activityId })
   const { data: reviews, isLoading: reviewsLoading } = useGetActivityReviewsQuery({ id: activityId }, { skip: !activityId })
+  const { data: activityMetrics, isLoading: metricsLoading } = useGetActivityMetricsQuery({ id: activityId }, { skip: !activityId })
 
-
-
-  if (isLoading || reviewsLoading) {
+  if (isLoading || reviewsLoading || metricsLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Card className="p-8 text-center">
-          <p className="text-slate-600">Loading...</p>
-        </Card>
-      </div>
+      <LoadingScreen/>
     );
   }
 
@@ -123,7 +120,7 @@ export default function ActivityManagement() {
               <TrendingUp className="w-5 h-5 text-slate-700" />
               <h2 className="text-2xl font-bold text-slate-900">Performance Metrics</h2>
             </div>
-            <ActivityPerformanceMetrics reviews={reviews}/>
+            <ActivityPerformanceMetrics activityMetrics={activityMetrics} reviews={reviews} />
           </div>
         </div>
       </div>

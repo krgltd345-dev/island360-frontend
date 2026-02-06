@@ -8,7 +8,6 @@ export function middleware(request) {
   const role = roleCookie?.value || null;
   const isAuthenticated = !!key?.value;
   const { pathname, searchParams } = request.nextUrl;
-  console.log(key, "key");
   const createRedirectUrl = (targetPath) => {
     const url = new URL(targetPath, request.url);
     searchParams.forEach((value, key) => {

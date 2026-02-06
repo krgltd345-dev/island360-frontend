@@ -26,8 +26,8 @@ const Navbar = () => {
   const navItems = [
     { name: 'Home', page: '/', icon: Target },
     { name: 'My Bookings', page: '/mybookings', icon: Calendar },
-    // { name: 'Messages', page: '/messages', icon: MessageSquare },
     { name: 'Profile', page: '/profile', icon: Users },
+    // { name: 'Messages', page: '/messages', icon: MessageSquare },
   ];
 
 
@@ -61,8 +61,8 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-14">
           {/* Logo */}
           <Link href={"/"} className="flex items-center gap-2">
-            <img src={"/island_logo.png"} alt="Logo" className="w-12 h-10" />
-            <span className="font-bold text-xl text-slate-900 hidden sm:block">Island 360</span>
+            <img src={"/island_logo.png"} alt="Logo" className="w-16 h-12" />
+            {/* <span className="font-bold text-xl text-slate-900 hidden sm:block">Island 360</span> */}
           </Link>
 
           {/* Desktop Navigation */}
@@ -103,36 +103,39 @@ const Navbar = () => {
               </Link>
             }
             {
-              userRoleInfo?.data?.user ?
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleLogout()}
-                  title="Logout"
-                  className="text-slate-600 hover:text-slate-900"
-                >
-                  <LogOut className="w-5 h-5" />
-                </Button> :
-                <div className='flex items-center gap-2'>
-                  <Button
-                    onClick={() => {
-                      dispatch(setSignUp("signin"))
-                      router.push("/login")
-                    }}
-                    className={"bg-amber-300 hover:bg-black h-9  hover:text-white border-0 px-7 py-4"} variant="outline" size="sm">
-                    <LogIn className="w-5 h-5" />
-                    Login
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      dispatch(setSignUp("signup"))
-                      router.push("/login")
-                    }}
-                    className={"bg-amber-300 hover:bg-black h-9 hover:text-white border-0 px-7 py-4"} variant="outline" size="sm">
-                    <RiUserAddLine className="w-5 h-5" />
-                    Signup
-                  </Button>
-                </div>
+              userRoleInfo?.data?.user &&
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleLogout()}
+                title="Logout"
+                className="text-slate-600 hover:text-slate-900"
+              >
+                <LogOut className="w-5 h-5" />
+              </Button>
+            }
+            {
+              !userRoleInfo?.data?.user && !userRoleInfoFetching &&
+            <div className='flex items-center gap-2'>
+              <Button
+                onClick={() => {
+                  dispatch(setSignUp("signin"))
+                  router.push("/login")
+                }}
+                className={"bg-amber-300 hover:bg-black h-9  hover:text-white border-0 px-7 py-4"} variant="outline" size="sm">
+                <LogIn className="w-5 h-5" />
+                Login
+              </Button>
+              <Button
+                onClick={() => {
+                  dispatch(setSignUp("signup"))
+                  router.push("/login")
+                }}
+                className={"bg-amber-300 hover:bg-black h-9 hover:text-white border-0 px-7 py-4"} variant="outline" size="sm">
+                <RiUserAddLine className="w-5 h-5" />
+                Signup
+              </Button>
+            </div>
             }
           </div>
 

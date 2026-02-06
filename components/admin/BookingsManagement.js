@@ -7,6 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Calendar, Clock, Users, DollarSign } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
+import { useGetAllBookingsQuery, useGetBookingsCountQuery } from '@/services/bookingApi';
+import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
+import { ConvertCentToDollar, statusStyles } from '@/lib/utils';
 
 const statusConfig = {
   pending: { color: 'bg-amber-100 text-amber-700' },
@@ -173,122 +176,95 @@ const bookings = [
 ]
 
 export default function AdminBookingOversight() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-
-  const filteredBookings = bookings.filter(booking => {
-    const matchesSearch =
-      booking.activity_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.customer_email?.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesStatus = statusFilter === 'all' || booking.status === statusFilter;
-
-    return matchesSearch && matchesStatus;
-  });
-
-  const stats = {
-    total: bookings.length,
-    pending: bookings.filter(b => b.status === 'pending').length,
-    confirmed: bookings.filter(b => b.status === 'confirmed').length,
-    completed: bookings.filter(b => b.status === 'completed').length,
-    totalRevenue: bookings.reduce((sum, b) => sum + (b.total_price || 0), 0),
-  };
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const { data: allBookings, isLoading } = useGetAllBookingsQuery([statusFilter])
+  const { data: bookingsCount, isLoading: bookingsCountLoading } = useGetBookingsCountQuery()
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <Card className="p-4">
-          <p className="text-sm text-slate-600">Total</p>
-          <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
-        </Card>
-        <Card className="p-4">
-          <p className="text-sm text-slate-600">Pending</p>
-          <p className="text-2xl font-bold text-amber-600">{stats.pending}</p>
-        </Card>
-        <Card className="p-4">
-          <p className="text-sm text-slate-600">Confirmed</p>
-          <p className="text-2xl font-bold text-green-600">{stats.confirmed}</p>
-        </Card>
-        <Card className="p-4">
-          <p className="text-sm text-slate-600">Completed</p>
-          <p className="text-2xl font-bold text-blue-600">{stats.completed}</p>
-        </Card>
-        <Card className="p-4">
-          <p className="text-sm text-slate-600">Revenue</p>
-          <p className="text-2xl font-bold text-slate-900">${stats.totalRevenue.toFixed(0)}</p>
-        </Card>
-      </div>
+      {
+        bookingsCount?.data &&
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="p-4">
+            <p className="text-sm text-slate-600">Total</p>
+            <p className="text-3xl font-bold text-amber-600">{bookingsCount?.data?.total}</p>
+          </Card>
+          <Card className="p-4">
+            <p className="text-sm text-slate-600">Pending</p>
+            <p className="text-3xl font-bold text-slate-600">{bookingsCount?.data?.pending}</p>
+          </Card>
+          <Card className="p-4">
+            <p className="text-sm text-slate-600">Confirmed</p>
+            <p className="text-3xl font-bold text-green-600">{bookingsCount?.data?.confirmed}</p>
+          </Card>
+          <Card className="p-4">
+            <p className="text-sm text-slate-600">completed</p>
+            <p className="text-3xl font-bold text-blue-600">{bookingsCount?.data?.completed}</p>
+          </Card>
+        </div>
+      }
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="p-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search bookings..."
-              className="pl-10"
-            />
-          </div>
-        </Card>
-        <Card className="p-4">
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="confirmed">Confirmed</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
-            </SelectContent>
-          </Select>
-        </Card>
-      </div>
+      <Tabs value={statusFilter} className={"w-full"} onValueChange={setStatusFilter}>
+        <div className='scrollbar-hide overflow-x-scroll'>
+        <TabsList className="bg-white border w-full max-md:w-3xl border-slate-200 p-1">
+          <TabsTrigger value="ALL" className="rounded-lg">All</TabsTrigger>
+          <TabsTrigger value="HOLD" className="rounded-lg">Pending</TabsTrigger>
+          <TabsTrigger value="CONFIRMED" className="rounded-lg">Confirmed</TabsTrigger>
+          <TabsTrigger value="COMPLETED" className="rounded-lg">Completed</TabsTrigger>
+          <TabsTrigger value="CANCELLED" className="rounded-lg">Cancelled</TabsTrigger>
+          <TabsTrigger value="REFUNDED" className="rounded-lg">Refunded</TabsTrigger>
+        </TabsList>
+        </div>
+      </Tabs>
 
       <div className="space-y-4">
-        {filteredBookings.map(booking => (
-          <Card key={booking.id} className="p-6">
+        {allBookings?.data.map(booking => (
+          <Card key={booking._id} className="p-6">
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
-                  <h4 className="font-semibold text-slate-900">{booking.activity_name}</h4>
-                  <Badge className={statusConfig[booking.status]?.color}>
-                    {booking.status}
+                  <h4 className="font-semibold text-slate-900">{booking?.activityId?.name}</h4>
+                  <Badge className={statusStyles[booking?.status]}>
+                    {booking?.status}
                   </Badge>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-slate-600">
                   <div>
                     <p className="text-xs text-slate-500">Customer</p>
-                    <p className="font-medium text-slate-900">{booking.customer_name}</p>
-                    <p className="text-xs">{booking.customer_email}</p>
+                    <p className="font-medium text-slate-900">{booking?.userId?.name}</p>
+                    <p className="text-xs">{booking?.userId?.email}</p>
                   </div>
                   <div>
                     <p className="text-xs text-slate-500 mb-1">Date & Time</p>
                     <div className="flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
-                      {format(parseISO(booking.booking_date), 'MMM d, yyyy')}
+                      {format(parseISO(booking?.bookingDate), 'MMM d, yyyy')}
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock className="w-3 h-3" />
-                      {booking.booking_time}
+                      {booking?.slotStartTime}
                     </div>
                   </div>
                   <div>
                     <p className="text-xs text-slate-500 mb-1">Guests</p>
                     <div className="flex items-center gap-1">
                       <Users className="w-3 h-3" />
-                      {booking.guests}
+                      {booking?.quantity}
                     </div>
                   </div>
                   <div>
                     <p className="text-xs text-slate-500 mb-1">Total</p>
                     <div className="flex items-center gap-1 font-semibold text-slate-900">
                       <DollarSign className="w-3 h-3" />
-                      {booking.total_price}
+                      {ConvertCentToDollar(booking?.price)}
                     </div>
+                    {
+                      booking?.refundAmount &&
+                      <div className="flex items-center gap-1 font-semibold text-slate-900">
+                        Refund Amt. <DollarSign className="w-3 h-3" />
+                        {ConvertCentToDollar(booking?.refundAmount)}
+                      </div>
+                    }
                   </div>
                 </div>
               </div>

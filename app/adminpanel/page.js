@@ -13,6 +13,7 @@ import { useGetAllUserQuery, useGetUserRoleQuery } from '@/services/userApi';
 import { useGetAdminsQuery, useGetVendorRequestsQuery, useGetVendorsQuery } from '@/services/adminApi';
 import { Skeleton } from '@/components/ui/skeleton';
 import AdminSiteSettings from '@/components/admin/AdminSiteSettings';
+import LoadingScreen from '@/components/loader/Loading';
 
 export default function AdminPanel() {
   const [userFilter, setUserFilter] = useState();
@@ -37,14 +38,7 @@ export default function AdminPanel() {
     userRoleInfoFetching || vendorRequestLoading || usersLoading || vendorsLoading || adminsLoading
   ) {
     return (
-      <LayoutWrapper>
-        <div className=" bg-slate-50 mt-12 py-8">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <Skeleton className="h-12 w-64 mb-8" />
-            <Skeleton className="h-96 w-full" />
-          </div>
-        </div>
-      </LayoutWrapper>
+      <LoadingScreen/>
     );
   }
 
@@ -173,7 +167,7 @@ export default function AdminPanel() {
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <div className='scrollbar-hide overflow-x-scroll'>
-              <TabsList className="grid w-full max-md:w-3xl grid-cols-6 text-sm">
+              <TabsList className={`grid w-full max-md:w-3xl ${userRoleInfo?.data?.user?.role === 'SUPER_ADMIN' ? 'grid-cols-6' : 'grid-cols-5'} text-sm`}>
                 <TabsTrigger value="vendors">
                   Approvals
                   {vendorRequest?.data?.length > 0 && (
@@ -184,7 +178,10 @@ export default function AdminPanel() {
                 <TabsTrigger value="activities">Activities</TabsTrigger>
                 <TabsTrigger value="bookings">Bookings</TabsTrigger>
                 <TabsTrigger value="payouts">Payouts</TabsTrigger>
+                {
+                  userRoleInfo?.data?.user?.role === 'SUPER_ADMIN' && 
                 <TabsTrigger value="settings">Settings</TabsTrigger>
+                }
               </TabsList>
             </div>
             <TabsContent value="vendors">

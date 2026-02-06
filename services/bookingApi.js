@@ -10,7 +10,6 @@ export const bookingApi = baseApi.injectEndpoints({
     }),
     getUserBookings: builder.query({
       query: (states) => {
-        console.log(states, "stateeeee");
         if (states.length === 1 && states[0] === 'ALL') {
           return {
             url: `/bookings`,
@@ -20,6 +19,21 @@ export const bookingApi = baseApi.injectEndpoints({
         states.forEach((s, i) => params.append(`states[${i}]`, s))
         return ({
           url: `/bookings?${params.toString()}`,
+        })
+      },
+      providesTags: ["BOOKING"]
+    }),
+    getAllBookings: builder.query({
+      query: (states) => {
+        if (states.length === 1 && states[0] === 'ALL') {
+          return {
+            url: `/bookings/all`,
+          }
+        }
+        const params = new URLSearchParams()
+        states.forEach((s, i) => params.append(`states[${i}]`, s))
+        return ({
+          url: `/bookings/all?${params.toString()}`,
         })
       },
       providesTags: ["BOOKING"]
@@ -76,6 +90,7 @@ export const {
   useCreateBookingMutation,
   useCreatePaymentMutation,
   useGetUserBookingsQuery,
+  useGetAllBookingsQuery,
   useCancelBookingMutation,
   useGetVendorBookingsQuery,
   useGetBookingsCountQuery,

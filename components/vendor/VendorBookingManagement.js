@@ -7,33 +7,9 @@ import { BookingCard } from './Bookingcard';
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 
 export default function VendorBookingManagement({ bookings, state, setState }) {
-  const { data: bookingsCount, isLoading: bookingsCountLoading } = useGetBookingsCountQuery()
-
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <Card className="p-4">
-          <p className="text-sm text-slate-600">Total</p>
-          <p className="text-3xl font-bold text-amber-600">{bookingsCount?.data?.total}</p>
-        </Card>
-        <Card className="p-4">
-          <p className="text-sm text-slate-600">Pending</p>
-          <p className="text-3xl font-bold text-slate-600">{bookingsCount?.data?.pending}</p>
-        </Card>
-        <Card className="p-4">
-          <p className="text-sm text-slate-600">Confirmed</p>
-          <p className="text-3xl font-bold text-green-600">{bookingsCount?.data?.confirmed}</p>
-        </Card>
-        <Card className="p-4">
-          <p className="text-sm text-slate-600">completed</p>
-          <p className="text-3xl font-bold text-blue-600">{bookingsCount?.data?.completed}</p>
-        </Card>
-        <Card className="p-4">
-          <p className="text-sm text-slate-600">Cancelled</p>
-          <p className="text-3xl font-bold text-red-600">{"NA"}</p>
-        </Card>
-      </div>
       <Tabs value={state} onValueChange={setState} className="w-full">
         <div className='scrollbar-hide overflow-x-scroll'>
           <TabsList className="grid w-full max-md:w-3xl grid-cols-4">

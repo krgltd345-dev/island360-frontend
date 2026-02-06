@@ -13,6 +13,9 @@ export const activityApi = baseApi.injectEndpoints({
     getActivityById: builder.query({
       query: (body) => `/activities/${body?.id}`,
     }),
+    getActivityMetrics: builder.query({
+      query: (body) => `activities/metrics/${body?.id}`,
+    }),
     getCategory: builder.query({
       query: (body) => `/categories`,
       providesTags: ["CATEGORY"]
@@ -63,6 +66,7 @@ export const {
   useUpdateActivityMutation,
   useRemoveActivityMutation,
   useGetCategoryQuery,
-  useCreateCategoryMutation
+  useCreateCategoryMutation,
+  useGetActivityMetricsQuery
 
 } = activityApi

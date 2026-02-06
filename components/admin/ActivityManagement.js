@@ -26,20 +26,23 @@ export default function AdminActivityOversight() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="p-4">
-          <p className="text-sm text-slate-600">Total Activities</p>
-          <p className="text-3xl font-bold text-slate-900">{count?.data?.total}</p>
-        </Card>
-        <Card className="p-4">
-          <p className="text-sm text-slate-600">Available</p>
-          <p className="text-3xl font-bold text-green-600">{count?.data?.active}</p>
-        </Card>
-        <Card className="p-4">
-          <p className="text-sm text-slate-600">Unavailable</p>
-          <p className="text-3xl font-bold text-red-600">{count?.data?.total - count?.data?.active}</p>
-        </Card>
-      </div>
+      {
+        count?.data &&
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card className="p-4">
+            <p className="text-sm text-slate-600">Total Activities</p>
+            <p className="text-3xl font-bold text-slate-900">{count?.data?.total}</p>
+          </Card>
+          <Card className="p-4">
+            <p className="text-sm text-slate-600">Available</p>
+            <p className="text-3xl font-bold text-green-600">{count?.data?.active}</p>
+          </Card>
+          <Card className="p-4">
+            <p className="text-sm text-slate-600">Unavailable</p>
+            <p className="text-3xl font-bold text-red-600">{count?.data?.total - count?.data?.active}</p>
+          </Card>
+        </div>
+      }
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
         <div className='scrollbar-hide overflow-x-scroll'>
           <TabsList className={`grid w-full max-xl:w-6xl grid-cols-7`}>

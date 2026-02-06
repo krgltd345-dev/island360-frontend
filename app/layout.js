@@ -3,6 +3,7 @@ import "./globals.css";
 import { ReduxProvider } from "@/lib/provider";
 import { Toaster } from "sonner";
 import { Suspense } from "react";
+import LoadingScreen from "@/components/loader/Loading";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,7 +27,7 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ReduxProvider>
-          <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+          <Suspense fallback={<LoadingScreen/>}>
         {children}
           </Suspense>
         <Toaster richColors position="top-center"/>
