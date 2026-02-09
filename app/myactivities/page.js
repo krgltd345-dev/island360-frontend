@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Edit, Trash2, Calendar, Clock, Shield, TrendingUp } from 'lucide-react';
+import { Plus, Edit, Trash2, Calendar, Clock, Shield, TrendingUp, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import LayoutWrapper from '@/components/layout/LayoutWrapper';
@@ -16,6 +16,8 @@ import { useCreateActivityMutation, useGetAllActivitiesQuery, useGetCategoryQuer
 import { useGetUserRoleQuery } from '@/services/userApi';
 import { useUploadImageMutation } from '@/services/upload';
 import { ConvertCentToDollar } from '@/lib/utils';
+import LoadingScreen from '@/components/loader/Loading';
+import ShowMorePagination from '@/components/pagination/ShowMorePagination';
 
 
 const scale = {
@@ -53,9 +55,13 @@ export default function MyActivities() {
     availableForBooking: true,
     allowGroupBookings: true,
   });
+  const [page, setPage] = useState(1)
   const { data: userRoleInfo, isLoading: userRoleInfoFetching } = useGetUserRoleQuery()
-  const { data: Actiities } = useGetAllActivitiesQuery({
-    vendorId: userRoleInfo?.data?.user?.vendorId
+  const { data: Actiities, isLoading: activityFetching } = useGetAllActivitiesQuery({
+    vendorId: userRoleInfo?.data?.user?.vendorId,
+    page,
+    limit: 15
+
   }, { skip: !userRoleInfo?.data?.user?.vendorId })
   const [Create] = useCreateActivityMutation()
   const [Update] = useUpdateActivityMutation()
@@ -183,13 +189,9 @@ export default function MyActivities() {
 
   const daysOfWeek = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
-  if (userRoleInfoFetching) {
+  if ( userRoleInfoFetching || activityFetching ) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Card className="p-8 text-center">
-          <p className="text-slate-600">Loading...</p>
-        </Card>
-      </div>
+      <LoadingScreen/>
     );
   }
 
@@ -247,84 +249,93 @@ export default function MyActivities() {
               </Button>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {Actiities?.data.map((activity, index) => (
-                <motion.div
-                  key={activity._id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Card className="overflow-hidden py-0 hover:shadow-lg transition-shadow">
-                    <img
-                      src={activity?.imageUrls[0] || 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400'}
-                      alt={activity?.name}
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="p-4">
-                      <h3 className="font-semibold text-lg text-slate-900 mb-2">{activity.name}</h3>
-                      <p className="text-slate-600 text-sm mb-3 h-10 line-clamp-2">{activity.description}</p>
-                      <div className="space-y-2 mb-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-lg font-bold text-slate-900">${ConvertCentToDollar(activity.price)}</span>
-                        </div>
-                        {activity.availableSpots && (
-                          <p className="text-xs text-slate-500">
-                            {activity.availableSpots} {activity.billingType === 'PER_UNIT' ? 'units' : 'spots'} per time slot
-                          </p>
-                        )}
-                        <div className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-lg">
-                          <span className="text-sm font-medium text-slate-700">
-                            {activity.availableForBooking ? 'Active' : 'Inactive'}
-                          </span>
-                          <button
-                            onClick={() => {
-                              handleUpdateActivityStatus(activity.availableForBooking, activity?._id)
-                            }}
-                            className={`relative cursor-pointer inline-flex h-6 w-11 items-center rounded-full transition-colors ${activity.availableForBooking ? 'bg-green-600' : 'bg-slate-300'
-                              }`}
-                          >
-                            <span
-                              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${activity.availableForBooking ? 'translate-x-6' : 'translate-x-1'
+            <div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Actiities?.data.map((activity, index) => (
+                  <motion.div
+                    key={activity._id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <Card className="overflow-hidden py-0 hover:shadow-lg transition-shadow">
+                      <img
+                        src={activity?.imageUrls[0] || 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400'}
+                        alt={activity?.name}
+                        className="w-full h-48 object-cover"
+                      />
+                      <div className="p-4">
+                        <h3 className="font-semibold text-lg text-slate-900 mb-2">{activity.name}</h3>
+                        <p className="text-slate-600 text-sm mb-3 h-10 line-clamp-2">{activity.description}</p>
+                        <div className="space-y-2 mb-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-lg font-bold text-slate-900">${ConvertCentToDollar(activity.price)}</span>
+                          </div>
+                          {activity.availableSpots && (
+                            <p className="text-xs text-slate-500">
+                              {activity.availableSpots} {activity.billingType === 'PER_UNIT' ? 'units' : 'spots'} per time slot
+                            </p>
+                          )}
+                          <div className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-lg">
+                            <span className="text-sm font-medium text-slate-700">
+                              {activity.availableForBooking ? 'Active' : 'Inactive'}
+                            </span>
+                            <button
+                              onClick={() => {
+                                handleUpdateActivityStatus(activity.availableForBooking, activity?._id)
+                              }}
+                              className={`relative cursor-pointer inline-flex h-6 w-11 items-center rounded-full transition-colors ${activity.availableForBooking ? 'bg-green-600' : 'bg-slate-300'
                                 }`}
-                            />
-                          </button>
+                            >
+                              <span
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${activity.availableForBooking ? 'translate-x-6' : 'translate-x-1'
+                                  }`}
+                              />
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Link href={(`/activitymanagement?id=${activity._id}`)} className="flex-1">
+                        <div className="flex gap-2">
+                          <Link href={(`/activitymanagement?id=${activity._id}`)} className="flex-1">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full"
+                            >
+                              <TrendingUp className="w-4 h-4 mr-1" />
+                              Manage
+                            </Button>
+                          </Link>
                           <Button
                             variant="outline"
                             size="sm"
-                            className="w-full"
+                            onClick={() => handleEdit(activity)}
                           >
-                            <TrendingUp className="w-4 h-4 mr-1" />
-                            Manage
+                            <Edit className="w-4 h-4" />
                           </Button>
-                        </Link>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEdit(activity)}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setDeleteDialogOpen(true)
-                            setFormData(activity);
-                          }}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setDeleteDialogOpen(true)
+                              setFormData(activity);
+                            }}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  </Card>
-                </motion.div>
-              ))}
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+              <ShowMorePagination 
+              setPage={setPage} 
+              length={Actiities?.data?.length} 
+              total={Actiities?.pagination?.total}
+              page={Actiities?.pagination?.page}
+              totalPages={Actiities?.pagination?.totalPages}
+               />
             </div>
           )}
 
@@ -538,7 +549,7 @@ export default function MyActivities() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Operating Hours Start</Label>
                     <Input

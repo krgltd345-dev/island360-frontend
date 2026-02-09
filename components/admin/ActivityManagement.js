@@ -9,6 +9,7 @@ import { useGetActivityCountQuery, useGetAllActivitiesQuery, useGetCategoryQuery
 import { ConvertCentToDollar } from '@/lib/utils';
 import { Tabs, TabsTrigger } from '../ui/tabs';
 import { TabsList } from '@radix-ui/react-tabs';
+import ShowMorePagination from '../pagination/ShowMorePagination';
 
 
 export default function AdminActivityOversight() {
@@ -16,9 +17,12 @@ export default function AdminActivityOversight() {
     name: "all",
     _id: null
   });
+  const [page, setPage] = useState(1)
   const { data: count } = useGetActivityCountQuery()
   const { data: Activities, isLoading } = useGetAllActivitiesQuery({
-    ...(selectedCategory?._id && { category: selectedCategory?._id })
+    ...(selectedCategory?._id && { category: selectedCategory?._id }),
+    page,
+    limit:15
   });
   const { data: categories, isLoading: categoryLoading } = useGetCategoryQuery()
 
@@ -43,7 +47,10 @@ export default function AdminActivityOversight() {
           </Card>
         </div>
       }
-      <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
+      <Tabs value={selectedCategory} onValueChange={(e) => {
+        setPage(1)
+        setSelectedCategory(e)
+      }} className="w-full">
         <div className='scrollbar-hide overflow-x-scroll'>
           <TabsList className={`grid w-full max-xl:w-6xl grid-cols-7`}>
             <TabsTrigger className={""} value={
@@ -117,7 +124,13 @@ export default function AdminActivityOversight() {
           </Card>
         ))}
       </div>
-
+      <ShowMorePagination
+        setPage={setPage}
+        length={Activities?.data?.length}
+        total={Activities?.pagination?.total}
+        page={Activities?.pagination?.page}
+        totalPages={Activities?.pagination?.totalPages}
+      />
       {/* Delete Confirmation Dialog */}
       {/* <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>

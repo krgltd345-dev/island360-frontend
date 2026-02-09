@@ -8,7 +8,22 @@ export const activityApi = baseApi.injectEndpoints({
         url: '/activities',
         params: { ...data },
       }),
-      providesTags: ["ACTIVITY"]
+      providesTags: ["ACTIVITY"],
+      serializeQueryArgs: ({ endpointName }) => {
+        return endpointName;
+      },
+      merge: (currentCache, newItems, { arg }) => {
+        const { page } = arg;
+        if (page > 1) {
+          currentCache.data.push(...newItems.data);
+        } else {
+          currentCache.data = newItems.data;
+        }
+        currentCache.pagination = newItems.pagination;
+      },
+      forceRefetch({ currentArg, previousArg }) {
+        return currentArg !== previousArg;
+      },
     }),
     getActivityById: builder.query({
       query: (body) => `/activities/${body?.id}`,

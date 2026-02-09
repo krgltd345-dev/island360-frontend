@@ -21,16 +21,19 @@ const iconMap = {
     Sparkles,
 };
 
-export default function CategoryFilter({ categories, selected, onChange }) {
+export default function CategoryFilter({ categories, selected, onChange, setPage }) {
 
   return (
     <div className="flex flex-wrap gap-3 mb-12 justify-center">
       <Button
         variant={selected?.name == "all" ? "default" : "outline"}
-        onClick={() => onChange({
-          name: "all",
-          _id: null
-        })}
+        onClick={() => {
+          setPage(1)
+          onChange({
+            name: "all",
+            _id: null
+          })
+        }}
         className={`
                 rounded-full px-6 py-5 font-medium transition-all duration-300
                 ${selected?.name == "all"
@@ -43,7 +46,7 @@ export default function CategoryFilter({ categories, selected, onChange }) {
         {"All Activities"}
       </Button>
       {categories.map((cat) => {
-        const Icon = iconMap[cat?.name] ||  Sparkles;
+        const Icon = iconMap[cat?.name] || Sparkles;
         const isActive = selected?._id === cat._id;
 
         return (
@@ -52,7 +55,10 @@ export default function CategoryFilter({ categories, selected, onChange }) {
           >
             <Button
               variant={isActive ? "default" : "outline"}
-              onClick={() => onChange(cat)}
+              onClick={() => {
+                setPage(1)
+                onChange(cat)
+              }}
               className={`
                 rounded-full px-6 py-5 font-medium transition-all duration-300
                 ${isActive

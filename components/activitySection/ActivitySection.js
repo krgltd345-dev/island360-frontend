@@ -1,10 +1,12 @@
 'use client';
 import React, { useState } from 'react'
 import CategoryFilter from '../category/Filters';
-import { Sparkles, Waves } from 'lucide-react';
+import { ChevronDown, ChevronRight, Sparkles, Waves } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
 import ActivityCard from './ActivityCard';
 import { useGetAllActivitiesQuery, useGetCategoryQuery } from '@/services/activityApi';
+import { Button } from '../ui/button';
+import ShowMorePagination from '../pagination/ShowMorePagination';
 
 
 
@@ -13,8 +15,11 @@ const ActivitySection = () => {
     name: "all",
     _id: null
   });
+  const [page, setPage] = useState(1)
   const { data: Actiities, isLoading } = useGetAllActivitiesQuery({
-    ...(selectedCategory?._id && { category: selectedCategory?._id })
+    ...(selectedCategory?._id && { category: selectedCategory?._id }),
+    page,
+    limit: 15
   });
   const { data: categories, isLoading: categoryLoading } = useGetCategoryQuery()
   return (
@@ -32,7 +37,7 @@ const ActivitySection = () => {
         </p>
       </div>
       {
-        categories?.data && <CategoryFilter categories={categories?.data} selected={selectedCategory} onChange={setSelectedCategory} />
+        categories?.data && <CategoryFilter setPage={setPage} categories={categories?.data} selected={selectedCategory} onChange={setSelectedCategory} />
       }
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -55,10 +60,19 @@ const ActivitySection = () => {
           <p className="text-slate-600">Check back soon for new adventures!</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {Actiities?.data?.map((activity, index) => (
-            <ActivityCard key={activity._id} activity={activity} index={index} />
-          ))}
+        <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {Actiities?.data?.map((activity, index) => (
+              <ActivityCard key={activity._id} activity={activity} index={index} />
+            ))}
+          </div>
+          <ShowMorePagination
+            setPage={setPage}
+            length={Actiities?.data?.length}
+            total={Actiities?.pagination?.total}
+            page={Actiities?.pagination?.page}
+            totalPages={Actiities?.pagination?.totalPages}
+          />
         </div>
       )}
     </div>
