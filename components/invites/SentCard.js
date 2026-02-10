@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Users, MoreHorizontal, Star, CheckCircle, XCircle, Trash2, Edit, Share2, Landmark, User } from 'lucide-react';
-import { format } from 'date-fns';
+import { Calendar, Clock, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import moment from 'moment';
 import { useRouter } from 'next/navigation';
@@ -12,7 +11,6 @@ import { toast } from 'sonner';
 import { statusStyles } from '@/lib/utils';
 
 export default function SentInviteCard({ invite }) {
-  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [Remove, { isLoading }] = useRemoveInviteMutation()
   const router = useRouter()
 

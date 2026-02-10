@@ -270,13 +270,6 @@ export default function MyBookings() {
         bookingToReview={bookingToReview}
         />
 
-        {/* Join Booking Dialog */}
-        {/* <JoinBookingDialog
-          shareCode={joinShareCode}
-          open={joinDialogOpen}
-          onOpenChange={setJoinDialogOpen}
-        /> */}
-
         {/* Participant Payment Dialog */}
         {/* <ParticipantCheckout
         booking={selectedBooking}

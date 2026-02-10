@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Edit, Save, X, Upload, MessageCircleWarning, Search, ChevronDown } from 'lucide-react';
+import { Edit, Save, X, Upload, Search, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { useUpdateUserMutation } from '@/services/userApi';
 import { useUploadImageMutation } from '@/services/upload';

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Loader2, Send, Store } from 'lucide-react';
+import { Loader2, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import StarRating from './StarRating';
 import { useSubmitReviewMutation } from '@/services/userApi';
@@ -11,8 +11,6 @@ export default function ReviewForm({ booking, onSuccess, onCancel }) {
   const [SubmitReview, { isLoading }] = useSubmitReviewMutation()
   const [rating, setRating] = useState(5);
   const [reviewText, setReviewText] = useState('');
-  const [vendorRating, setVendorRating] = useState(0);
-  const [vendorReviewText, setVendorReviewText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   console.log(booking, "bookingbooking");
   const handleSubmit = async (e) => {

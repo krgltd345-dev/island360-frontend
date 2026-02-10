@@ -1,17 +1,16 @@
 "use client";
-import { Calendar, List, LogIn, LogOut, Menu, MessageSquare, Target, TreePalm, Users } from 'lucide-react';
+import { Calendar, List, LogIn, LogOut, Menu, Target, Users } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '../ui/sheet';
 import { Button } from '../ui/button';
-import { useGetUserRoleQuery, userApi } from '@/services/userApi';
+import { useGetUserRoleQuery } from '@/services/userApi';
 import { toast } from 'sonner';
 import { useLogOutMutation } from '@/services/authApi';
 import { useDispatch } from 'react-redux';
 import { deleteCookie, setCookie } from 'cookies-next';
 import { setIsLogin, setSignUp } from '@/services/globalSlice';
-import { bookingApi } from '@/services/bookingApi';
 import { ROLES } from '@/lib/utils';
 import { RiUserAddLine } from "react-icons/ri";
 

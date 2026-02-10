@@ -2,19 +2,17 @@ import React, { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Users, MoreHorizontal, Star, CheckCircle, XCircle, Trash2, Edit, Share2, Landmark, User } from 'lucide-react';
-import { format } from 'date-fns';
+import { Calendar, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import moment from 'moment';
 import { useRouter } from 'next/navigation';
-import { useCreateInvitePaymentMutation, useInviteActionMutation, useRemoveInviteMutation } from '@/services/inviteApi';
+import { useCreateInvitePaymentMutation, useInviteActionMutation } from '@/services/inviteApi';
 import { toast } from 'sonner';
 import { ConvertCentToDollar, statusStyles } from '@/lib/utils';
 
 
 
 export default function ReceiveInviteCard({ invite }) {
-  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [Action, { isLoading }] = useInviteActionMutation()
   const [InvitePayment] = useCreateInvitePaymentMutation()
   const router = useRouter()

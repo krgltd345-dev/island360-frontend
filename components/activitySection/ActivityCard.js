@@ -1,8 +1,7 @@
 'use client';
 import React from 'react';
-import { Clock, Users, Star, Anchor, Bike, Sparkles, ShieldCheck, Heart, ArrowRight } from 'lucide-react';
+import { Clock, Users, Star, Anchor, Bike, Sparkles, ShieldCheck, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
-// import { useActivityRatings } from '../reviews/useActivityRatings';
 import { Card } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';

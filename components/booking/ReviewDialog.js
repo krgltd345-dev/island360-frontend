@@ -5,7 +5,7 @@ import { useGetUserActivityReviewsQuery, useRemoveReviewMutation } from '@/servi
 import StarRating from './StarRating';
 import { Card } from '../ui/card';
 import { format } from 'date-fns';
-import { Delete, Loader2, Send } from 'lucide-react';
+import { Delete, Loader2 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { toast } from 'sonner';
 

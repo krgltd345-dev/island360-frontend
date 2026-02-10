@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Mail, ArrowLeft, CheckCircle2, Lock, Eye, EyeOff, KeyRound } from 'lucide-react';
+import { Mail, ArrowLeft, Lock, Eye, EyeOff } from 'lucide-react';
 import { useForgotPasswordMutation, useResetPasswordMutation, useVerifyOtpMutation } from '@/services/authApi';
 import { toast } from 'sonner';
 

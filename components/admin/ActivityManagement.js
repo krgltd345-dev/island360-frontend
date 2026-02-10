@@ -3,8 +3,7 @@
 import React, { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, Eye, EyeOff, Edit, Trash2, Calendar } from 'lucide-react';
-import { toast } from 'sonner';
+import { Eye, EyeOff, Calendar } from 'lucide-react';
 import { useGetActivityCountQuery, useGetAllActivitiesQuery, useGetCategoryQuery } from '@/services/activityApi';
 import { ConvertCentToDollar } from '@/lib/utils';
 import { Tabs, TabsTrigger } from '../ui/tabs';

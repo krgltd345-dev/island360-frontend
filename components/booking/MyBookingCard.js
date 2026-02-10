@@ -2,21 +2,12 @@ import React, { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Users, MoreHorizontal, Star, CheckCircle, XCircle, Trash2, Edit, Share2, Landmark } from 'lucide-react';
-import { format } from 'date-fns';
+import { Calendar, Clock, Users, Star, XCircle, Share2, Landmark } from 'lucide-react';
 import { motion } from 'framer-motion';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import ShareBookingDialog from './ShareBookingModal';
 import moment from 'moment';
 import { useCreatePaymentMutation } from '@/services/bookingApi';
 import { useRouter } from 'next/navigation';
-import { ConvertCentToDollar } from '@/lib/utils';
 
 const statusStyles = {
   'HOLD': "bg-amber-100 text-amber-700 border-amber-200",

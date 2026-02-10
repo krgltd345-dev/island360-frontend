@@ -1,4 +1,3 @@
-import { TreePalm } from 'lucide-react'
 import React from 'react'
 
 const Footer = () => {

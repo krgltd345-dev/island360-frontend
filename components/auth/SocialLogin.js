@@ -12,7 +12,6 @@ const SocialLogin = () => {
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get('redirect');
   const router = useRouter()
-  const dispatch = useDispatch()
   const [googleLogin] = useGoogleLoginMutation();
 
 
