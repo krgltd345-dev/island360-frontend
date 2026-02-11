@@ -110,6 +110,7 @@ export default function MultiStepBookingForm({ Activity }) {
     }
   }, [isGroupBooking, Activity, formData?.quantity])
 
+
   return (
     <div className="space-y-6">
       {/* Progress Indicator */}
@@ -171,16 +172,16 @@ export default function MultiStepBookingForm({ Activity }) {
                         setOpen(false);
                       }}
                       disabled={(date) => {
+                        const DAY_MAP = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
                         const today = new Date();
                         today.setHours(0, 0, 0, 0);
                         const selectedDate = new Date(date);
                         selectedDate.setHours(0, 0, 0, 0);
                         if (selectedDate < today) return true;
-                        // const dateStr = format(date, 'yyyy-MM-dd');
-                        // const daySchedules = allActivitySchedules.filter(s => s.date === dateStr);
-                        // if (daySchedules.length === 0) return false;
-                        // const allBlocked = daySchedules.every(s => s.blocked || !s.available);
-                        // return allBlocked;
+                        const operationalDays = Activity?.data?.operationalDays || [];
+                        if (!operationalDays.length) return true;
+                        const selectedDay = DAY_MAP[selectedDate.getDay()];
+                        return !operationalDays.includes(selectedDay);
                       }}
                       initialFocus
                     />
@@ -403,27 +404,27 @@ export default function MultiStepBookingForm({ Activity }) {
             </div>
 
             <div className="bg-slate-50 rounded-2xl p-5 space-y-3">
-                <div className="flex justify-between text-slate-600">
-                  <span>Subtotal</span>
-                  <span>${formData?.numberOfPersons && isGroupBooking ? ((ConvertCentToDollar(Activity?.data?.price) * formData?.quantity) / formData?.numberOfPersons).toFixed(2) : (ConvertCentToDollar(Activity?.data?.price) * formData?.quantity).toFixed(2)}</span>
+              <div className="flex justify-between text-slate-600">
+                <span>Subtotal</span>
+                <span>${formData?.numberOfPersons && isGroupBooking ? ((ConvertCentToDollar(Activity?.data?.price) * formData?.quantity) / formData?.numberOfPersons).toFixed(2) : (ConvertCentToDollar(Activity?.data?.price) * formData?.quantity).toFixed(2)}</span>
+              </div>
+              {
+                !Activity?.data?.nonProfitStatus && <div className="flex justify-between text-slate-600">
+                  <span>Fees {`(${fee?.data?.fee}%)`}</span>
+                  <span>${formData?.numberOfPersons && isGroupBooking ? (((ConvertCentToDollar(Activity?.data?.price) * formData?.quantity) * (fee?.data?.fee / 100)) / formData?.numberOfPersons).toFixed(2) : ((ConvertCentToDollar(Activity?.data?.price) * formData?.quantity) * (fee?.data?.fee / 100)).toFixed(2)}</span>
                 </div>
+              }
+              <div className="border-t border-slate-200 pt-3 flex justify-between">
+                <span className="font-semibold text-slate-900">Total</span>
                 {
-                  !Activity?.data?.nonProfitStatus && <div className="flex justify-between text-slate-600">
-                    <span>Fees {`(${fee?.data?.fee}%)`}</span>
-                    <span>${formData?.numberOfPersons && isGroupBooking ? (((ConvertCentToDollar(Activity?.data?.price) * formData?.quantity) * (fee?.data?.fee / 100)) / formData?.numberOfPersons).toFixed(2) : ((ConvertCentToDollar(Activity?.data?.price) * formData?.quantity) * (fee?.data?.fee / 100)).toFixed(2)}</span>
-                  </div>
+                  Activity?.data?.nonProfitStatus ?
+                    <span className="text-2xl font-bold text-slate-900">
+                      ${formData?.numberOfPersons && isGroupBooking ? ((ConvertCentToDollar(Activity?.data?.price) * formData?.quantity) / formData?.numberOfPersons).toFixed(2) : ((ConvertCentToDollar(Activity?.data?.price) * formData?.quantity)).toFixed(2)}
+                    </span> : <span className="text-2xl font-bold text-slate-900">
+                      ${formData?.numberOfPersons && isGroupBooking ? (((ConvertCentToDollar(Activity?.data?.price) * formData?.quantity) + ((ConvertCentToDollar(Activity?.data?.price) * formData?.quantity) * (fee?.data?.fee / 100))) / formData?.numberOfPersons).toFixed(2) : ((ConvertCentToDollar(Activity?.data?.price) * formData?.quantity) + ((ConvertCentToDollar(Activity?.data?.price) * formData?.quantity) * (fee?.data?.fee / 100))).toFixed(2)}
+                    </span>
                 }
-                <div className="border-t border-slate-200 pt-3 flex justify-between">
-                  <span className="font-semibold text-slate-900">Total</span>
-                  {
-                    Activity?.data?.nonProfitStatus ?
-                      <span className="text-2xl font-bold text-slate-900">
-                        ${formData?.numberOfPersons && isGroupBooking ? ((ConvertCentToDollar(Activity?.data?.price) * formData?.quantity) / formData?.numberOfPersons).toFixed(2) : ((ConvertCentToDollar(Activity?.data?.price) * formData?.quantity)).toFixed(2)}
-                      </span> : <span className="text-2xl font-bold text-slate-900">
-                        ${formData?.numberOfPersons && isGroupBooking ? (((ConvertCentToDollar(Activity?.data?.price) * formData?.quantity) + ((ConvertCentToDollar(Activity?.data?.price) * formData?.quantity) * (fee?.data?.fee / 100))) / formData?.numberOfPersons).toFixed(2) : ((ConvertCentToDollar(Activity?.data?.price) * formData?.quantity) + ((ConvertCentToDollar(Activity?.data?.price) * formData?.quantity) * (fee?.data?.fee / 100))).toFixed(2)}
-                      </span>
-                  }
-                </div>
+              </div>
             </div>
 
             <div className="flex justify-between gap-3">

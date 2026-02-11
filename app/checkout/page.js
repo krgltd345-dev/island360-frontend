@@ -7,20 +7,20 @@ import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { Shield, ShieldCheck, CheckCircle2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
 const Checkout = () => {
+  const router = useRouter()
   const searchParams = useSearchParams();
   const Id = searchParams.get('id');
   const bookingId = searchParams.get('booking');
   const status = searchParams.get('redirect_status');
   const [isStripeLoading, setIsStripeLoading] = useState(true);
 
-  console.log(bookingId, "bookingId");
 
   useEffect(() => {
     // Check if Stripe is loaded
@@ -30,6 +30,12 @@ const Checkout = () => {
       setIsStripeLoading(false);
     });
   }, []);
+
+  useEffect(() => {
+    if (bookingId && (status === "succeeded")) {
+      router.push(`/invite?id=${bookingId}`)
+    }
+  }, [bookingId, status])
 
   if (!Id && !status) {
     return (
@@ -120,8 +126,8 @@ const Checkout = () => {
           <div className="flex flex-row gap-8 items-start justify-center">
             {/* Main Checkout Form */}
             <div className="flex-1 max-w-2xl w-full">
-              <Elements 
-                stripe={stripePromise} 
+              <Elements
+                stripe={stripePromise}
                 options={{
                   clientSecret: Id,
                   appearance: {
@@ -138,7 +144,7 @@ const Checkout = () => {
                   },
                 }}
               >
-                <CheckoutForm bookingId={bookingId}/>
+                <CheckoutForm bookingId={bookingId} />
               </Elements>
             </div>
           </div>

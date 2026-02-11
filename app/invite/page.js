@@ -1,112 +1,127 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Filter, Inbox, Share2, UserPlus, Users as UsersIcon } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar, Mail, Plus, Share2, User, Users as UsersIcon, X, XCircle } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import BookingCard from '@/components/booking/MyBookingCard';
 import LayoutWrapper from '@/components/layout/LayoutWrapper';
-import { useCancelBookingMutation, useGetUserBookingsQuery } from '@/services/bookingApi';
-import { useRouter } from 'next/navigation';
-import Recieved from '@/components/invites/Recieved';
-import SentInvites from '@/components/invites/SentInvites';
-import { ConvertCentToDollar } from '@/lib/utils';
-import ReviewDialog from '@/components/booking/ReviewDialog';
+import { useGetBookingByIdQuery } from '@/services/bookingApi';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { statusStyles } from '@/lib/utils';
+import { useGetSentInvitesQuery, useInviteFriendsMutation, useRemoveInviteMutation } from '@/services/inviteApi';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 
 
 export default function Invite() {
+  const searchParams = useSearchParams();
   const router = useRouter()
-  const [statusFilter, setStatusFilter] = useState('ALL');
-  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [bookingToCancel, setBookingToCancel] = useState(null);
-  const [bookingToDelete, setBookingToDelete] = useState(null);
-  const [showBookings, setShowBookings] = useState(true);
-  const [bookingToEdit, setBookingToEdit] = useState(null);
-  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
-  const [bookingToReview, setBookingToReview] = useState(null);
-  const [editFormData, setEditFormData] = useState({
-    guests: 1,
-    special_requests: ''
-  });
+  const bookingId = searchParams.get('id');
 
-  const { data: userBookings, isLoading } = useGetUserBookingsQuery([statusFilter])
-  const [Cancel] = useCancelBookingMutation()
 
-  const handleCancelClick = (booking) => {
-    setBookingToCancel(booking);
-    setCancelDialogOpen(true);
+  const { data: booking, isLoading } = useGetBookingByIdQuery({ id: bookingId }, { skip: !bookingId });
+  const [emailFields, setEmailFields] = useState([{ id: 1, value: '' }]);
+  const [filteredInvites, setFilteredInvites] = useState([]);
+  const { data: Invites } = useGetSentInvitesQuery()
+  const [Remove, { isLoading: removeLoading }] = useRemoveInviteMutation()
+  const [emails, setEmails] = useState([]);
+  const [invite] = useInviteFriendsMutation()
+
+
+  // useEffect(() => {
+  //   if (!open) {
+  //     setEmailFields([{ id: 1, value: '' }]);
+  //     setEmails([]);
+  //   }
+  // }, [open]);
+
+  const addEmailField = () => {
+    if (emailFields.length >= booking?.data?.booking?.numberOfPersons) {
+      toast.error(`You can add only ${booking?.data?.booking?.numberOfPersons} email(s)`);
+      return;
+    }
+
+    const newId = Math.max(...emailFields.map(f => f.id), 0) + 1;
+    setEmailFields([...emailFields, { id: newId, value: '' }]);
   };
 
-  const handleDeleteClick = (booking) => {
-    setBookingToDelete(booking);
-    setDeleteDialogOpen(true);
+  const removeEmailField = (id) => {
+    if (emailFields.length > 1) {
+      setEmailFields(emailFields.filter(field => field.id !== id));
+    } else {
+      toast.warning('At least one email field is required');
+    }
   };
 
-  const handleEditClick = (booking) => {
-    setBookingToEdit(booking);
-    setEditFormData({
-      guests: booking.guests,
-      special_requests: booking.special_requests || ''
-    });
-    setEditDialogOpen(true);
+  const updateEmailField = (id, value) => {
+    setEmailFields(emailFields.map(field =>
+      field.id === id ? { ...field, value } : field
+    ));
   };
 
-  const confirmCancel = async () => {
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleCancel = async (id) => {
     try {
-      if (bookingToCancel) {
-        const res = await Cancel({ id: bookingToCancel?._id }).unwrap()
-        toast.success(res?.message)
-      }
+      const res = await Remove({ id }).unwrap()
+      toast.success(res?.message)
     } catch (error) {
-      console.log(error);
+      toast.error(error?.data?.message)
+      console.log(error, "error");
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      // Extract all non-empty emails
+      const validEmails = emailFields
+        .map(field => field.value.trim())
+        .filter(email => email !== '');
+
+      if (validEmails.length === 0) {
+        toast.error('Please enter at least one email address');
+        return;
+      }
+
+      // Validate all emails
+      const invalidEmails = validEmails.filter(email => !validateEmail(email));
+      if (invalidEmails.length > 0) {
+        toast.error(`Invalid email addresses: ${invalidEmails.join(', ')}`);
+        return;
+      }
+
+      // Store emails in array
+      setEmails(validEmails);
+
+      console.log('Emails to send invitations:', validEmails);
+      const res = await invite({ bookingId: booking?.data?.booking?._id, emails: validEmails }).unwrap()
+
+      toast.success(`Invitations will be sent to ${validEmails.length} email${validEmails.length > 1 ? 's' : ''}`);
+      setEmailFields([{ id: 1, value: '' }]);
+      setEmails([]);
+    } catch (error) {
+      console.log(error, "error");
       toast.error(error?.data?.message)
     }
   };
-
-  const handleReviewClick = (booking) => {
-    setBookingToReview(booking);
-    setReviewDialogOpen(true);
-  };
-
-  const hasReview = (bookingId) => {
-    // return existingReviews.some(r => r.booking_id === bookingId);
-  };
-
-  // const getParticipantInfo = (booking) => {
-  //   const participation = myParticipations.find(p => p.booking_id === booking.id);
-  //   return participation;
-  // };
-
-
-  const calculateAmount = (booking, cancel) => {
-    if (booking?.status === "CANCELLED" || booking?.status === "REFUNDED" || cancel) {
-      if (booking?.groupShare) {
-        return `Refund Amount $${ConvertCentToDollar(booking?.groupShare) * booking?.activityId?.refundOnCancellations / 100}`
-      } else {
-        return `Refund Amount $${ConvertCentToDollar(booking?.totalPrice) * booking?.activityId?.refundOnCancellations / 100}`
-      }
-    } else {
-      if (booking?.groupShare) {
-        return `$${ConvertCentToDollar(booking?.groupShare)}`
-      } else {
-        return `$${ConvertCentToDollar(booking?.totalPrice)}`
-      }
+  // console.log(booking, "booking");
+  useEffect(() => {
+    if (booking && Invites?.data?.invitations?.length > 0) {
+      const filtered = Invites?.data?.invitations?.filter((invite) => invite?.bookingId?._id === booking?.data?.booking?._id)
+      setFilteredInvites(filtered)
     }
-  }
+
+
+  }, [booking, Invites])
+
 
   if (isLoading) {
     return (
@@ -136,147 +151,102 @@ export default function Invite() {
             >
               <div className="flex items-center gap-3 text-sky-600 mb-3">
                 <Calendar className="w-5 h-5" />
-                <span className="text-sm font-medium tracking-wide uppercase">Your Reservations</span>
+                <span className="text-sm font-medium tracking-wide uppercase">Group Invites</span>
               </div>
-              <h1 className="text-3xl font-bold text-slate-900">My Bookings</h1>
+              <h1 className="text-3xl flex gap-2 items-center font-bold text-slate-900"> <Share2 className="w-5 h-5" />Invite your Friends</h1>
+              <p>
+                Invite others to join your booking for {booking?.data?.booking?.activityId?.name}
+              </p>
             </motion.div>
-            <div className='flex items-center gap-2'>
-              <Button onClick={() => setShowBookings(true)} variant={showBookings ? 'default' : 'outline'} className="mt-4">
-                <UserPlus className="w-4 h-4 mr-2" />
-                Bookings
-              </Button>
-              <Button onClick={() => setShowBookings(false)} variant={!showBookings ? 'default' : 'outline'} className="mt-4">
-                <Share2 className="w-4 h-4 mr-2" />
-                Invites
-              </Button>
-            </div>
           </div>
         </div>
-        {
-          showBookings ?
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-              {/* Filters */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="mb-8"
-              >
-                <div className="flex items-center gap-2 mb-4 text-slate-600">
-                  <Filter className="w-4 h-4" />
-                  <span className="text-sm font-medium">Filter by status</span>
-                </div>
-                <Tabs value={statusFilter} className={"w-full scrollbar-hide overflow-x-scroll"} onValueChange={setStatusFilter}>
-                  <TabsList className="bg-white border border-slate-200 p-1">
-                    <TabsTrigger value="ALL" className="rounded-lg">All</TabsTrigger>
-                    <TabsTrigger value="HOLD" className="rounded-lg">Pending</TabsTrigger>
-                    <TabsTrigger value="CONFIRMED" className="rounded-lg">Confirmed</TabsTrigger>
-                    <TabsTrigger value="COMPLETED" className="rounded-lg">Completed</TabsTrigger>
-                    <TabsTrigger value="CANCELLED" className="rounded-lg">Cancelled</TabsTrigger>
-                    <TabsTrigger value="REFUNDED" className="rounded-lg">Refunded</TabsTrigger>
-                  </TabsList>
-                </Tabs>
-              </motion.div>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-              {/* Bookings List */}
-              {userBookings?.pagination?.total === 0 ? (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="text-center py-16"
-                >
-                  <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Inbox className="w-10 h-10 text-slate-400" />
+          {/* Filters */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="mb-8"
+          >
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-3">
+                <Label>Email Addresses</Label>
+                {emailFields.map((field, index) => (
+                  <div key={field.id} className="flex gap-2">
+                    <div className="flex-1">
+                      <Input
+                        type="email"
+                        placeholder="Enter email address"
+                        value={field.value}
+                        onChange={(e) => updateEmailField(field.id, e.target.value)}
+                        className="w-full"
+                      />
+                    </div>
+                    {emailFields.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => removeEmailField(field.id)}
+                        className="shrink-0"
+                      >
+                        <X className="w-5 h-5" />
+                      </Button>
+                    )}
                   </div>
-                  <h3 className="text-xl font-semibold text-slate-900 mb-2">No bookings found</h3>
-                </motion.div>
-              ) : (
-                <div className="space-y-4">
-                  {userBookings?.data?.map((booking, index) => {
-                    // const participantInfo = getParticipantInfo(booking);
-                    return (
-                      <div key={booking._id}>
-                        <BookingCard
-                          booking={booking}
-                          index={index}
-                          onCancel={handleCancelClick}
-                          onDelete={handleDeleteClick}
-                          onEdit={handleEditClick}
-                          onReview={handleReviewClick}
-                          calculateAmount={calculateAmount}
-                          hasReview={hasReview(booking.id)}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-            :
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                ))}
+              </div>
 
-              <Tabs defaultValue="received" className="space-y-6">
-                <TabsList className={`grid grid-cols-2 w-full'}`}>
-                  <TabsTrigger value="received">
-                    Received Invites
-                  </TabsTrigger>
-                  <TabsTrigger value="sent">
-                    Sent Invites
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="received">
-                  <Recieved />
-                </TabsContent>
-
-                <TabsContent value="sent">
-                  <SentInvites />
-                </TabsContent>
-              </Tabs>
-            </div>
-
-        }
-
-
-        {/* Cancel Confirmation Dialog */}
-        <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Cancel Booking?</AlertDialogTitle>
-              <AlertDialogDescription>
-                <>
-                  Are you sure you want to cancel this booking? This action cannot be undone.
-                  All accepted and paid invitees will also be cancelled and refunded.<br />
-                  <span className='text-black font-semibold'>{calculateAmount(bookingToCancel, true)}</span>
-                </>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Keep Booking</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={confirmCancel}
-                className="bg-red-600 hover:bg-red-700"
+              <Button
+                type="button"
+                variant="outline"
+                onClick={addEmailField}
+                className="w-full"
               >
-                Yes, Cancel
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Email
+              </Button>
 
-        {/* Review Dialog */}
-        <ReviewDialog
-          reviewDialogOpen={reviewDialogOpen}
-          setReviewDialogOpen={setReviewDialogOpen}
-          bookingToReview={bookingToReview}
-        />
+              <div className="pt-2">
+                <Button
+                  type="submit"
+                  className="w-full"
+                >
+                  <Mail className="w-4 h-4 mr-2" />
+                  Send Invitations
+                </Button>
+              </div>
+              {
+                filteredInvites?.length > 0 &&
+                <div className='grid grid-cols-1 gap-2 max-h-50 overflow-auto '>
+                  {
+                    filteredInvites?.map((invite) => (
+                      <Card key={invite?._id} className="overflow-hidden h-full bg-white border-0 py-0 shadow-sm hover:shadow-md transition-all duration-300">
+                        <div className="flex items-center justify-between p-3">
+                          <div className='flex items-center gap-2'>
+                            <User className="w-4 h-4 mr-2" />
+                            {invite?.inviteeEmail}
+                            <Badge className={`${statusStyles[invite?.status]} border h-6 font-medium`}>
+                              {invite?.status}
+                            </Badge>
+                          </div>
+                          {
+                            invite?.status == "PENDING" &&
+                            <Button className={""} disabled={removeLoading} variant="destructive" onClick={() => handleCancel(invite?._id)}>
+                              <XCircle className="w-4 h-4" />
+                            </Button>
+                          }
+                        </div>
+                      </Card>
+                    ))
+                  }
+                </div>
+              }
+            </form>
 
-        {/* Participant Payment Dialog */}
-        {/* <ParticipantCheckout
-        booking={selectedBooking}
-        participant={selectedParticipant}
-        open={paymentDialogOpen}
-        onOpenChange={setPaymentDialogOpen}
-      /> */}
+          </motion.div>
+        </div>
       </div>
     </LayoutWrapper>
   );

@@ -8,6 +8,11 @@ export const bookingApi = baseApi.injectEndpoints({
         url: `/bookings/available-slots/${data?.id}?date=${data?.date}`,
       }),
     }),
+    getBookingById: builder.query({
+      query: (data) => ({
+        url: `/bookings/${data?.id}`,
+      }),
+    }),
     getUserBookings: builder.query({
       query: (states) => {
         if (states.length === 1 && states[0] === 'ALL') {
@@ -95,6 +100,7 @@ export const {
   useGetVendorBookingsQuery,
   useGetBookingsCountQuery,
   useCompleteBookingMutation,
+  useGetBookingByIdQuery
 
 
 } = bookingApi

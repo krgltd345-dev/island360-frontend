@@ -17,7 +17,6 @@ const statusStyles = {
 };
 
 export default function BookingCard({ booking, index = 0, onCancel, onDelete, onEdit, onReview, hasReview, calculateAmount }) {
-  const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const router = useRouter()
   const [Payment] = useCreatePaymentMutation()
 
@@ -35,11 +34,11 @@ export default function BookingCard({ booking, index = 0, onCancel, onDelete, on
 
   return (
     <>
-      <ShareBookingDialog
+      {/* <ShareBookingDialog
         booking={booking}
         open={shareDialogOpen}
         onOpenChange={setShareDialogOpen}
-      />
+      /> */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -67,7 +66,7 @@ export default function BookingCard({ booking, index = 0, onCancel, onDelete, on
                   {
                     (booking.status === 'CONFIRMED' || booking.status === 'PARTIALLY_CONFIRMED') &&
                     booking?.groupBooking &&
-                    <Button size='sm' variant="outline" className={"cursor-pointer"} onClick={() => setShareDialogOpen(true)}>
+                    <Button size='sm' variant="outline" className={"cursor-pointer"} onClick={() => router.push(`/invite?id=${booking?._id}`)}>
                       <Share2 className="w-4 h-4 mr-2" />
                       Invite
                     </Button>
