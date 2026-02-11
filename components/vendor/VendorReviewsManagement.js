@@ -1,13 +1,7 @@
 'use Client';
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Star, MessageSquare, Reply } from 'lucide-react';
-import { toast } from 'sonner';
+import { Star, MessageSquare } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { useGetVendorReviewsQuery, useGetVendorStatsQuery } from '@/services/userApi';
 

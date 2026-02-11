@@ -77,9 +77,6 @@ export default function ActivityDetailPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-12">
             {/* Left Column - Details */}
             <div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5 }}
             >
               {/* Image Gallery */}
               <div className="space-y-4 mb-6">
@@ -100,7 +97,7 @@ export default function ActivityDetailPage() {
                       <div className="relative rounded-xl overflow-hidden">
                         <img
                           src={Activity?.data?.imageUrls?.[1]}
-                          alt={`${Activity?.data?.name} - Image 2`}
+                          alt={`${Activity?.data?.name}-2`}
                           className="w-full h-30 sm:h-48 object-cover"
                         />
                       </div>
@@ -109,7 +106,7 @@ export default function ActivityDetailPage() {
                       <div className="relative rounded-xl overflow-hidden">
                         <img
                           src={Activity?.data?.imageUrls?.[2]}
-                          alt={`${Activity?.data?.name} - Image 3`}
+                          alt={`${Activity?.data?.name}-3`}
                           className="w-full h-30 sm:h-48 object-cover"
                         />
                       </div>
@@ -126,7 +123,7 @@ export default function ActivityDetailPage() {
                 {Activity?.data?.durationMinutes && (
                   <div className="flex items-center gap-2 text-slate-600">
                     <Clock className="w-5 h-5 text-slate-400" />
-                    <span>{Activity?.data?.durationMinutes}</span>
+                    <span>{Activity?.data?.durationMinutes > 60 ? `${(Activity?.data?.durationMinutes / 60).toFixed(1)} h` : `${Activity?.data?.durationMinutes} min`}</span>
                   </div>
                 )}
                 {Activity?.data?.maxGuests && (
@@ -150,9 +147,6 @@ export default function ActivityDetailPage() {
 
             {/* Right Column - Booking Form */}
             <div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
             >
               <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-100 sticky top-8">
                 <div className="mb-6 pb-6 border-b border-slate-100">
@@ -170,10 +164,13 @@ export default function ActivityDetailPage() {
                           </span>
                           <span className="text-slate-500 ml-1">
                             {Activity?.data?.billingType === 'PER_HOUR'
-                              ? '/ hour'
-                              : Activity?.data?.billingType === 'PER_UNIT'
-                                ? `/ ${Activity?.data?.unit_name || 'unit'}`
-                                : '/ person'}
+                              && '/ hour'}
+                            {Activity?.data?.billingType === 'PER_UNIT'
+                              && `/ ${Activity?.data?.unit_name || 'unit'}`}
+                            {
+                              Activity?.data?.billingType === 'PER_PERSON' && '/ person'
+                            }
+
                           </span>
                           {Activity?.data?.billingType === 'PER_HOUR' && Activity?.data?.minDurationMinutes && (
                             <p className="text-xs text-slate-600 mt-1">
@@ -183,13 +180,13 @@ export default function ActivityDetailPage() {
                         </>
                       )}
                     </div>
-                    {false && (
+                    {/* {false && (
                       <div className="flex items-center gap-1 text-amber-500">
                         <Star className="w-4 h-4 fill-current" />
                         <span className="font-medium">{(4).toFixed(1)}</span>
                         <span className="text-slate-400 text-sm">({10})</span>
                       </div>
-                    )}
+                    )} */}
                   </div>
                   {/* {vendor?.vendor_business_name && (
                       <p className="text-sm text-slate-600">

@@ -25,7 +25,6 @@ export default function SentInviteCard({ invite }) {
   };
 
   return (
-    <>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -69,6 +68,5 @@ export default function SentInviteCard({ invite }) {
           </div>
         </Card>
       </motion.div>
-    </>
   );
 }

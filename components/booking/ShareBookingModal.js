@@ -103,10 +103,8 @@ export default function ShareBookingDialog({ booking, open, onOpenChange }) {
   };
   // console.log(booking, "booking");
   useEffect(() => {
-    console.log(booking, Invites?.data?.length > 0, "booking && Invites?.data?.length > 0");
     if (booking && Invites?.data?.invitations?.length > 0) {
       const filtered = Invites?.data?.invitations?.filter((invite) => invite?.bookingId?._id === booking?._id)
-      console.log(filtered, "filteredfiltered");
       setFilteredInvites(filtered)
     }
 

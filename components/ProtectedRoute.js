@@ -11,8 +11,6 @@ export default function ProtectedRoute({ children, requireAdmin = false }) {
   const router = useRouter();
 
   useEffect(() => {
-    // TODO: Implement authentication check
-    // For now, this is a placeholder
     // const authenticated = isAuthenticated();
     // if (!authenticated) {
     //   router.push('/login');

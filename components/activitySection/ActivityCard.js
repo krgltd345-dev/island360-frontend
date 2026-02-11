@@ -72,7 +72,7 @@ export default function ActivityCard({ activity, index = 0 }) {
                   transition={{ delay: index * 0.1 + 0.2 }}
                 >
                   <Clock className="w-4 h-4" />
-                  {activity?.durationMinutes} min
+                  {activity?.durationMinutes > 60 ? `${(activity?.durationMinutes / 60).toFixed(1)} h` : `${activity?.durationMinutes} min`}
                 </motion.span>
               )}
               {activity?.maxGuests && (

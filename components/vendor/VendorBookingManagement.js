@@ -1,8 +1,7 @@
 'use Client';
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import { Card } from "@/components/ui/card";
 import { Calendar } from 'lucide-react';
-import { useGetBookingsCountQuery } from '@/services/bookingApi';
 import { BookingCard } from './Bookingcard';
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 

@@ -19,7 +19,8 @@ const ActivitySection = () => {
   const { data: Actiities, isLoading } = useGetAllActivitiesQuery({
     ...(selectedCategory?._id && { category: selectedCategory?._id }),
     page,
-    limit: 15
+    limit: 15,
+    availableForBooking:true
   });
   const { data: categories, isLoading: categoryLoading } = useGetCategoryQuery()
   return (

@@ -64,7 +64,6 @@ export default function BookingCard({ booking, index = 0, onCancel, onDelete, on
                     Leave a Review
                   </Button>
                 }
-                <>
                   {
                     (booking.status === 'CONFIRMED' || booking.status === 'PARTIALLY_CONFIRMED') &&
                     booking?.groupBooking &&
@@ -80,7 +79,6 @@ export default function BookingCard({ booking, index = 0, onCancel, onDelete, on
                       Cancel
                     </Button>
                   }
-                </>
               </div>
               {/* <DropdownMenu>
                 <DropdownMenuTrigger asChild>

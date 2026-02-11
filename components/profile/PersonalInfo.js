@@ -173,7 +173,6 @@ export default function PersonalInfoSection({ user }) {
             Full Name
           </Label>
           {isEditing ? (
-            <>
               <Input
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -181,7 +180,6 @@ export default function PersonalInfoSection({ user }) {
                 // disabled={!canChangeName}
                 className={''}
               />
-            </>
           ) : (
             <p className="text-slate-900 font-medium">{user.name || 'Not provided'}</p>
           )}

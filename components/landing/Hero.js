@@ -4,7 +4,6 @@ import { Waves } from 'lucide-react';
 
 export const Hero = () => {
   return (
-    <>
       <div className="relative overflow-hidden bg-blue-900 text-white">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1600')] bg-cover bg-center opacity-40" />
         <div className="absolute inset-0 bg-gradient-to-r from-blue-900/60 via-pink-300/5 to-pink-500/50" />
@@ -37,7 +36,5 @@ export const Hero = () => {
           </svg>
         </div>
       </div>
-
-    </>
   )
 }

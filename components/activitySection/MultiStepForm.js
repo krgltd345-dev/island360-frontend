@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react';
-import { CalendarIcon, Users, Clock, Loader2, ChevronRight, ChevronLeft, Check, User } from 'lucide-react';
+import { CalendarIcon, Users, Clock, Loader2, ChevronRight, ChevronLeft, Check, User, Info } from 'lucide-react';
 import { format } from 'date-fns';
 import { Label } from '../ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
@@ -27,6 +27,7 @@ export default function MultiStepBookingForm({ Activity }) {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGroupBooking, setIsGroupBooking] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     activityId: '',
@@ -91,7 +92,7 @@ export default function MultiStepBookingForm({ Activity }) {
       console.log(res, "booking res");
       if (res?.data?.bookingId) {
         const payData = await Payment({ id: res?.data?.bookingId }).unwrap();
-        router.push(`/checkout?id=${payData?.data?.clientSecret}`)
+        router.push(`/checkout?id=${payData?.data?.clientSecret}&booking=${res?.data?.bookingId}`)
       }
       toast.success('Please Wait, redirecting to payment.');
       // navigate(createPageUrl('MyBookings'));
@@ -151,7 +152,7 @@ export default function MultiStepBookingForm({ Activity }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-slate-700 font-medium">Select Date</Label>
-                <Popover>
+                <Popover open={open} onOpenChange={setOpen} >
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
@@ -165,7 +166,10 @@ export default function MultiStepBookingForm({ Activity }) {
                     <Calendar
                       mode="single"
                       selected={formData?.bookingDate}
-                      onSelect={(date) => setFormData({ ...formData, bookingDate: date })}
+                      onSelect={(date) => {
+                        setFormData({ ...formData, bookingDate: date })
+                        setOpen(false);
+                      }}
                       disabled={(date) => {
                         const today = new Date();
                         today.setHours(0, 0, 0, 0);
@@ -329,6 +333,17 @@ export default function MultiStepBookingForm({ Activity }) {
                 <Switch className={"cursor-pointer"} checked={isGroupBooking} onCheckedChange={setIsGroupBooking} />
               </div>
             }
+            {
+              isGroupBooking && Activity?.data?.allowGroupBookings &&
+              <div className="flex items-center justify-between p-3 bg-yellow-100 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Info className="w-5 h-5 text-yellow-600" />
+                  <div>
+                    <p className="text-xs text-yellow-600">Group members can be invited once your payment is completed successfully.</p>
+                  </div>
+                </div>
+              </div>
+            }
 
             {isGroupBooking && Activity?.data?.allowGroupBookings && Activity?.data?.billingType !== "PER_PERSON" &&
               <div className="space-y-2">
@@ -388,7 +403,6 @@ export default function MultiStepBookingForm({ Activity }) {
             </div>
 
             <div className="bg-slate-50 rounded-2xl p-5 space-y-3">
-              <>
                 <div className="flex justify-between text-slate-600">
                   <span>Subtotal</span>
                   <span>${formData?.numberOfPersons && isGroupBooking ? ((ConvertCentToDollar(Activity?.data?.price) * formData?.quantity) / formData?.numberOfPersons).toFixed(2) : (ConvertCentToDollar(Activity?.data?.price) * formData?.quantity).toFixed(2)}</span>
@@ -410,7 +424,6 @@ export default function MultiStepBookingForm({ Activity }) {
                       </span>
                   }
                 </div>
-              </>
             </div>
 
             <div className="flex justify-between gap-3">

@@ -16,8 +16,11 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
 const Checkout = () => {
   const searchParams = useSearchParams();
   const Id = searchParams.get('id');
+  const bookingId = searchParams.get('booking');
   const status = searchParams.get('redirect_status');
   const [isStripeLoading, setIsStripeLoading] = useState(true);
+
+  console.log(bookingId, "bookingId");
 
   useEffect(() => {
     // Check if Stripe is loaded
@@ -58,6 +61,12 @@ const Checkout = () => {
             <h2 className="text-2xl font-bold text-slate-900 mb-2">Payment Successful!</h2>
             <p className="text-slate-600 mb-6">Your payment has been processed successfully.</p>
             <div className="flex flex-col gap-3">
+              {/* <Link href={`/invite?id=${bookingId}`} className="w-full">
+                <Button className="w-full">
+                  <CheckCircle2 className="w-4 h-4 mr-2" />
+                  Invite Friends
+                </Button>
+              </Link> */}
               <Link href="/mybookings" className="w-full">
                 <Button className="w-full">
                   <CheckCircle2 className="w-4 h-4 mr-2" />
@@ -129,7 +138,7 @@ const Checkout = () => {
                   },
                 }}
               >
-                <CheckoutForm />
+                <CheckoutForm bookingId={bookingId}/>
               </Elements>
             </div>
           </div>
