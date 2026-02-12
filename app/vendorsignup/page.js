@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Store, CheckCircle, Clock, Router } from 'lucide-react';
+import { Store, CheckCircle, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import LayoutWrapper from '@/components/layout/LayoutWrapper';
 import { useGetUserRoleQuery, useVendorApplicationMutation } from '@/services/userApi';

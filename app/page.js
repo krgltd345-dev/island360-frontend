@@ -1,7 +1,6 @@
 import ActivitySection from "@/components/activitySection/ActivitySection";
 import { Hero } from "@/components/landing/Hero";
 import LayoutWrapper from "@/components/layout/LayoutWrapper";
-import Link from "next/link";
 
 
 export const metadata = {

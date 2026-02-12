@@ -198,7 +198,7 @@ export default function MultiStepBookingForm({ Activity }) {
                 >
                   <SelectTrigger className="h-12 border-slate-200">
                     <Clock className="mr-2 h-4 w-4 text-slate-500" />
-                    <SelectValue placeholder={formData?.bookingDate ? "Pick a time" : "Select a date first"} />
+                    <SelectValue placeholder={"Pick a time"} />
                   </SelectTrigger>
                   <SelectContent>
                     {
@@ -264,8 +264,20 @@ export default function MultiStepBookingForm({ Activity }) {
               </div>
             )} */}
 
-            {(Activity?.data?.billingType === 'PER_HOUR' || Activity?.data?.billingType === 'PER_UNIT') && (
+            {Activity?.data?.billingType !== 'PER_PERSON'&& (
               <div className="space-y-2">
+                {
+                  Activity?.data?.billingType === 'PER_HOUR' &&
+                  <Label className="text-slate-700 font-medium">
+                    Number of Hours
+                  </Label>
+                }
+                {
+                  Activity?.data?.billingType === 'PER_UNIT' &&
+                  <Label className="text-slate-700 font-medium">
+                    Number of Units
+                  </Label>
+                }
                 <Label className="text-slate-700 font-medium">
                   {Activity?.data?.billingType === 'PER_HOUR' ? 'Number of Hours' : `Number of Units`}
                 </Label>
