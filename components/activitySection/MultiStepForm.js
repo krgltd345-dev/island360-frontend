@@ -85,7 +85,7 @@ export default function MultiStepBookingForm({ Activity }) {
         return;
       }
       const timeArr = formData?.slotStartTime.split("-")
-      const endTime = Activity?.data?.billingType !== "PER_HOUR" ? addMinutesToTime(timeArr[0], Activity?.data?.minDurationMinutes) : addMinutesToTime(timeArr[0], formData?.quantity)
+      const endTime = Activity?.data?.billingType !== "PER_HOUR" ? addMinutesToTime(timeArr[0], Activity?.data?.minDurationMinutes) : addMinutesToTime(timeArr[0], formData?.quantity * 60)
       console.log(timeArr, "timeArr", endTime);
       const { numberOfPersons, ...restFormData } = formData;
       const data = {

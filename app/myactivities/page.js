@@ -109,7 +109,7 @@ export default function MyActivities() {
   const handleEdit = (activity) => {
     setEditingActivity(activity);
     setFormData(activity);
-    setFormData({ ...activity, price: ConvertCentToDollar(activity?.price) })
+    setFormData({ ...activity, price: ConvertCentToDollar(activity?.price), minDurationMinutes: activity?.minDurationMinutes / 60, bookingGapMinutes: activity?.bookingGapMinutes / 60 })
     setImages({
       image_url: activity?.imageUrls?.[0] || '',
       image_url_2: activity?.imageUrls?.[1] || '',
@@ -128,7 +128,7 @@ export default function MyActivities() {
         availableSpots: formData.availableSpots ? parseInt(formData.availableSpots) : null,
         ...(formData?.allowGroupBookings && { maxGroupSize: parseInt(formData.maxGroupSize) }),
         minDurationMinutes: formData.minDurationMinutes * 60,
-        bookingGapMinutes: formData.bookingGapMinutes?  formData.bookingGapMinutes * 60 : null,
+        bookingGapMinutes: formData.bookingGapMinutes ? formData.bookingGapMinutes * 60 : null,
         imageUrls: Object.values(images).filter(Boolean),
         ...(editingActivity && formData?.category?.name && { category: formData?.category?._id }),
       };
