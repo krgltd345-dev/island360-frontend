@@ -123,7 +123,7 @@ export default function ActivityDetailPage() {
                 {Activity?.data?.durationMinutes && (
                   <div className="flex items-center gap-2 text-slate-600">
                     <Clock className="w-5 h-5 text-slate-400" />
-                    <span>{Activity?.data?.durationMinutes > 60 ? `${(Activity?.data?.durationMinutes / 60).toFixed(1)} h` : `${Activity?.data?.durationMinutes} min`}</span>
+                    <span>{Activity?.data?.minDurationMinutes > 60 ? `${(Activity?.data?.minDurationMinutes / 60).toFixed(1)} h` : `${Activity?.data?.minDurationMinutes} min`}</span>
                   </div>
                 )}
                 {Activity?.data?.maxGuests && (

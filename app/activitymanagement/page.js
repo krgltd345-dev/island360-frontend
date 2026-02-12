@@ -74,8 +74,8 @@ export default function ActivityManagement() {
                 <p className="font-medium text-slate-900">${Activity?.data?.price} {Activity?.data?.billingType === 'PER_HOUR' ? '/ hour' : Activity?.data?.billingType === 'PER_UNIT' ? `/ ${Activity?.data?.unitName || 'unit'}` : '/ person'}</p>
               </div>
               <div>
-                <p className="text-slate-600">Duration {Activity?.data?.durationMinutes > 120 ? "( in Hours )" : "( in Mimutes )"}</p>
-                <p className="font-medium text-slate-900">{Activity?.data?.durationMinutes > 120 ? Activity?.data?.durationMinutes / 60 : Activity?.data?.durationMinutes || 'N/A'}</p>
+                <p className="text-slate-600">Duration {Activity?.data?.minDurationMinutes > 60 ? "( in Hours )" : "( in Mimutes )"}</p>
+                <p className="font-medium text-slate-900">{Activity?.data?.minDurationMinutes > 60 ? Activity?.data?.minDurationMinutes / 60 : Activity?.data?.minDurationMinutes || 'N/A'}</p>
               </div>
               <div>
                 <p className="text-slate-600">Max Guests</p>

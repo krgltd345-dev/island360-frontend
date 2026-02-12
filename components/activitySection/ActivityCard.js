@@ -64,7 +64,7 @@ export default function ActivityCard({ activity, index = 0 }) {
           <div className="absolute bottom-4 left-4 right-4">
             <h3 className="text-xl font-semibold text-white mb-1">{activity?.name}</h3>
             <div className="flex items-center gap-3 text-white/80 text-sm">
-              {activity?.durationMinutes && (
+              {activity?.minDurationMinutes && (
                 <motion.span
                   className="flex items-center gap-1.5 bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-full"
                   initial={{ x: -10, opacity: 0 }}
@@ -72,7 +72,7 @@ export default function ActivityCard({ activity, index = 0 }) {
                   transition={{ delay: index * 0.1 + 0.2 }}
                 >
                   <Clock className="w-4 h-4" />
-                  {activity?.durationMinutes > 60 ? `${(activity?.durationMinutes / 60).toFixed(1)} h` : `${activity?.durationMinutes} min`}
+                  {activity?.minDurationMinutes > 60 ? `${(activity?.minDurationMinutes / 60).toFixed(1)} h` : `${activity?.minDurationMinutes} min`}
                 </motion.span>
               )}
               {activity?.maxGuests && (

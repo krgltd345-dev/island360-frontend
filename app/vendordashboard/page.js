@@ -113,7 +113,7 @@ export default function VendorDashboard() {
   const handleEdit = (activity) => {
     setEditingActivity(activity);
     setFormData(activity);
-    setFormData({ ...activity, price: ConvertCentToDollar(activity?.price) })
+    setFormData({ ...activity, price: ConvertCentToDollar(activity?.price), minDurationMinutes: activity?.minDurationMinutes / 60, bookingGapMinutes: activity?.bookingGapMinutes / 60 })
     setImages({
       image_url: activity?.imageUrls?.[0] || '',
       image_url_2: activity?.imageUrls?.[1] || '',
