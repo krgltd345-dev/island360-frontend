@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react';
 import { CalendarIcon, Users, Clock, Loader2, ChevronRight, ChevronLeft, Check, User, Info } from 'lucide-react';
-import { format } from 'date-fns';
+import { addMinutes, format } from 'date-fns';
 import { Label } from '../ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Button } from '../ui/button';
@@ -67,6 +67,15 @@ export default function MultiStepBookingForm({ Activity }) {
     setCurrentStep(currentStep - 1);
   };
 
+  function addMinutesToTime(time, minutesToAdd) {
+    const [hours, minutes] = time.split(":");
+
+    const date = new Date();
+    date.setHours(hours, minutes, 0, 0);
+
+    return format(addMinutes(date, minutesToAdd), "HH:mm");
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -76,8 +85,8 @@ export default function MultiStepBookingForm({ Activity }) {
         return;
       }
       const timeArr = formData?.slotStartTime.split("-")
-
-      console.log(timeArr, "timeArr");
+      const endTime = Activity?.data?.billingType !== "PER_HOUR" ? addMinutesToTime(timeArr[0], Activity?.data?.minDurationMinutes) : addMinutesToTime(timeArr[0], formData?.quantity)
+      console.log(timeArr, "timeArr", endTime);
       const { numberOfPersons, ...restFormData } = formData;
       const data = {
         ...(isGroupBooking ? formData : restFormData),
@@ -85,9 +94,10 @@ export default function MultiStepBookingForm({ Activity }) {
         bookingDate: format(formData?.bookingDate, 'yyyy-MM-dd'),
         groupBooking: isGroupBooking,
         slotStartTime: timeArr[0],
-        slotEndTime: timeArr[1],
+        slotEndTime: endTime,
 
       }
+      console.log(data, "dataa");
       const res = await createBooking(data).unwrap()
       console.log(res, "booking res");
       if (res?.data?.bookingId) {
@@ -264,7 +274,7 @@ export default function MultiStepBookingForm({ Activity }) {
               </div>
             )} */}
 
-            {Activity?.data?.billingType !== 'PER_PERSON'&& (
+            {Activity?.data?.billingType !== 'PER_PERSON' && (
               <div className="space-y-2">
                 {
                   Activity?.data?.billingType === 'PER_HOUR' &&
@@ -278,9 +288,6 @@ export default function MultiStepBookingForm({ Activity }) {
                     Number of Units
                   </Label>
                 }
-                <Label className="text-slate-700 font-medium">
-                  {Activity?.data?.billingType === 'PER_HOUR' ? 'Number of Hours' : `Number of Units`}
-                </Label>
                 <Select
                   value={formData?.quantity?.toString()}
                   onValueChange={(value) => setFormData({ ...formData, quantity: parseInt(value) })}
@@ -299,7 +306,7 @@ export default function MultiStepBookingForm({ Activity }) {
                           </SelectItem>
                         );
                       }) : [...Array(10)].map((_, i) => {
-                        const count = i + 1;
+                        const count = i + Math.ceil(Activity?.data?.minDurationMinutes / 60);
                         return (
                           <SelectItem key={count} value={count.toString()}>
                             {count} {(count === 1 ? 'Hour' : 'Hours')}

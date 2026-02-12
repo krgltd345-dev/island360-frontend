@@ -19,12 +19,6 @@ import { ConvertCentToDollar } from '@/lib/utils';
 import LoadingScreen from '@/components/loader/Loading';
 import ShowMorePagination from '@/components/pagination/ShowMorePagination';
 
-
-const scale = {
-  m: "Minutes",
-  h: "Hours",
-}
-
 export default function MyActivities() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -46,7 +40,7 @@ export default function MyActivities() {
     price: '', //number
     maxGuests: '', //number
     availableSpots: '', //n
-    durationMinutes: '', //n
+    bookingGapMinutes: '',
     minDurationMinutes: '', //n
     imageUrls: [], //
     operationalDays: [],
@@ -78,7 +72,7 @@ export default function MyActivities() {
       price: '', //number
       maxGuests: '', //number
       availableSpots: '', //n
-      durationMinutes: '', //n
+      bookingGapMinutes: '',
       minDurationMinutes: '', //n
       imageUrls: [], //
       operationalDays: [],
@@ -92,7 +86,6 @@ export default function MyActivities() {
       image_url_2: '',
       image_url_3: '',
     })
-    setTimeScale("m")
     setEditingActivity(null);
   };
 
@@ -135,8 +128,8 @@ export default function MyActivities() {
         maxGuests: formData.maxGuests ? parseInt(formData.maxGuests) : null,
         availableSpots: formData.availableSpots ? parseInt(formData.availableSpots) : null,
         ...(formData?.allowGroupBookings && { maxGroupSize: parseInt(formData.maxGroupSize) }),
-        minDurationMinutes: (formData.minDurationMinutes && timeScale == "h") ? formData.minDurationMinutes * 60 : (formData.minDurationMinutes && timeScale == "d") ? formData.minDurationMinutes * 60 * 24 : parseFloat(formData.minDurationMinutes),
-        durationMinutes: (formData.durationMinutes && timeScale == "h") ? formData.durationMinutes * 60 : (formData.durationMinutes && timeScale == "d") ? formData.durationMinutes * 60 * 24 : parseFloat(formData.durationMinutes),
+        minDurationMinutes: formData.minDurationMinutes * 60,
+        bookingGapMinutes: formData.bookingGapMinutes?  formData.bookingGapMinutes * 60 : null,
         imageUrls: Object.values(images).filter(Boolean),
         ...(editingActivity && formData?.category?.name && { category: formData?.category?._id }),
       };
@@ -150,7 +143,6 @@ export default function MyActivities() {
       }
       toast.success(res?.message)
       setDialogOpen(false);
-      setTimeScale("m")
     } catch (error) {
       toast.error(error?.data?.message)
       console.log(error);
@@ -190,9 +182,9 @@ export default function MyActivities() {
 
   const daysOfWeek = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
-  if ( userRoleInfoFetching || activityFetching ) {
+  if (userRoleInfoFetching || activityFetching) {
     return (
-      <LoadingScreen/>
+      <LoadingScreen />
     );
   }
 
@@ -330,13 +322,13 @@ export default function MyActivities() {
                   </motion.div>
                 ))}
               </div>
-              <ShowMorePagination 
-              setPage={setPage} 
-              length={Actiities?.data?.length} 
-              total={Actiities?.pagination?.total}
-              page={Actiities?.pagination?.page}
-              totalPages={Actiities?.pagination?.totalPages}
-               />
+              <ShowMorePagination
+                setPage={setPage}
+                length={Actiities?.data?.length}
+                total={Actiities?.pagination?.total}
+                page={Actiities?.pagination?.page}
+                totalPages={Actiities?.pagination?.totalPages}
+              />
             </div>
           )}
 
@@ -472,36 +464,26 @@ export default function MyActivities() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Duration ( in {scale[timeScale]} )</Label>
-                    <div className='flex gap-2 items-center'>
-                      <Select value={timeScale} onValueChange={(value) => setTimeScale(value)}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="m">Minutes</SelectItem>
-                          {/* <SelectItem value="per_group">Per Group (Fixed Price)</SelectItem> */}
-                          <SelectItem value="h">Hours</SelectItem>
-                          {/* <SelectItem value="d">Days</SelectItem> */}
-                        </SelectContent>
-                      </Select>
-                      <Input
-                        type="number"
-                        value={formData.durationMinutes}
-                        onChange={(e) => setFormData({ ...formData, durationMinutes: e.target.value })}
-                        placeholder={timeScale == "m" ? "e.g., 60, 120" : "e.g., 1,2,4.."}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Min Duration ( in {scale[timeScale]} )</Label>
+                    <Label>Min Booking Time ( in Hours ) *</Label>
                     <Input
                       type="number"
                       // step="0.5"
-                      placeholder={timeScale == "m" ? "e.g., 60, 120" : "e.g., 1,2,4.."}
+                      placeholder={"e.g., 1,2,4.."}
                       value={formData.minDurationMinutes}
                       onChange={(e) => setFormData({ ...formData, minDurationMinutes: e.target.value })}
+                      required
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Gap between Bookings</Label>
+                    <div className='flex gap-2 items-center'>
+                      <Input
+                        type="number"
+                        value={formData.bookingGapMinutes}
+                        onChange={(e) => setFormData({ ...formData, bookingGapMinutes: e.target.value })}
+                        placeholder={"e.g., 1,2,4.."}
+                      />
+                    </div>
                   </div>
                 </div>
 

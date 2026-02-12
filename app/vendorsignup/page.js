@@ -17,6 +17,8 @@ export default function VendorSignup() {
   const [UploadFile] = useUploadDocumentMutation()
   const [Application] = useVendorApplicationMutation()
   const [formData, setFormData] = useState({
+    vendorName: '',
+    vendorDesignation: '',
     businessName: '',
     phoneNumber: '',
     email: '',
@@ -61,6 +63,8 @@ export default function VendorSignup() {
     e.preventDefault();
     try {
       const data = {
+        vendorName: formData?.vendorName,
+        vendorDesignation: formData?.vendorDesignation,
         businessName: formData?.businessName,
         phoneNumber: formData?.phoneNumber,
         email: formData?.email,
@@ -150,6 +154,24 @@ export default function VendorSignup() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label>Name *</Label>
+                <Input
+                  value={formData.vendorName}
+                  onChange={(e) => setFormData({ ...formData, vendorName: e.target.value })}
+                  placeholder="Your Name"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Designation *</Label>
+                <Input
+                  value={formData.vendorDesignation}
+                  onChange={(e) => setFormData({ ...formData, vendorDesignation: e.target.value })}
+                  placeholder="You Designation eg; Manager, Owner..."
+                  required
+                />
+              </div>
               <div className="space-y-2">
                 <Label>Business Name *</Label>
                 <Input
