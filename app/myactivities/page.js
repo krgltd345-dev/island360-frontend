@@ -24,7 +24,6 @@ export default function MyActivities() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editingActivity, setEditingActivity] = useState(null);
   const [uploadingImages, setUploadingImages] = useState(false);
-  const [timeScale, setTimeScale] = useState('m');
   const { data: categories } = useGetCategoryQuery()
   const [images, setImages] = useState({
     image_url: '',
@@ -399,7 +398,7 @@ export default function MyActivities() {
 
                 <div className="space-y-2">
                   <Label>Billing Type *</Label>
-                  <Select value={formData.billingType} onValueChange={(value) => setFormData({ ...formData, billingType: value })}>
+                  <Select disabled={editingActivity} value={formData.billingType} onValueChange={(value) => setFormData({ ...formData, billingType: value })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>

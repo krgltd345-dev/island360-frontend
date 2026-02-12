@@ -22,18 +22,12 @@ import VendorReviewsManagement from '@/components/vendor/VendorReviewsManagement
 import LoadingScreen from '@/components/loader/Loading';
 import ShowMorePagination from '@/components/pagination/ShowMorePagination';
 
-const scale = {
-  m: "Minutes",
-  h: "Hours",
-}
-
 export default function VendorDashboard() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [state, setState] = useState("CONFIRMED");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editingActivity, setEditingActivity] = useState(null);
   const [uploadingImages, setUploadingImages] = useState(false);
-  const [timeScale, setTimeScale] = useState('m');
   const { data: categories } = useGetCategoryQuery()
   const [images, setImages] = useState({
     image_url: '',
@@ -49,7 +43,7 @@ export default function VendorDashboard() {
     price: '', //number
     maxGuests: '', //number
     availableSpots: '', //n
-    durationMinutes: '', //n
+    bookingGapMinutes: '', //n
     minDurationMinutes: '', //n
     imageUrls: [], //
     operationalDays: [],
@@ -62,7 +56,7 @@ export default function VendorDashboard() {
   const { data: userRoleInfo, isLoading: userRoleInfoFetching } = useGetUserRoleQuery()
   const { data: Actiities } = useGetAllActivitiesQuery({
     vendorId: userRoleInfo?.data?.user?.vendorId,
-    limit:15,
+    limit: 15,
     page
   }, { skip: !userRoleInfo?.data?.user?.vendorId })
   const { data: bookings, isLoading: bookingsLoading } = useGetVendorBookingsQuery({ state })
@@ -81,7 +75,7 @@ export default function VendorDashboard() {
       price: '', //number
       maxGuests: '', //number
       availableSpots: '', //n
-      durationMinutes: '', //n
+      bookingGapMinutes: '', //n
       minDurationMinutes: '', //n
       imageUrls: [], //
       operationalDays: [],
@@ -95,7 +89,6 @@ export default function VendorDashboard() {
       image_url_2: '',
       image_url_3: '',
     })
-    setTimeScale("m")
     setEditingActivity(null);
   };
 
@@ -138,8 +131,8 @@ export default function VendorDashboard() {
         maxGuests: formData.maxGuests ? parseInt(formData.maxGuests) : null,
         availableSpots: formData.availableSpots ? parseInt(formData.availableSpots) : null,
         ...(formData?.allowGroupBookings && { maxGroupSize: parseInt(formData.maxGroupSize) }),
-        minDurationMinutes: (formData.minDurationMinutes && timeScale == "h") ? formData.minDurationMinutes * 60 : (formData.minDurationMinutes && timeScale == "d") ? formData.minDurationMinutes * 60 * 24 : parseFloat(formData.minDurationMinutes),
-        durationMinutes: (formData.durationMinutes && timeScale == "h") ? formData.durationMinutes * 60 : (formData.durationMinutes && timeScale == "d") ? formData.durationMinutes * 60 * 24 : parseFloat(formData.durationMinutes),
+        minDurationMinutes: formData.minDurationMinutes * 60,
+        bookingGapMinutes: formData.bookingGapMinutes?  formData.bookingGapMinutes * 60 : null,
         imageUrls: Object.values(images).filter(Boolean),
         ...(editingActivity && formData?.category?.name && { category: formData?.category?._id }),
       };
@@ -153,7 +146,6 @@ export default function VendorDashboard() {
       }
       toast.success(res?.message)
       setDialogOpen(false);
-      setTimeScale("m")
     } catch (error) {
       toast.error(error?.data?.message)
       console.log(error);
@@ -471,7 +463,7 @@ export default function VendorDashboard() {
 
                 <div className="space-y-2">
                   <Label>Billing Type *</Label>
-                  <Select value={formData.billingType} onValueChange={(value) => setFormData({ ...formData, billingType: value })}>
+                  <Select disabled={editingActivity} value={formData.billingType} onValueChange={(value) => setFormData({ ...formData, billingType: value })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -536,36 +528,26 @@ export default function VendorDashboard() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Duration ( in {scale[timeScale]} )</Label>
-                    <div className='flex gap-2 items-center'>
-                      <Select value={timeScale} onValueChange={(value) => setTimeScale(value)}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="m">Minutes</SelectItem>
-                          {/* <SelectItem value="per_group">Per Group (Fixed Price)</SelectItem> */}
-                          <SelectItem value="h">Hours</SelectItem>
-                          {/* <SelectItem value="d">Days</SelectItem> */}
-                        </SelectContent>
-                      </Select>
-                      <Input
-                        type="number"
-                        value={formData.durationMinutes}
-                        onChange={(e) => setFormData({ ...formData, durationMinutes: e.target.value })}
-                        placeholder={timeScale == "m" ? "e.g., 60, 120" : "e.g., 1,2,4.."}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Min Duration ( in {scale[timeScale]} )</Label>
+                    <Label>Min Booking Time ( in Hours ) *</Label>
                     <Input
                       type="number"
                       // step="0.5"
-                      placeholder={timeScale == "m" ? "e.g., 60, 120" : "e.g., 1,2,4.."}
+                      placeholder={"e.g., 1,2,4.."}
                       value={formData.minDurationMinutes}
                       onChange={(e) => setFormData({ ...formData, minDurationMinutes: e.target.value })}
+                      required
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Gap between Bookings</Label>
+                    <div className='flex gap-2 items-center'>
+                      <Input
+                        type="number"
+                        value={formData.bookingGapMinutes}
+                        onChange={(e) => setFormData({ ...formData, bookingGapMinutes: e.target.value })}
+                        placeholder={"e.g., 1,2,4.."}
+                      />
+                    </div>
                   </div>
                 </div>
 
