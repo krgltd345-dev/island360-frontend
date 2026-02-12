@@ -11,6 +11,7 @@ import LayoutWrapper from '@/components/layout/LayoutWrapper';
 import ActivityPerformanceMetrics from '@/components/activityManagement/ActivityMetrix';
 import { useGetActivityReviewsQuery } from '@/services/userApi';
 import LoadingScreen from '@/components/loader/Loading';
+import { ConvertCentToDollar } from '@/lib/utils';
 
 export default function ActivityManagement() {
   const searchParams = useSearchParams();
@@ -71,7 +72,7 @@ export default function ActivityManagement() {
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-slate-600">Price</p>
-                <p className="font-medium text-slate-900">${Activity?.data?.price} {Activity?.data?.billingType === 'PER_HOUR' ? '/ hour' : Activity?.data?.billingType === 'PER_UNIT' ? `/ ${Activity?.data?.unitName || 'unit'}` : '/ person'}</p>
+                <p className="font-medium text-slate-900">${ConvertCentToDollar(Activity?.data?.price)} {Activity?.data?.billingType === 'PER_HOUR' ? '/ hour' : Activity?.data?.billingType === 'PER_UNIT' ? `/ ${Activity?.data?.unitName || 'unit'}` : '/ person'}</p>
               </div>
               <div>
                 <p className="text-slate-600">Duration {Activity?.data?.minDurationMinutes > 60 ? "( in Hours )" : "( in Mimutes )"}</p>

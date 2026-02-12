@@ -174,7 +174,7 @@ export default function ActivityDetailPage() {
                           </span>
                           {Activity?.data?.billingType === 'PER_HOUR' && Activity?.data?.minDurationMinutes && (
                             <p className="text-xs text-slate-600 mt-1">
-                              Min. {Activity?.data?.minDurationMinutes} {Activity?.data?.minDurationMinutes === 1 ? 'hour' : 'hours'}
+                              Min. {Activity?.data?.minDurationMinutes / 60} {(Activity?.data?.minDurationMinutes / 60 )=== 1 ? 'hour' : 'hours'}
                             </p>
                           )}
                         </>
