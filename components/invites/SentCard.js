@@ -1,18 +1,16 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, User } from 'lucide-react';
+import { Calendar, Clock, User, XCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import moment from 'moment';
-import { useRouter } from 'next/navigation';
 import { useRemoveInviteMutation } from '@/services/inviteApi';
 import { toast } from 'sonner';
 import { statusStyles } from '@/lib/utils';
 
 export default function SentInviteCard({ invite }) {
   const [Remove, { isLoading }] = useRemoveInviteMutation()
-  const router = useRouter()
 
   const handleCancel = async () => {
     try {

@@ -13,7 +13,7 @@ import { Lock, Loader2, CreditCard, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-export default function CheckoutForm({ bookingId }) {
+export default function CheckoutForm({ bookingId, isGroup }) {
   const stripe = useStripe();
   const elements = useElements();
   const router = useRouter();
@@ -43,7 +43,7 @@ export default function CheckoutForm({ bookingId }) {
       const { error } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: `${window.location.origin}/checkout?booking=${bookingId}`,
+          return_url: `${window.location.origin}/checkout?booking=${bookingId}&isGroup=${isGroup}`,
         },
       });
 

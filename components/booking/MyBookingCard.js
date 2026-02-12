@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, Users, Star, XCircle, Share2, Landmark } from 'lucide-react';
 import { motion } from 'framer-motion';
-import ShareBookingDialog from './ShareBookingModal';
 import moment from 'moment';
 import { useCreatePaymentMutation } from '@/services/bookingApi';
 import { useRouter } from 'next/navigation';
@@ -23,13 +22,11 @@ export default function BookingCard({ booking, index = 0, onCancel, onDelete, on
   const handlePaymentClick = async (booking) => {
     try {
       const payData = await Payment({ id: booking?._id }).unwrap();
-      router.push(`/checkout?id=${payData?.data?.clientSecret}`)
+      router.push(`/checkout?id=${payData?.data?.clientSecret}&booking=${booking?._id}&isGroup=${booking?.groupBooking}`)
     } catch (error) {
       console.log(error, "error");
     }
   };
-
-
 
 
   return (
@@ -79,53 +76,6 @@ export default function BookingCard({ booking, index = 0, onCancel, onDelete, on
                     </Button>
                   }
               </div>
-              {/* <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="text-slate-400 hover:text-slate-600">
-                    <MoreHorizontal className="w-5 h-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {canShare && (
-                    <DropdownMenuItem onClick={() => setShareDialogOpen(true)}>
-                      <Share2 className="w-4 h-4 mr-2" />
-                      Invite
-                    </DropdownMenuItem>
-                  )}
-                  {(canShare) && (canCancel || canDelete) && <DropdownMenuSeparator />}
-                  {canCancel && (
-                    <DropdownMenuItem
-                      onClick={() => onCancel(booking)}
-                      className="text-red-600 focus:text-red-600"
-                    >
-                      <XCircle className="w-4 h-4 mr-2" />
-                      Cancel Booking
-                    </DropdownMenuItem>
-                  )}
-                  {canDelete && (
-                    <DropdownMenuItem
-                      onClick={() => onDelete(booking)}
-                      className="text-red-600 focus:text-red-600"
-                    >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Delete Booking
-                    </DropdownMenuItem>
-                  )}
-                  {(canReview || hasReview) && (canCancel || canDelete) && <DropdownMenuSeparator />}
-                  {canReview && (
-                    <DropdownMenuItem onClick={() => onReview(booking)}>
-                      <Star className="w-4 h-4 mr-2 text-amber-500" />
-                      Leave a Review
-                    </DropdownMenuItem>
-                  )}
-                  {hasReview && (
-                    <DropdownMenuItem disabled className="text-slate-500">
-                      <CheckCircle className="w-4 h-4 mr-2 text-emerald-500" />
-                      Review Submitted
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu> */}
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">

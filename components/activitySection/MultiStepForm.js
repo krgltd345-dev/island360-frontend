@@ -92,7 +92,7 @@ export default function MultiStepBookingForm({ Activity }) {
       console.log(res, "booking res");
       if (res?.data?.bookingId) {
         const payData = await Payment({ id: res?.data?.bookingId }).unwrap();
-        router.push(`/checkout?id=${payData?.data?.clientSecret}&booking=${res?.data?.bookingId}`)
+        router.push(`/checkout?id=${payData?.data?.clientSecret}&booking=${res?.data?.bookingId}&isGroup=${isGroupBooking}`)
       }
       toast.success('Please Wait, redirecting to payment.');
       // navigate(createPageUrl('MyBookings'));

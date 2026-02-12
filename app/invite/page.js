@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Mail, Plus, Share2, User, Users as UsersIcon, X, XCircle } from 'lucide-react';
+import { ArrowLeft, Calendar, Mail, Plus, Share2, User, Users as UsersIcon, X, XCircle } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { toast } from 'sonner';
 import LayoutWrapper from '@/components/layout/LayoutWrapper';
@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 
 
 
@@ -150,6 +151,11 @@ export default function Invite() {
               transition={{ duration: 0.5 }}
             >
               <div className="flex items-center gap-3 text-sky-600 mb-3">
+                <Link href={('/mybookings')}>
+                  <Button className={"text-black"} variant="ghost" size="icon">
+                    <ArrowLeft className="w-5 h-5" />
+                  </Button>
+                </Link>
                 <Calendar className="w-5 h-5" />
                 <span className="text-sm font-medium tracking-wide uppercase">Group Invites</span>
               </div>

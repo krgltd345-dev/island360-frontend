@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import { Shield, ShieldCheck, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { Shield, ShieldCheck, CheckCircle2, ArrowLeft, Hourglass } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
@@ -19,8 +19,9 @@ const Checkout = () => {
   const Id = searchParams.get('id');
   const bookingId = searchParams.get('booking');
   const status = searchParams.get('redirect_status');
+  const isGroup = searchParams.get('isGroup');
   const [isStripeLoading, setIsStripeLoading] = useState(true);
-
+  const [inviteLoading, setInviteLoading] = useState(true);
 
   useEffect(() => {
     // Check if Stripe is loaded
@@ -32,10 +33,14 @@ const Checkout = () => {
   }, []);
 
   useEffect(() => {
-    if (bookingId && (status === "succeeded")) {
-      router.push(`/invite?id=${bookingId}`)
+    if (bookingId && (status === "succeeded") && (isGroup == "true")) {
+      setInviteLoading(true)
+      setTimeout(() => {
+        setInviteLoading(false)
+        router.push(`/invite?id=${bookingId}`)
+      }, 3000);
     }
-  }, [bookingId, status])
+  }, [bookingId, status, isGroup])
 
   if (!Id && !status) {
     return (
@@ -67,12 +72,20 @@ const Checkout = () => {
             <h2 className="text-2xl font-bold text-slate-900 mb-2">Payment Successful!</h2>
             <p className="text-slate-600 mb-6">Your payment has been processed successfully.</p>
             <div className="flex flex-col gap-3">
-              {/* <Link href={`/invite?id=${bookingId}`} className="w-full">
-                <Button className="w-full">
-                  <CheckCircle2 className="w-4 h-4 mr-2" />
+              {
+                inviteLoading && isGroup == "true" &&
+                <Button disabled className="w-full">
+                  <Hourglass className="w-4 h-4 mr-2 animate-spin" />
                   Invite Friends
-                </Button>
-              </Link> */}
+                </Button>}
+              {!inviteLoading && isGroup == "true" &&
+                <Link href={`/invite?id=${bookingId}`} className="w-full">
+                  <Button className="w-full">
+                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                    Invite Friends
+                  </Button>
+                </Link>
+              }
               <Link href="/mybookings" className="w-full">
                 <Button className="w-full">
                   <CheckCircle2 className="w-4 h-4 mr-2" />
@@ -144,7 +157,7 @@ const Checkout = () => {
                   },
                 }}
               >
-                <CheckoutForm bookingId={bookingId} />
+                <CheckoutForm isGroup={isGroup} bookingId={bookingId} />
               </Elements>
             </div>
           </div>

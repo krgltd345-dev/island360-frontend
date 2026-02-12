@@ -171,6 +171,7 @@ export default function MyActivities() {
     try {
       const res = await Remove({ id: formData?._id }).unwrap();
       toast.success(res?.message)
+      setDeleteDialogOpen(false)
       resetForm()
     } catch (error) {
       toast.error(error?.data?.message)
