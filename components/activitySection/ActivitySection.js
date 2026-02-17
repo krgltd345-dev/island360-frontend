@@ -1,12 +1,13 @@
 'use client';
 import React, { useState } from 'react'
 import CategoryFilter from '../category/Filters';
-import { ChevronDown, ChevronRight, Sparkles, Waves } from 'lucide-react';
+import { ChevronDown, ChevronRight, LayoutGrid, Sparkles, Waves } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
 import ActivityCard from './ActivityCard';
 import { useGetAllActivitiesQuery, useGetCategoryQuery } from '@/services/activityApi';
 import { Button } from '../ui/button';
 import ShowMorePagination from '../pagination/ShowMorePagination';
+import CategoryCards from '../category/CategoryCards';
 
 
 
@@ -20,12 +21,12 @@ const ActivitySection = () => {
     ...(selectedCategory?._id && { category: selectedCategory?._id }),
     page,
     limit: 15,
-    availableForBooking:true
+    availableForBooking: true
   });
   const { data: categories, isLoading: categoryLoading } = useGetCategoryQuery()
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-gradient-to-b from-slate-50 to-white">
-      <div className='text-center mb-12'>
+    <div className="max-w-7xl w-full mx-auto px-4 relative sm:px-6 lg:px-8 pt-0 pb-16 bg-gradient-to-b from-slate-50 to-white">
+      <div className='text-center mb-6'>
         <div className="flex items-center justify-center gap-2 text-green-600 mb-3">
           <Sparkles className="w-4 h-4" />
           <span className="text-sm font-medium tracking-wide uppercase">Our Offerings</span>
@@ -36,9 +37,34 @@ const ActivitySection = () => {
         <p className="text-slate-600 max-w-2xl mx-auto">
           Choose from our curated selection of exciting activities and create memories that last a lifetime.
         </p>
+        <Button
+          variant={selectedCategory?.name == "all" ? "default" : "outline"}
+          onClick={() => {
+            setPage(1)
+            setSelectedCategory({
+              name: "all",
+              _id: null
+            })
+          }}
+          className={`
+                      rounded-full mt-2 px-6 py-5 font-medium transition-all duration-300
+                      ${selectedCategory?.name == "all"
+              ? 'bg-slate-900 text-white shadow-lg'
+              : 'bg-white/80 backdrop-blur border-slate-200 text-slate-700 hover:bg-white hover:border-slate-300'
+            }
+                    `}
+        >
+          <LayoutGrid className="w-4 h-4 mr-2" />
+          {"All Activities"}
+        </Button>
+      </div>
+      <div className='text-center'>
+        <h2 className="text-lg md:text-xl font-semibold text-slate-900">
+          Top Categories
+        </h2>
       </div>
       {
-        categories?.data && <CategoryFilter setPage={setPage} categories={categories?.data} selected={selectedCategory} onChange={setSelectedCategory} />
+        categories?.data && <CategoryCards setPage={setPage} categories={categories?.data} selected={selectedCategory} onChange={setSelectedCategory} />
       }
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

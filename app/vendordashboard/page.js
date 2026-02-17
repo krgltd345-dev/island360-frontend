@@ -125,19 +125,18 @@ export default function VendorDashboard() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const { maxGuests, availableSpots, bookingGapMinutes, ...restFormData } = formData;
       const data = {
-        ...formData,
+        ...restFormData,
         price: parseFloat(formData.price),
-        maxGuests: formData.maxGuests ? parseInt(formData.maxGuests) : null,
-        availableSpots: formData.availableSpots ? parseInt(formData.availableSpots) : null,
+        ...(maxGuests && {maxGuests : parseInt(formData.maxGuests)}),
+        ...(availableSpots && {availableSpots : parseInt(formData.availableSpots)}),
+        ...(bookingGapMinutes && {bookingGapMinutes : parseInt(formData.bookingGapMinutes * 60)}),
         ...(formData?.allowGroupBookings && { maxGroupSize: parseInt(formData.maxGroupSize) }),
         minDurationMinutes: formData.minDurationMinutes * 60,
-        bookingGapMinutes: formData.bookingGapMinutes?  formData.bookingGapMinutes * 60 : null,
         imageUrls: Object.values(images).filter(Boolean),
         ...(editingActivity && formData?.category?.name && { category: formData?.category?._id }),
       };
-
-      console.log(data, "Create");
       let res;
       if (editingActivity) {
         res = await Update(data).unwrap()
@@ -453,11 +452,12 @@ export default function VendorDashboard() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Description</Label>
+                  <Label>Description *</Label>
                   <Textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows={3}
+                    required
                   />
                 </div>
 
@@ -510,7 +510,7 @@ export default function VendorDashboard() {
                     <Label>Max Guests</Label>
                     <Input
                       type="number"
-                      value={formData.maxGuests}
+                      value={formData?.maxGuests || ""}
                       onChange={(e) => setFormData({ ...formData, maxGuests: e.target.value })}
                     />
                   </div>
@@ -518,7 +518,7 @@ export default function VendorDashboard() {
                     <Label>Available Spots</Label>
                     <Input
                       type="number"
-                      value={formData.availableSpots}
+                      value={formData?.availableSpots || ""}
                       onChange={(e) => setFormData({ ...formData, availableSpots: e.target.value })}
                     />
                   </div>
@@ -543,7 +543,7 @@ export default function VendorDashboard() {
                     <div className='flex gap-2 items-center'>
                       <Input
                         type="number"
-                        value={formData.bookingGapMinutes}
+                        value={formData?.bookingGapMinutes || ""}
                         onChange={(e) => setFormData({ ...formData, bookingGapMinutes: e.target.value })}
                         placeholder={"e.g., 1,2,4.."}
                       />

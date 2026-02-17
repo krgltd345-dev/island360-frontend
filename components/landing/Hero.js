@@ -4,9 +4,9 @@ import { Waves } from 'lucide-react';
 
 export const Hero = () => {
   return (
-      <div className="relative overflow-hidden bg-blue-900 text-white">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1600')] bg-cover bg-center opacity-40" />
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/60 via-pink-300/5 to-pink-500/50" />
+      <div className="relative overflow-hidden bg-blue-900/30 text-white">
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1760643965237-3e05664f1306?q=80&w=1791&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')] bg-cover bg-center opacity-80" />
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/50 via-pink-300/5 to-pink-500/20" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
           <motion.div
@@ -23,9 +23,6 @@ export const Hero = () => {
               Island 360
               <span className="block text-amber-300">Bookings</span>
             </h1>
-            <p className="text-lg text-blue-50 mb-8 max-w-xl">
-              From thrilling boat charters to scenic scooter rides, discover and book your next adventure with ease.
-            </p>
           </motion.div>
         </div>
 
