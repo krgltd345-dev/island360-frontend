@@ -39,15 +39,34 @@ export const BookingCard = ({ booking }) => {
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4" />
               {booking?.slotStartTime}
+              {"-"}
+              <span>{booking?.slotEndTime}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              {booking?.numberOfPersons} guests
-            </div>
+            {
+              (booking?.activityId?.billingType === "PER_HOUR" || booking?.activityId?.billingType === "PER_UNIT") &&
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4" />
+                {booking?.quantity} { booking?.activityId?.billingType === "PER_HOUR" ? "Hours" : "Units"}
+              </div>
+            }
+            {
+              booking?.numberOfPersons > 0 &&
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                {booking?.numberOfPersons} Max Group Members
+              </div>
+            }
+            {
+              booking?.inviteAcceptedCount > 0 &&
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                {booking?.inviteAcceptedCount + 1} Confirmed Group Members
+              </div>
+            }
           </div>
         </div>
         <div className="text-right">
-          <p className="text-2xl font-bold text-slate-900">${ConvertCentToDollar(booking?.totalPrice)}</p>
+          <p className="text-2xl font-bold text-slate-900">${ConvertCentToDollar(booking?.groupBooking ? booking?.price * (booking?.inviteAcceptedCount + 1) / booking?.numberOfPersons : booking?.price)}</p>
         </div>
       </div>
 
@@ -80,7 +99,7 @@ export const BookingCard = ({ booking }) => {
               <CheckCircle className="w-4 h-4 mr-1" />
               Mark Complete
             </Button>
-            <Button
+            {/* <Button
               size="sm"
               variant="outline"
               onClick={() => {
@@ -90,7 +109,7 @@ export const BookingCard = ({ booking }) => {
             >
               <Ban className="w-4 h-4 mr-1" />
               Cancel
-            </Button>
+            </Button> */}
           </>
         )}
       </div>

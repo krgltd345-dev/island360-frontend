@@ -82,7 +82,7 @@ export default function ActivityDetailPage() {
               <div className="space-y-4 mb-6">
                 <div className="relative rounded-2xl overflow-hidden">
                   <img
-                    src={Activity?.data?.imageUrls?.[0] || 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800'}
+                    src={Activity?.data?.imageUrls?.[0] || '/default.png'}
                     alt={Activity?.data?.name}
                     className="w-full h-50  sm:h-80 object-cover"
                   />

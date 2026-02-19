@@ -91,6 +91,8 @@ export default function InviteCard({ invite, index = 0 }) {
               <div className="flex items-center gap-2 text-slate-600">
                 <Clock className="w-4 h-4 text-slate-400" />
                 <span>{invite?.bookingId?.slotStartTime}</span>
+                {"-"}
+                <span>{invite?.bookingId?.slotEndTime}</span>
               </div>
               <div className="text-right">
                 {

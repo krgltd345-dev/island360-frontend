@@ -41,7 +41,7 @@ export default function BookingCard({ booking, index = 0, onCancel, onDelete, on
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: index * 0.1 }}
       >
-        <Card className="overflow-hidden max-sm:py-0 bg-white border-0 shadow-sm hover:shadow-md transition-all duration-300">
+        <Card className="overflow-hidden py-0 max-sm:py-0 bg-white border-0 shadow-sm hover:shadow-md transition-all duration-300">
           <div className="p-4 sm:p-6">
             <div className="flex items-start justify-between mb-4">
               <div>
@@ -60,21 +60,21 @@ export default function BookingCard({ booking, index = 0, onCancel, onDelete, on
                     Leave a Review
                   </Button>
                 }
-                  {
-                    (booking.status === 'CONFIRMED' || booking.status === 'PARTIALLY_CONFIRMED') &&
-                    booking?.groupBooking &&
-                    <Button size='sm' variant="outline" className={"cursor-pointer"} onClick={() => router.push(`/invite?id=${booking?._id}`)}>
-                      <Share2 className="w-4 h-4 mr-2" />
-                      Invite
-                    </Button>
-                  }
-                  {(booking.status === 'CONFIRMED' || booking.status === 'PARTIALLY_CONFIRMED') &&
-                    booking?.activityId?.allowCancellations &&
-                    <Button size='sm' variant="destructive" className={"cursor-pointer"} onClick={() => onCancel(booking)}>
-                      <XCircle className="w-4 h-4 mr-2" />
-                      Cancel
-                    </Button>
-                  }
+                {
+                  (booking.status === 'CONFIRMED' || booking.status === 'PARTIALLY_CONFIRMED') &&
+                  booking?.groupBooking &&
+                  <Button size='sm' variant="outline" className={"cursor-pointer"} onClick={() => router.push(`/invite?id=${booking?._id}`)}>
+                    <Share2 className="w-4 h-4 mr-2" />
+                    Invite
+                  </Button>
+                }
+                {(booking.status === 'CONFIRMED' || booking.status === 'PARTIALLY_CONFIRMED') &&
+                  booking?.activityId?.allowCancellations &&
+                  <Button size='sm' variant="destructive" className={"cursor-pointer"} onClick={() => onCancel(booking)}>
+                    <XCircle className="w-4 h-4 mr-2" />
+                    Cancel
+                  </Button>
+                }
               </div>
             </div>
 
@@ -86,6 +86,8 @@ export default function BookingCard({ booking, index = 0, onCancel, onDelete, on
               <div className="flex items-center gap-2 text-slate-600">
                 <Clock className="w-4 h-4 text-slate-400" />
                 <span>{booking?.slotStartTime}</span>
+                {"-"}
+                <span>{booking?.slotEndTime}</span>
               </div>
               <div className="flex items-center gap-2 text-slate-600">
                 <Users className="w-4 h-4 text-slate-400" />
@@ -98,6 +100,10 @@ export default function BookingCard({ booking, index = 0, onCancel, onDelete, on
               <div className="text-right">
                 <span className="text-lg font-bold text-slate-900">{calculateAmount(booking)}</span>
               </div>
+            </div>
+            <div className='mt-2 text-slate-600 text-sm bg-gray-100 w-fit px-3 py-1 rounded-full'>
+              Booking ID :
+               {booking?._id}
             </div>
 
             {booking?.specialRequests && (
