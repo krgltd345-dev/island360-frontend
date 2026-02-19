@@ -63,6 +63,14 @@ export const activityApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["ACTIVITY"]
     }),
+    toggleActivity: builder.mutation({
+      query: (body) => ({
+        url: `activities/toggle/${body._id}`,
+        method: 'PATCH',
+        body
+      }),
+      invalidatesTags: ["ACTIVITY"]
+    }),
     removeActivity: builder.mutation({
       query: (body) => ({
         url: `activities/${body.id}`,
@@ -82,6 +90,7 @@ export const {
   useRemoveActivityMutation,
   useGetCategoryQuery,
   useCreateCategoryMutation,
-  useGetActivityMetricsQuery
+  useGetActivityMetricsQuery,
+  useToggleActivityMutation
 
 } = activityApi

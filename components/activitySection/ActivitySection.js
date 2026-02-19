@@ -58,13 +58,8 @@ const ActivitySection = () => {
           {"All Activities"}
         </Button>
       </div>
-      <div className='text-center'>
-        <h2 className="text-lg md:text-xl font-semibold text-slate-900">
-          Top Categories
-        </h2>
-      </div>
       {
-        categories?.data && <CategoryCards setPage={setPage} categories={categories?.data} selected={selectedCategory} onChange={setSelectedCategory} />
+        categories?.data && <CategoryFilter setPage={setPage} categories={categories?.data} selected={selectedCategory} onChange={setSelectedCategory} />
       }
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

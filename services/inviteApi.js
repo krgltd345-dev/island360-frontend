@@ -28,7 +28,14 @@ export const inviteApi = baseApi.injectEndpoints({
     }),
     removeInvite: builder.mutation({
       query: (body) => ({
-        url: `/booking-invites/${body.id}`,
+        url: `/booking-invites/inviter/${body.id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ["INVITE"]
+    }),
+    removeMyInvite: builder.mutation({
+      query: (body) => ({
+        url: `/booking-invites/invitee/${body.id}`,
         method: 'DELETE',
       }),
       invalidatesTags: ["INVITE"]
@@ -47,6 +54,7 @@ export const {
   useGetReceivedinvitesQuery,
   useGetSentInvitesQuery,
   useRemoveInviteMutation,
+  useRemoveMyInviteMutation,
   useInviteActionMutation,
   useCreateInvitePaymentMutation
 

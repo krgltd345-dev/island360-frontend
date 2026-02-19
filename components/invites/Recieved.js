@@ -1,10 +1,9 @@
-import { useGetReceivedinvitesQuery } from '@/services/inviteApi'
 import React from 'react'
 import ReceiveInviteCard from './ReceiveCard';
 import { Inbox } from 'lucide-react';
 
-const Received = () => {
-  const { data: Invites, isLoading } = useGetReceivedinvitesQuery()
+const Received = ({ Invites }) => {
+
 
 
 

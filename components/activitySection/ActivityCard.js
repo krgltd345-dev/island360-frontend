@@ -38,7 +38,7 @@ export default function ActivityCard({ activity, index = 0 }) {
       <Card className="group overflow-hidden bg-white border-0 shadow-sm hover:shadow-xl transition-all duration-500 py-0">
         <div className="relative h-56 overflow-hidden">
           <img
-            src={activity?.imageUrls?.[0] || `https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800`}
+            src={activity?.imageUrls?.[0] || `/default.png`}
             alt={activity?.name}
             className="w-full h-full object-cover group-hover:scale-120 opacity-90 bg-black transition-transform duration-700"
           />

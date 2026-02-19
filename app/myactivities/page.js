@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Edit, Trash2, Calendar, Clock, Shield, TrendingUp, ChevronDown } from 'lucide-react';
+import { Plus, Edit, Trash2, Calendar, Clock, Shield, TrendingUp, ChevronDown, EyeOff, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import LayoutWrapper from '@/components/layout/LayoutWrapper';
@@ -18,6 +18,7 @@ import { useUploadImageMutation } from '@/services/upload';
 import { ConvertCentToDollar } from '@/lib/utils';
 import LoadingScreen from '@/components/loader/Loading';
 import ShowMorePagination from '@/components/pagination/ShowMorePagination';
+import { Badge } from '@/components/ui/badge';
 
 export default function MyActivities() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -125,9 +126,9 @@ export default function MyActivities() {
       const data = {
         ...restFormData,
         price: parseFloat(formData.price),
-        ...(maxGuests && {maxGuests : parseInt(formData.maxGuests)}),
-        ...(availableSpots && {availableSpots : parseInt(formData.availableSpots)}),
-        ...(bookingGapMinutes && {bookingGapMinutes : parseInt(formData.bookingGapMinutes * 60)}),
+        ...(maxGuests && { maxGuests: parseInt(formData.maxGuests) }),
+        ...(availableSpots && { availableSpots: parseInt(formData.availableSpots) }),
+        ...(bookingGapMinutes && { bookingGapMinutes: parseInt(formData.bookingGapMinutes * 60) }),
         ...(formData?.allowGroupBookings && { maxGroupSize: parseInt(formData.maxGroupSize) }),
         minDurationMinutes: formData.minDurationMinutes * 60,
         imageUrls: Object.values(images).filter(Boolean),
@@ -252,12 +253,25 @@ export default function MyActivities() {
                   >
                     <Card className="overflow-hidden py-0 hover:shadow-lg transition-shadow">
                       <img
-                        src={activity?.imageUrls[0] || 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400'}
+                        src={activity?.imageUrls[0] || '/default.png'}
                         alt={activity?.name}
                         className="w-full h-48 object-cover"
                       />
                       <div className="p-4">
-                        <h3 className="font-semibold text-lg text-slate-900 mb-2">{activity.name}</h3>
+                        <div className="flex items-start justify-between mb-2">
+                          <h4 className="font-semibold text-slate-900">{activity?.name}</h4>
+                          <Badge className={activity?.availableForBooking ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>
+                            {activity?.availableForBooking && (
+                              <><Eye className="w-3 h-3 mr-1" />Active</>
+                            )} 
+                            {!activity?.availableForBooking && !activity.adminDisabled && (
+                              <><EyeOff className="w-3 h-3 mr-1" />Inactive</>
+                            )}
+                            {activity.adminDisabled && (
+                              <><EyeOff className="w-3 h-3 mr-1" />Admin Disabled</>
+                            )}
+                          </Badge>
+                        </div>
                         <p className="text-slate-600 text-sm mb-3 h-10 line-clamp-2">{activity.description}</p>
                         <div className="space-y-2 mb-3">
                           <div className="flex items-center justify-between">
@@ -268,23 +282,42 @@ export default function MyActivities() {
                               {activity.availableSpots} {activity.billingType === 'PER_UNIT' ? 'units' : 'spots'} per time slot
                             </p>
                           )}
-                          <div className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-lg">
-                            <span className="text-sm font-medium text-slate-700">
-                              {activity.availableForBooking ? 'Active' : 'Inactive'}
-                            </span>
-                            <button
-                              onClick={() => {
-                                handleUpdateActivityStatus(activity.availableForBooking, activity?._id)
-                              }}
-                              className={`relative cursor-pointer inline-flex h-6 w-11 items-center rounded-full transition-colors ${activity.availableForBooking ? 'bg-green-600' : 'bg-slate-300'
-                                }`}
-                            >
-                              <span
-                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${activity.availableForBooking ? 'translate-x-6' : 'translate-x-1'
+                          {!activity.adminDisabled &&
+                            <div className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-lg">
+                              <span className="text-sm font-medium text-slate-700">
+                                {activity.availableForBooking ? 'Active' : 'Inactive'}
+                              </span>
+                              <button
+                                onClick={() => {
+                                  handleUpdateActivityStatus(activity.availableForBooking, activity?._id)
+                                }}
+                                className={`relative cursor-pointer inline-flex h-6 w-11 items-center rounded-full transition-colors ${activity.availableForBooking ? 'bg-green-600' : 'bg-slate-300'
                                   }`}
+                              >
+                                <span
+                                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${activity.availableForBooking ? 'translate-x-6' : 'translate-x-1'
+                                    }`}
+                                />
+                              </button>
+                            </div>
+                          }
+                          {
+                            activity.adminDisabled &&
+                            <div className="flex flex-col py-2 px-3 bg-red-100 rounded-lg">
+                              <div className='flex items-center justify-between'>
+                                <span className="text-sm font-medium text-red-700">
+                                  Admin Disabled Reason
+                                </span>
+                              </div>
+
+                              <Textarea
+                                className={"mt-2 bg-slate-50"}
+                                value={activity?.adminNotes}
+                                readOnly
+                                rows={4}
                               />
-                            </button>
-                          </div>
+                            </div>
+                          }
                         </div>
                         <div className="flex gap-2">
                           <Link href={(`/activitymanagement?id=${activity._id}`)} className="flex-1">

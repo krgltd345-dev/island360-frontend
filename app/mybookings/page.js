@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Filter, Inbox, Share2, UserPlus, Users as UsersIcon } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -23,12 +23,19 @@ import Recieved from '@/components/invites/Recieved';
 import SentInvites from '@/components/invites/SentInvites';
 import { ConvertCentToDollar } from '@/lib/utils';
 import ReviewDialog from '@/components/booking/ReviewDialog';
+import { useGetReceivedinvitesQuery } from '@/services/inviteApi';
+import InviteCard from '@/components/invites/InviteCard';
+import { Badge } from '@/components/ui/badge';
 
 
 
 export default function MyBookings() {
   const router = useRouter()
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [filteredInvites, setFilteredInvites] = useState({
+    invites: [],
+    pending: 0
+  });
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -42,8 +49,10 @@ export default function MyBookings() {
     guests: 1,
     special_requests: ''
   });
-
-  const { data: userBookings, isLoading } = useGetUserBookingsQuery([statusFilter])
+  const { data: Invites, isLoading: invitesLoading } = useGetReceivedinvitesQuery()
+  const { data: userBookings, isLoading } = useGetUserBookingsQuery([statusFilter], {
+    skip: statusFilter === "INVITES"
+  })
   const [Cancel] = useCancelBookingMutation()
 
   const handleCancelClick = (booking) => {
@@ -108,7 +117,20 @@ export default function MyBookings() {
     }
   }
 
-  if (isLoading) {
+  useEffect(() => {
+    if (Invites?.data?.invitations) {
+      const filtered = Invites?.data?.invitations?.filter((invite) => (invite?.status !== "REJECTED" && invite?.status !== "EXPIRED" && invite?.status !== "CANCELLED"))
+      const pending = Invites?.data?.invitations?.filter((invite) => invite?.status === "PENDING")
+      setFilteredInvites({
+        invites: filtered,
+        pending: pending?.length
+      })
+    }
+
+  }, [Invites, statusFilter])
+
+
+  if (isLoading && invitesLoading) {
     return (
       <LayoutWrapper>
         <div className="min-h-[calc(100vh-156px)] mt-12 bg-slate-50 py-8">
@@ -174,12 +196,21 @@ export default function MyBookings() {
                     <TabsTrigger value="COMPLETED" className="rounded-lg">Completed</TabsTrigger>
                     <TabsTrigger value="CANCELLED" className="rounded-lg">Cancelled</TabsTrigger>
                     <TabsTrigger value="REFUNDED" className="rounded-lg">Refunded</TabsTrigger>
+                    {
+                      filteredInvites?.invites?.length > 0 &&
+                      <TabsTrigger value="INVITES" className="rounded-lg">
+                        {
+                          filteredInvites?.pending > 0 &&
+                          <Badge className=" bg-amber-500 text-xs">{filteredInvites?.pending}</Badge>
+                        }
+                        Invites</TabsTrigger>
+                    }
                   </TabsList>
                 </Tabs>
               </motion.div>
 
               {/* Bookings List */}
-              {userBookings?.pagination?.total === 0 ? (
+              {userBookings?.pagination?.total === 0 && statusFilter !== "INVITES" && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -190,7 +221,9 @@ export default function MyBookings() {
                   </div>
                   <h3 className="text-xl font-semibold text-slate-900 mb-2">No bookings found</h3>
                 </motion.div>
-              ) : (
+              )}
+
+              {userBookings?.data.length > 0 && statusFilter !== "INVITES" && (
                 <div className="space-y-4">
                   {userBookings?.data?.map((booking, index) => {
                     // const participantInfo = getParticipantInfo(booking);
@@ -211,6 +244,42 @@ export default function MyBookings() {
                   })}
                 </div>
               )}
+              {
+                statusFilter === "INVITES" && filteredInvites?.invites?.length == 0 &&
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center py-16"
+                >
+                  <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Inbox className="w-10 h-10 text-slate-400" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-slate-900 mb-2">No Invite found</h3>
+                </motion.div>
+
+              }
+              {
+                statusFilter === "INVITES" && filteredInvites?.invites?.length > 0 &&
+                <div className="space-y-4">
+                  {filteredInvites?.invites?.map((invite, index) => {
+                    // const participantInfo = getParticipantInfo(booking);
+                    return (
+                      <div key={invite._id}>
+                        <InviteCard
+                          invite={invite}
+                          index={index}
+                        // onCancel={handleCancelClick}
+                        // onDelete={handleDeleteClick}
+                        // onEdit={handleEditClick}
+                        // onReview={handleReviewClick}
+                        // calculateAmount={calculateAmount}
+                        // hasReview={hasReview(booking.id)}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              }
             </div>
             :
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -226,7 +295,7 @@ export default function MyBookings() {
                 </TabsList>
 
                 <TabsContent value="received">
-                  <Recieved />
+                  <Recieved Invites={Invites} />
                 </TabsContent>
 
                 <TabsContent value="sent">
@@ -246,7 +315,7 @@ export default function MyBookings() {
               <AlertDialogDescription>
                 <>
                   Are you sure you want to cancel this booking? This action cannot be undone.
-                  All accepted and paid invitees will also be cancelled and refunded.<br/>
+                  All accepted and paid invitees will also be cancelled and refunded.<br />
                   <span className='text-black font-semibold'>{calculateAmount(bookingToCancel, true)}</span>
                 </>
               </AlertDialogDescription>
@@ -265,9 +334,9 @@ export default function MyBookings() {
 
         {/* Review Dialog */}
         <ReviewDialog
-        reviewDialogOpen={reviewDialogOpen}
-        setReviewDialogOpen={setReviewDialogOpen}
-        bookingToReview={bookingToReview}
+          reviewDialogOpen={reviewDialogOpen}
+          setReviewDialogOpen={setReviewDialogOpen}
+          bookingToReview={bookingToReview}
         />
 
         {/* Participant Payment Dialog */}

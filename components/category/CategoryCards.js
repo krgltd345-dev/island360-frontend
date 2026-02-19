@@ -2,20 +2,15 @@ import React from 'react';
 
 
 const iconMap = {
-  "all":
-    "/icons/all.png",
-  "Boating":
-    "/icons/boaticon.png",
-  "Scooter":
-    "/icons/scootyicon.png",
-  "Kayak/Paddleboard":
-    "/icons/kayakicon.png",
-  "Nature Trails":
-    "/icons/natureicon.png",
-  "Jet Ski":
-    "/icons/jeticon.png",
-  "Other":
-    "/icons/islandicon.png",
+  all: "/icons/all.png",
+  boating: "/icons/boaticon.png",
+  scooter: "/icons/scootyicon.png",
+  kayak: "/icons/kayakicon.png",
+  paddleboard: "/icons/kayakicon.png",
+  nature: "/icons/natureicon.png",
+  "jet ski": "/icons/jeticon.png",
+  horse: "/icons/horseicon.png",
+  other: "/icons/islandicon.png",
 };
 
 export default function CategoryCards({ categories, selected, onChange, setPage }) {
@@ -43,7 +38,11 @@ export default function CategoryCards({ categories, selected, onChange, setPage 
           {"All"}
         </div> */}
         {categories.map((cat) => {
-          const Icon = iconMap[cat?.name] || '/icons/islandicon.png';
+          const categoryName = cat?.name?.toLowerCase() || "";
+          const matchedKey = Object.keys(iconMap).find(key =>
+            categoryName.includes(key)
+          );
+          const Icon = iconMap[matchedKey] || "/icons/islandicon.png";
           const isActive = selected?._id === cat._id;
 
           return (
@@ -62,8 +61,8 @@ export default function CategoryCards({ categories, selected, onChange, setPage 
               `}
             >
               <img className='rounded-full h-20 w-20' src={Icon} />
-              <p className='w-36 overflow-hidden text-ellipsis text-center'>
-              {cat.name}
+              <p className='w-36 overflow-hidden line-clamp-1 text-ellipsis text-center'>
+                {cat.name}
               </p>
             </div>
           );

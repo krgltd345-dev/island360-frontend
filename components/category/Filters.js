@@ -24,7 +24,7 @@ export default function CategoryFilter({ categories, selected, onChange, setPage
 
   return (
     <div className="flex flex-wrap gap-3 mb-12 justify-center">
-      <Button
+      {/* <Button
         variant={selected?.name == "all" ? "default" : "outline"}
         onClick={() => {
           setPage(1)
@@ -43,7 +43,7 @@ export default function CategoryFilter({ categories, selected, onChange, setPage
       >
         <LayoutGrid className="w-4 h-4 mr-2" />
         {"All Activities"}
-      </Button>
+      </Button> */}
       {categories.map((cat) => {
         const Icon = iconMap[cat?.name] || Sparkles;
         const isActive = selected?._id === cat._id;

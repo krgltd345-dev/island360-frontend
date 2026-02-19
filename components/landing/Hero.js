@@ -4,8 +4,8 @@ import { Waves } from 'lucide-react';
 
 export const Hero = () => {
   return (
-      <div className="relative overflow-hidden bg-blue-900/30 text-white">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1760643965237-3e05664f1306?q=80&w=1791&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')] bg-cover bg-center opacity-80" />
+      <div className="relative min-h-screen overflow-hidden bg-blue-900/30 text-white">
+        <div className="absolute inset-0 bg-[url('/cover1.jpeg')] bg-cover bg-top opacity-80" />
         <div className="absolute inset-0 bg-gradient-to-r from-blue-900/50 via-pink-300/5 to-pink-500/20" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
