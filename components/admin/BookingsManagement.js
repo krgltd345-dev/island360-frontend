@@ -33,7 +33,7 @@ export default function AdminBookingOversight() {
             <p className="text-3xl font-bold text-green-600">{bookingsCount?.data?.confirmed}</p>
           </Card>
           <Card className="p-4">
-            <p className="text-sm text-slate-600">completed</p>
+            <p className="text-sm text-slate-600">Completed</p>
             <p className="text-3xl font-bold text-blue-600">{bookingsCount?.data?.completed}</p>
           </Card>
         </div>
@@ -41,14 +41,14 @@ export default function AdminBookingOversight() {
 
       <Tabs value={statusFilter} className={"w-full"} onValueChange={setStatusFilter}>
         <div className='scrollbar-hide overflow-x-scroll'>
-        <TabsList className="bg-white border w-full max-md:w-3xl border-slate-200 p-1">
-          <TabsTrigger value="ALL" className="rounded-lg">All</TabsTrigger>
-          <TabsTrigger value="HOLD" className="rounded-lg">Pending</TabsTrigger>
-          <TabsTrigger value="CONFIRMED" className="rounded-lg">Confirmed</TabsTrigger>
-          <TabsTrigger value="COMPLETED" className="rounded-lg">Completed</TabsTrigger>
-          <TabsTrigger value="CANCELLED" className="rounded-lg">Cancelled</TabsTrigger>
-          <TabsTrigger value="REFUNDED" className="rounded-lg">Refunded</TabsTrigger>
-        </TabsList>
+          <TabsList className="bg-white border w-full max-md:w-3xl border-slate-200 p-1">
+            <TabsTrigger value="ALL" className="rounded-lg">All</TabsTrigger>
+            <TabsTrigger value="HOLD" className="rounded-lg">Pending</TabsTrigger>
+            <TabsTrigger value="CONFIRMED" className="rounded-lg">Confirmed</TabsTrigger>
+            <TabsTrigger value="COMPLETED" className="rounded-lg">Completed</TabsTrigger>
+            <TabsTrigger value="CANCELLED" className="rounded-lg">Cancelled</TabsTrigger>
+            <TabsTrigger value="REFUNDED" className="rounded-lg">Refunded</TabsTrigger>
+          </TabsList>
         </div>
       </Tabs>
 
@@ -78,20 +78,32 @@ export default function AdminBookingOversight() {
                     <div className="flex items-center gap-1">
                       <Clock className="w-3 h-3" />
                       {booking?.slotStartTime}
+                      {"-"}
+                      <span>{booking?.slotEndTime}</span>
                     </div>
                   </div>
                   <div>
-                    <p className="text-xs text-slate-500 mb-1">Guests</p>
-                    <div className="flex items-center gap-1">
-                      <Users className="w-3 h-3" />
-                      {booking?.quantity}
-                    </div>
+                    {
+                      booking?.groupBooking && <>
+                        <p className="text-xs text-slate-500 mb-1">Group Members</p>
+                        <div className="flex items-center gap-1">
+                          <Users className="w-3 h-3" />
+                          {booking?.inviteAcceptedCount + 1}
+                        </div>
+                      </>}
+                    {
+                      (booking?.activityId?.billingType === "PER_HOUR" || booking?.activityId?.billingType === "PER_UNIT") &&
+                      <div className="flex items-center gap-2">
+                        {booking?.quantity} {booking?.activityId?.billingType === "PER_HOUR" ? "Hours" : "Units"}
+                      </div>
+                    }
+
                   </div>
                   <div>
                     <p className="text-xs text-slate-500 mb-1">Total</p>
                     <div className="flex items-center gap-1 font-semibold text-slate-900">
                       <DollarSign className="w-3 h-3" />
-                      {ConvertCentToDollar(booking?.price)}
+                      {ConvertCentToDollar(booking?.groupBooking ? booking?.groupShare * (booking?.inviteAcceptedCount + 1) : booking?.totalPrice)}
                     </div>
                     {
                       booking?.refundAmount &&

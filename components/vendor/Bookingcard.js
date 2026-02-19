@@ -45,7 +45,9 @@ export const BookingCard = ({ booking }) => {
             {
               (booking?.activityId?.billingType === "PER_HOUR" || booking?.activityId?.billingType === "PER_UNIT") &&
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4" />
+                {
+                  booking?.activityId?.billingType === "PER_HOUR" && <Clock className="w-4 h-4" />
+                }
                 {booking?.quantity} { booking?.activityId?.billingType === "PER_HOUR" ? "Hours" : "Units"}
               </div>
             }

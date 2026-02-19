@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Users, Clock } from 'lucide-react';
+import { Calendar, Users, Clock, Timer } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { useGetUserBookingsQuery } from '@/services/bookingApi';
 import { ConvertCentToDollar, statusStyles } from '@/lib/utils';
@@ -64,11 +64,23 @@ export default function BookingInfo() {
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4" />
                   <span>{booking?.slotStartTime}</span>
+                  {"-"}
+                  <span>{booking?.slotEndTime}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4" />
-                  <span>{booking?.numberOfPersons} {booking?.numberOfPersons === 1 ? 'guest' : 'guests'}</span>
-                </div>
+                {
+                  booking?.numberOfPersons > 0 &&
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    <span>{booking?.numberOfPersons} {booking?.numberOfPersons === 1 ? 'guest' : 'guests'}</span>
+                  </div>
+                }
+                {
+                  (booking?.activityId?.billingType === "PER_HOUR" || booking?.activityId?.billingType === "PER_UNIT") &&
+                  <div className="flex items-center gap-2">
+                    <Timer className="w-4 h-4" />
+                    {booking?.quantity} {booking?.activityId?.billingType === "PER_HOUR" ? "Hours" : "Units"}
+                  </div>
+                }
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-slate-900">
                     {calculateAmount(booking)}
@@ -85,8 +97,8 @@ export default function BookingInfo() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-4 border-t border-slate-100 text-xs text-slate-500">
-            <span>Booking ID: {booking?._id.slice(0, 8)}</span>
+          <div className="flex flex-col sm:flex-row items-center justify-between pt-4 border-t border-slate-100 text-xs text-slate-500">
+            <span>Booking ID: {booking?._id}</span>
             <span>Booked on {format(parseISO(booking?.createdAt), 'MMM d, yyyy')}</span>
           </div>
         </Card>
