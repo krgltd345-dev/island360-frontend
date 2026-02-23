@@ -85,6 +85,32 @@ export const userApi = baseApi.injectEndpoints({
       query: (body) => `/reviews/vendor`,
 
     }),
+    licenseRequest: builder.mutation({
+      query: (body) => ({
+        url: '/vendor/license-renewal-request',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ["LICENSE"]
+    }),
+    getLicenseStatus: builder.query({
+      query: () => `/vendor/license-renewal-status`,
+      providesTags: ["LICENSE"]
+
+    }),
+    getLicenseRequest: builder.query({
+      query: () => `/admin/license-requests`,
+      providesTags: ["LICENSE"]
+
+    }),
+    licenseAction: builder.mutation({
+      query: (body) => ({
+        url: `/admin/license-requests/${body?.id}`,
+        method: 'PATCH',
+        body,
+      }),
+      invalidatesTags: ["LICENSE"]
+    }),
   }),
 })
 
@@ -103,5 +129,10 @@ export const {
   useRemoveReviewMutation,
   useGetVendorStatsQuery,
   useGetVendorReviewsQuery,
-  useGetVendorDetailsQuery
+  useGetVendorDetailsQuery,
+  useLicenseRequestMutation,
+  useGetLicenseStatusQuery,
+  useGetLicenseRequestQuery,
+  useLicenseActionMutation
+
 } = userApi

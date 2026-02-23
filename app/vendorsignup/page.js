@@ -4,18 +4,23 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Store, CheckCircle, Clock } from 'lucide-react';
+import { Store, CheckCircle, Clock, CalendarIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import LayoutWrapper from '@/components/layout/LayoutWrapper';
 import { useGetUserRoleQuery, useVendorApplicationMutation } from '@/services/userApi';
 import { useUploadDocumentMutation } from '@/services/upload';
 import { useRouter } from 'next/navigation';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
 
 export default function VendorSignup() {
   const router = useRouter()
+  const [open, setOpen] = useState(false)
   const { data: userRoleInfo, isLoading: userRoleInfoFetching } = useGetUserRoleQuery()
   const [UploadFile] = useUploadDocumentMutation()
   const [Application] = useVendorApplicationMutation()
+  const [isExpiry, setIsExpiry] = useState(false)
   const [formData, setFormData] = useState({
     vendorName: '',
     vendorDesignation: '',
@@ -26,6 +31,7 @@ export default function VendorSignup() {
     businessLicenseNumber: '',
     taxId: '',
     insurance: '',
+    licenseExpiry: null,
     taxDoc: '',
     govtId: '',
     businessLicense: '',
@@ -74,6 +80,7 @@ export default function VendorSignup() {
         insurance: formData?.insurance,
         taxDoc: formData?.taxDoc,
         govtId: formData?.govtId,
+        businessLicenseExpiry: isExpiry ? new Date(formData?.licenseExpiry).getTime() : null,
         businessLicense: formData?.businessLicense,
         nonProfitStatus: formData?.nonProfitStatus,
         allowCancellations: formData?.allowCancellations,
@@ -235,6 +242,60 @@ export default function VendorSignup() {
                   required={!formData?.nonProfitStatus}
                 />
               </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={isExpiry || false}
+                  onChange={(e) => setIsExpiry((prev) => !prev)}
+                  className="w-4 cursor-pointer h-4"
+                />
+                <Label className={"cursor-pointer"} onClick={() => {
+                  setIsExpiry((prev) => !prev)
+                }}>License has Expiry Date?</Label>
+              </div>
+              {
+                isExpiry &&
+                <div className="space-y-2">
+                  <Label className=" font-medium">Select Business License Expiry Date *</Label>
+                  <Popover open={open} onOpenChange={setOpen} >
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-left font-normal h-12 border-slate-200"
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4 text-slate-500" />
+                        {formData?.licenseExpiry ? format(formData?.licenseExpiry, 'PPP') : <span className="text-slate-500">Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={formData?.licenseExpiry}
+                        onSelect={(date) => {
+                          setFormData({ ...formData, licenseExpiry: date })
+                          setOpen(false);
+                        }}
+                        captionLayout="dropdown"
+                        fromYear={2025}
+                        toYear={2125}
+                        disabled={(date) => {
+                          const today = new Date();
+                          today.setHours(0, 0, 0, 0);
+
+                          const oneMonthLater = new Date(today);
+                          oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+
+                          const checkDate = new Date(date);
+                          checkDate.setHours(0, 0, 0, 0);
+
+                          return checkDate < oneMonthLater;
+                        }}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              }
 
               <div className="space-y-2">
                 <Label>Tax ID / EIN</Label>
