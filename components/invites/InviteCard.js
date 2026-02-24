@@ -126,7 +126,7 @@ export default function InviteCard({ invite, index = 0 }) {
             {
               invite?.status == "PENDING"
               && (
-                <div className="bg-amber-50 mt-6 border border-amber-200 rounded-lg p-4 flex items-center justify-between">
+                <div className="bg-amber-50 mt-6 border border-amber-200 rounded-lg p-4 flex gap-2 max-sm:flex-col items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Landmark className="w-5 h-5 text-amber-600" />
                     <div>

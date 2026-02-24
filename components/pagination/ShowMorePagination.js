@@ -5,9 +5,7 @@ import { Button } from '../ui/button'
 const ShowMorePagination = ({length, total, page, totalPages, setPage}) => {
   return (
     <div className='text-black/50 flex items-center justify-center mt-10 gap-3'>
-      {
-        `Showing ${length} of ${total}`
-      }
+      { length && `Showing ${length} of ${total}`}
       {
         page < totalPages &&
         <Button

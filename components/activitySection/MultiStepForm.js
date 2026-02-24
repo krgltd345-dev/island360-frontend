@@ -368,7 +368,7 @@ export default function MultiStepBookingForm({ Activity }) {
             {isGroupBooking && Activity?.data?.allowGroupBookings && Activity?.data?.billingType !== "PER_PERSON" &&
               <div className="space-y-2">
                 <Label className="text-slate-700 font-medium">
-                  {`Number of Prsons in Group`}
+                  {`Number of Persons in Group`}
                 </Label>
                 <Select
                   value={formData?.numberOfPersons?.toString() || Activity?.data?.maxGroupSize}
