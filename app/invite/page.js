@@ -40,8 +40,8 @@ export default function Invite() {
   // }, [open]);
 
   const addEmailField = () => {
-    if (emailFields.length >= booking?.data?.booking?.numberOfPersons) {
-      toast.error(`You can add only ${booking?.data?.booking?.numberOfPersons} email(s)`);
+    if (emailFields.length >= booking?.data?.booking?.numberOfPersons - 1) {
+      toast.error(`You can add only ${booking?.data?.booking?.numberOfPersons - 1} email(s)`);
       return;
     }
 
