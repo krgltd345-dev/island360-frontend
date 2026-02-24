@@ -181,7 +181,7 @@ export default function AdminVendorApprovals({ vendorRequest, vendors }) {
                         </div>
                         <div className="flex items-center font-semibold text-slate-700 gap-2">
                           <Clock className="w-4 h-4" />
-                          New Expiry Date : {moment(vendor?.businessLicenseExpiry).format('MMM d, yyyy')}
+                          New Expiry Date : {moment(vendor?.businessLicenseExpiry).format('DD-MM-YYYY')}
                         </div>
                         <div className="flex items-center font-semibold text-slate-700 gap-2">
                           📄 New License Number : {vendor?.businessLicenseNumber}

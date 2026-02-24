@@ -125,6 +125,10 @@ export default function VendorBusinessSection({ vendor }) {
               <p className="text-slate-900 font-medium">{vendor?.vendor?.businessName || 'Not provided'}</p>
             </div>
             <div className="space-y-2">
+              <Label>Business License No.</Label>
+              <p className="text-slate-900 font-medium">{vendor?.vendor?.licenseNumber || 'Not provided'}</p>
+            </div>
+            <div className="space-y-2">
               <Label>Business License Expiry</Label>
               <div className='flex gap-2 items-center'>
                 <p className={`${vendor?.vendor?.licenseExpiry > new Date().getTime() ? "text-slate-900" : "text-red-700"} font-medium`}>{vendor?.vendor?.licenseExpiry ? moment(vendor?.vendor?.licenseExpiry).format("MM-DD-YYYY") : 'Not provided'}</p>
@@ -137,8 +141,6 @@ export default function VendorBusinessSection({ vendor }) {
                 }
               </div>
             </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label>Business Phone</Label>
               <p className="text-slate-900 font-medium">{vendor?.vendor?.phoneNumber || 'Not provided'}</p>
@@ -148,11 +150,10 @@ export default function VendorBusinessSection({ vendor }) {
               <Label>Business Email</Label>
               <p className="text-slate-900 font-medium">{vendor?.vendor?.email || 'Not provided'}</p>
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Business Address</Label>
-            <p className="text-slate-900 font-medium">{vendor?.vendor?.address || 'Not provided'}</p>
+            <div className="space-y-2">
+              <Label>Business Address</Label>
+              <p className="text-slate-900 font-medium">{vendor?.vendor?.address || 'Not provided'}</p>
+            </div>
           </div>
         </form>
       </Card>

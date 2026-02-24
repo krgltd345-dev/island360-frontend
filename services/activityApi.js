@@ -43,6 +43,21 @@ export const activityApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["CATEGORY"]
     }),
+    editCategory: builder.mutation({
+      query: (body) => ({
+        url: `/categories/${body?._id}`,
+        method: 'PATCH',
+        body,
+      }),
+      invalidatesTags: ["CATEGORY"]
+    }),
+    removeCategory: builder.mutation({
+      query: (body) => ({
+        url: `/categories/${body?.id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ["CATEGORY"]
+    }),
     createActivity: builder.mutation({
       query: (body) => ({
         url: '/activities',
@@ -91,6 +106,8 @@ export const {
   useGetCategoryQuery,
   useCreateCategoryMutation,
   useGetActivityMetricsQuery,
-  useToggleActivityMutation
+  useToggleActivityMutation,
+  useRemoveCategoryMutation,
+  useEditCategoryMutation
 
 } = activityApi

@@ -7,19 +7,24 @@ import { Label } from "@/components/ui/label";
 import { Settings, Save, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useGetSettingsQuery, useUpdateSettingsMutation } from '@/services/adminApi';
-import { useCreateCategoryMutation, useGetCategoryQuery } from '@/services/activityApi';
+import { useCreateCategoryMutation, useEditCategoryMutation, useGetCategoryQuery, useRemoveCategoryMutation } from '@/services/activityApi';
 import { Badge } from '../ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 
 export default function AdminSiteSettings() {
   const { data: settingsData, isLoading } = useGetSettingsQuery()
   const { data: categories, isLoading: categoryLoading } = useGetCategoryQuery()
   const [AddCategory, { isLoading: addLoading }] = useCreateCategoryMutation()
   const [Update, { isLoading: updateLoading }] = useUpdateSettingsMutation()
+  const [Remove, { isLoading: removeLoading }] = useRemoveCategoryMutation()
+  const [Edit, { isLoading: editLoading }] = useEditCategoryMutation()
   const [settings, setSettings] = useState({
     platformFee: 0,
   });
+
   const [category, setcategory] = useState("");
-  console.log(settingsData, "settings");
+  const [name, setName] = useState("")
+  const [open, setOpen] = useState(false);
   useEffect(() => {
     if (settingsData) {
       setSettings({
@@ -38,11 +43,32 @@ export default function AdminSiteSettings() {
     }
   };
 
-    const handleAdd = async () => {
+  const handleAdd = async () => {
     try {
-      const res = await AddCategory({name: category}).unwrap()
+      const res = await AddCategory({ name: category }).unwrap()
       toast.success(res?.message)
       setcategory("")
+    } catch (error) {
+      console.log(error);
+      toast.error(error?.data?.message)
+    }
+  };
+
+  const handleRemoveCategory = async () => {
+    try {
+      const res = await Remove({ id: name?._id }).unwrap()
+      setOpen(false)
+      toast.success(res?.message)
+    } catch (error) {
+      console.log(error);
+      toast.error(error?.data?.message)
+    }
+  };
+    const handleUpdateCategory = async () => {
+    try {
+      const res = await Edit(name).unwrap()
+      setOpen(false)
+      toast.success(res?.message)
     } catch (error) {
       console.log(error);
       toast.error(error?.data?.message)
@@ -56,8 +82,6 @@ export default function AdminSiteSettings() {
       </div>
     );
   }
-
-  console.log(categories, "categories");
 
   return (
     <div className="space-y-6">
@@ -109,7 +133,10 @@ export default function AdminSiteSettings() {
           <div className='flex flex-wrap gap-2'>
             {
               categories?.data.map((category) => (
-                <Badge className={"text-base bg-blue-100 border-blue-500 text-blue-500"} key={category?._id}>
+                <Badge onClick={() => {
+                  setName(category)
+                  setOpen(true)
+                }} className={"text-base cursor-pointer bg-blue-100 border-blue-500 text-blue-500"} key={category?._id}>
                   {category?.name}
                 </Badge>
               ))
@@ -123,25 +150,66 @@ export default function AdminSiteSettings() {
               onChange={(e) => setcategory(e.target.value)}
             />
             <Button
-            onClick={handleAdd}
-            disabled={ addLoading || category?.length < 2}
-            className="w-full bg-slate-900"
-          >
-            {addLoading ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Addmin...
-              </>
-            ) : (
-              <>
-                <Save className="w-4 h-4 mr-2" />
-                Add Category
-              </>
-            )}
-          </Button>
+              onClick={handleAdd}
+              disabled={addLoading || category?.length < 2}
+              className="w-full bg-slate-900"
+            >
+              {addLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Addmin...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Add Category
+                </>
+              )}
+            </Button>
           </div>
         </div>
       </Card>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{"Update Category"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-slate-600">
+              Categories with 0 Activities can only be removed.
+            </p>
+            <div className="space-y-2">
+              <Label>Category Name</Label>
+              <Input
+                className={""}
+                autoFocus={false}
+                value={name?.name || ""}
+                onChange={(e) => setName((prev) => {
+                  return { ...prev, name: e.target.value }
+                })}
+                placeholder="Enter category name"
+              />
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button
+                disabled={editLoading || removeLoading}
+                onClick={handleRemoveCategory}
+                className="flex-1 bg-red-600 hover:bg-red-700"
+              >
+                Remove Category
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleUpdateCategory}
+                disabled={editLoading || removeLoading}
+                className="flex-1"
+              >
+                {'Save Changes'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
