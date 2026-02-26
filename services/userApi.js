@@ -98,6 +98,11 @@ export const userApi = baseApi.injectEndpoints({
       providesTags: ["LICENSE"]
 
     }),
+    getEarnings: builder.query({
+      query: () => `/vendor/earnings`,
+      // providesTags: ["LICENSE"]
+
+    }),
     getLicenseRequest: builder.query({
       query: () => `/admin/license-requests`,
       providesTags: ["LICENSE"]
@@ -133,6 +138,7 @@ export const {
   useLicenseRequestMutation,
   useGetLicenseStatusQuery,
   useGetLicenseRequestQuery,
-  useLicenseActionMutation
+  useLicenseActionMutation,
+  useGetEarningsQuery
 
 } = userApi

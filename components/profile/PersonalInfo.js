@@ -3,16 +3,22 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Edit, Save, X, Upload, Search, ChevronDown } from 'lucide-react';
+import { Edit, Save, X, Upload, Search, ChevronDown, EyeOff, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { useUpdateUserMutation } from '@/services/userApi';
 import { useUploadImageMutation } from '@/services/upload';
 import { countries, getCountryByCode } from '@/lib/countries';
+import { Separator } from '../ui/separator';
+import { useChangePasswordMutation } from '@/services/authApi';
+import { deleteCookie } from 'cookies-next';
+import { useRouter } from 'next/navigation';
 
 export default function PersonalInfoSection({ user }) {
+  const router = useRouter()
   const [isEditing, setIsEditing] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [Update] = useUpdateUserMutation();
+  const [UpdatePassword, { isLoading }] = useChangePasswordMutation()
   const [UploadImage] = useUploadImageMutation();
   const [formData, setFormData] = useState({
     name: user?.name || '',
@@ -21,7 +27,15 @@ export default function PersonalInfoSection({ user }) {
     countryCode: user?.countryCode || '',
     postalCode: user?.postalCode || '',
   });
-
+  const [formData2, setFormData2] = useState({
+    password: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [countrySearch, setCountrySearch] = useState('');
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
   const countryDropdownRef = useRef(null);
@@ -71,7 +85,7 @@ export default function PersonalInfoSection({ user }) {
         ...(formData?.postalCode !== user?.postalCode && formData?.postalCode !== "" && { postalCode: formData?.postalCode }),
       }
       console.log(formData, "formdata", data);
-      const res = await Update(data).unwrap();
+      const res = await UpdatePassword(data).unwrap();
       toast.success(res?.message)
       setIsEditing(false);
       console.log(res, "res");
@@ -112,6 +126,103 @@ export default function PersonalInfoSection({ user }) {
       toast.error('Failed to upload photo');
     }
     setUploadingPhoto(false);
+  };
+
+  const validatePassword = (password) => {
+    if (!password) {
+      return "Password is required";
+    }
+    if (password.length < 7) {
+      return "Password must be at least 8 characters";
+    }
+    if (!/(?=.*[a-z])/.test(password)) {
+      return "Password must contain at least one lowercase letter";
+    }
+    if (!/(?=.*[A-Z])/.test(password)) {
+      return "Password must contain at least one uppercase letter";
+    }
+    if (!/(?=.*\d)/.test(password)) {
+      return "Password must contain at least one number";
+    }
+    if (!/(?=.*[^A-Za-z0-9])/.test(password)) {
+      return "Password must contain at least one special character";
+    }
+    return "";
+  };
+
+  const validateConfirmPassword = (confirmPassword, password) => {
+    console.log(confirmPassword, password);
+    if (!confirmPassword) {
+      return 'Please confirm your password';
+    }
+    if (confirmPassword !== password) {
+      return 'Passwords do not match';
+    }
+    return '';
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData2((prev) => ({ ...prev, [name]: value }));
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: '' }));
+    }
+    if (name === 'newPassword' && formData2.confirmPassword) {
+      const confirmError = validateConfirmPassword(formData2.confirmPassword, value);
+      if (confirmError) {
+        setErrors((prev) => ({ ...prev, newPassword: confirmError }));
+      } else {
+        setErrors((prev) => ({ ...prev, newPassword: '' }));
+      }
+    }
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    let error = '';
+
+    if (name === 'newPassword') {
+      error = validatePassword(value);
+    } else if (name === 'confirmPassword') {
+      error = validateConfirmPassword(value, formData2.newPassword);
+    }
+
+    if (error) {
+      setErrors((prev) => ({ ...prev, [name]: error }));
+    }
+  };
+
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+
+    const newErrors = {};
+    const passwordError = validatePassword(formData2.newPassword);
+    const confirmPasswordError = validateConfirmPassword(formData2.confirmPassword, formData2.newPassword);
+
+    if (passwordError) newErrors.newPassword = passwordError;
+    if (confirmPasswordError) newErrors.confirmPassword = confirmPasswordError;
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    const data = {
+      newPassword: formData2?.newPassword,
+      currentPassword: formData2?.password
+    }
+    try {
+      const res = await UpdatePassword(data).unwrap();
+      deleteCookie('role')
+      deleteCookie('authKey')
+      router.push("/login");
+      toast.success(res?.message)
+    } catch (error) {
+      console.log(error);
+      toast.error(error?.data?.message || 'Failed to change password, Please try again.');
+    }
   };
 
   return (
@@ -173,13 +284,13 @@ export default function PersonalInfoSection({ user }) {
             Full Name
           </Label>
           {isEditing ? (
-              <Input
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Your full name"
-                // disabled={!canChangeName}
-                className={''}
-              />
+            <Input
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="Your full name"
+              // disabled={!canChangeName}
+              className={''}
+            />
           ) : (
             <p className="text-slate-900 font-medium">{user.name || 'Not provided'}</p>
           )}
@@ -320,6 +431,112 @@ export default function PersonalInfoSection({ user }) {
           </div>
         )}
       </form>
+      <Separator />
+      <div className='flex flex-col gap-5'>
+        <h3 className="text-xl font-semibold text-slate-900">Change Password</h3>
+        <form onSubmit={handleChangePassword}>
+          <div className="space-y-2">
+            <Label>Current Password</Label>
+            <div className="relative">
+              <Input
+                id="password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Enter Current Password"
+                value={formData2.password}
+                onChange={handleChange}
+                className={`${errors.password ? 'border-red-400 focus-visible:ring-red-400/20' : ''}`}
+                aria-invalid={errors.password ? 'true' : 'false'}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-black/50 hover:text-black/80"
+              >
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
+            </div>
+            {errors.password && (
+              <p className="text-xs text-red-600 drop-shadow-sm">{errors.password}</p>
+            )}
+          </div>
+
+          <div className="space-y-2 mt-4">
+            <Label>New Password</Label>
+            <div className="relative">
+              <Input
+                id="newPassword"
+                name="newPassword"
+                type={showNewPassword ? 'text' : 'password'}
+                placeholder="Enter New Password"
+                value={formData2.newPassword}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={`${errors.newPassword ? 'border-red-400 focus-visible:ring-red-400/20' : ''}`}
+                aria-invalid={errors.newPassword ? 'true' : 'false'}
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-black/50 cursor-pointer hover:text-black/80"
+              >
+                {showNewPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
+            </div>
+            {errors.newPassword && (
+              <p className="text-xs text-red-600 drop-shadow-sm">{errors.newPassword}</p>
+            )}
+          </div>
+
+          <div className="space-y-2 mt-4">
+            <Label>Confirm New Password</Label>
+            <div className="relative">
+              <Input
+                id="confirm-password"
+                name="confirmPassword"
+                type={showConfirmPassword ? 'text' : 'password'}
+                placeholder="Confirm your password"
+                value={formData2.confirmPassword}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={`${errors.confirmPassword ? 'border-red-400 focus-visible:ring-red-400/20' : ''}`}
+                aria-invalid={errors.confirmPassword ? 'true' : 'false'}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-black/50 cursor-pointer hover:text-black/80"
+              >
+                {showConfirmPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
+            </div>
+            {errors.confirmPassword && (
+              <p className="text-xs text-red-600 drop-shadow-sm">{errors.confirmPassword}</p>
+            )}
+          </div>
+
+          <Button
+            type="submit"
+            className="flex-1 bg-slate-900 mt-4 w-full hover:bg-slate-800"
+          // disabled={isLoading}
+          >
+            <Save className="w-4 h-4 mr-2" />
+            {isLoading ? 'Updating...' : 'Save'}
+          </Button>
+        </form>
+      </div>
     </Card>
   );
 }
