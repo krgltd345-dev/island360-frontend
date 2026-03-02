@@ -13,10 +13,13 @@ import { useRouter } from 'next/navigation';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
+import VendorAggrementModal from '@/components/vendor/VendorAggrementModal';
 
 export default function VendorSignup() {
   const router = useRouter()
   const [open, setOpen] = useState(false)
+  const [openAgreement, setOpenAgreement] = useState(false)
+  const [agree, setAgree] = useState(false)
   const { data: userRoleInfo, isLoading: userRoleInfoFetching } = useGetUserRoleQuery()
   const [UploadFile] = useUploadDocumentMutation()
   const [Application] = useVendorApplicationMutation()
@@ -403,6 +406,20 @@ export default function VendorSignup() {
                   </div>
                 )}
               </div>
+              <div className="flex items-center gap-2 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <input
+                  type="checkbox"
+                  checked={agree}
+                  onChange={(e) => setAgree((prev) => !prev)}
+                  className="w-4 h-4"
+                />
+                <Label onClick={() => {
+                  setOpenAgreement(true)
+                }} className="text-blue-700 underline cursor-pointer">
+                  Agree to Vendor Service Agreement
+                </Label>
+              </div>
+
 
               <div className="bg-slate-50 rounded-lg p-4 text-sm text-slate-600">
                 <p className="font-medium text-slate-900 mb-2">What happens next?</p>
@@ -414,12 +431,13 @@ export default function VendorSignup() {
                 </ul>
               </div>
 
-              <Button type="submit" disabled={uploadingDocs} className="w-full h-12 bg-slate-900 hover:bg-slate-800">
+              <Button type="submit" disabled={uploadingDocs || !agree} className="w-full h-12 bg-slate-900 hover:bg-slate-800">
                 {uploadingDocs ? 'Uploading Documents...' : 'Submit Application'}
               </Button>
             </form>
           </Card>
         </div>
+        <VendorAggrementModal agree={agree} setAgree={setAgree} dialogOpen={openAgreement} setDialogOpen={setOpenAgreement} />
       </div>
     </LayoutWrapper>
   );

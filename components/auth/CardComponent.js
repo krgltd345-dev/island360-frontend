@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import SignIn from './SignIn'
 import SignUp from './SignUp'
 import ForgotPassword from './ForgotPassword'
@@ -7,8 +7,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { bookingApi } from '@/services/bookingApi';
 import { userApi } from '@/services/userApi';
 import { setSignUp } from '@/services/globalSlice';
+import PrivacyPolicyModal from '../footer/PrivacyPolicyModal';
+import TermsOfServiceModal from '../footer/TermsOfServiceModal';
 
 const CardComponent = ({ getGoogleLogin }) => {
+  const [openPrivacyPolicy, setOpenPrivacyPolicy] = useState(false)
+  const [openTerms, setOpenTerms] = useState(false)
   const { signUp } = useSelector((state) => state.global);
   const dispatch = useDispatch()
 
@@ -66,7 +70,28 @@ const CardComponent = ({ getGoogleLogin }) => {
         {signUp === 'forgot' && (
           <ForgotPassword onSwitchToSignIn={() => dispatch(setSignUp('signin'))} />
         )}
+        <div className='flex text-sm justify-center items-center mt-1 text-white/80 gap-1'>
+          <div
+            onClick={() => {
+              setOpenTerms(true)
+            }}
+            className="underline cursor-pointer underline-offset-2 hover:text-white"
+          >
+            Terms of Service
+          </div>
+          |
+          <div
+            onClick={() => {
+              setOpenPrivacyPolicy(true)
+            }}
+            className="underline cursor-pointer underline-offset-2 hover:text-white"
+          >
+            Privacy Policy
+          </div>
+        </div>
       </div>
+      <PrivacyPolicyModal dialogOpen={openPrivacyPolicy} setDialogOpen={setOpenPrivacyPolicy} />
+      <TermsOfServiceModal dialogOpen={openTerms} setDialogOpen={setOpenTerms} />
     </>
   )
 }
