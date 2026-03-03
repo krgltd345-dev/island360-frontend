@@ -21,11 +21,32 @@ const Footer = () => {
         consentGiven: true,
         consentType: type
       }).unwrap();
+      // if (type == "PRIVACY_POLICY") {
+      //   setOpenPrivacyPolicy(false)
+      // }
+      // if (type == "TERMS_OF_SERVICE") {
+      //   setOpenTerms(false)
+      // }
+      // if (type == "RELEASE_OF_LIABILITY") {
+      //   setOpenLiability(false)
+      // }
     } catch (error) {
       console.log(error);
       toast.error(error?.data?.message)
     }
   }
+
+  useEffect(() => {
+    if (userRoleInfo?.data?.user?.liabilityConsentVersion) {
+      setOpenLiability(false)
+    }
+    if (userRoleInfo?.data?.user?.termsConsentVersion) {
+      setOpenTerms(false)
+    }
+    if (userRoleInfo?.data?.user?.privacyConsentVersion) {
+      setOpenPrivacyPolicy(false)
+    }
+  }, [userRoleInfo?.data?.user])
 
   useEffect(() => {
     if (userRoleInfo && !userRoleInfoFetching && !isLoading) {
@@ -38,17 +59,17 @@ const Footer = () => {
       if (!userRoleInfo?.data?.user?.privacyConsentVersion) {
         setOpenPrivacyPolicy(true)
       }
-      if (userRoleInfo?.data?.user?.liabilityConsentVersion) {
-        setOpenLiability(false)
-      }
-      if (userRoleInfo?.data?.user?.termsConsentVersion) {
-        setOpenTerms(false)
-      }
-      if (userRoleInfo?.data?.user?.privacyConsentVersion) {
-        setOpenPrivacyPolicy(false)
-      }
+      // if (userRoleInfo?.data?.user?.liabilityConsentVersion) {
+      //   setOpenLiability(false)
+      // }
+      // if (userRoleInfo?.data?.user?.termsConsentVersion) {
+      //   setOpenTerms(false)
+      // }
+      // if (userRoleInfo?.data?.user?.privacyConsentVersion) {
+      //   setOpenPrivacyPolicy(false)
+      // }
     }
-  }, [userRoleInfo, userRoleInfoFetching, isLoading])
+  }, [userRoleInfo, openPrivacyPolicy, openTerms, openLiability, userRoleInfoFetching, isLoading])
   return (
     <footer className="bg-white border-t border-slate-100 py-8 mt-auto relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
