@@ -1,12 +1,54 @@
 'use client';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import PrivacyPolicyModal from './PrivacyPolicyModal'
 import TermsOfServiceModal from './TermsOfServiceModal';
+import { useGetUserRoleQuery, useUserConsentMutation } from '@/services/userApi';
+import ReleaseOfLiabilityModal from './ReleaseOfLiabilityModal';
+import { toast } from 'sonner';
 
 const Footer = () => {
+  const { data: userRoleInfo, isLoading: userRoleInfoFetching } = useGetUserRoleQuery()
   const [openPrivacyPolicy, setOpenPrivacyPolicy] = useState(false)
   const [openTerms, setOpenTerms] = useState(false)
+  const [openLiability, setOpenLiability] = useState(false)
+  const [Consent, { isLoading }] = useUserConsentMutation()
+
+
+  const handleAccept = async (type) => {
+    try {
+      const res = await Consent({
+        consentGiven: true,
+        consentType: type
+      }).unwrap();
+    } catch (error) {
+      console.log(error);
+      toast.error(error?.data?.message)
+    }
+  }
+
+  useEffect(() => {
+    if (userRoleInfo && !userRoleInfoFetching && !isLoading) {
+      if (!userRoleInfo?.data?.user?.liabilityConsentVersion) {
+        setOpenLiability(true)
+      }
+      if (!userRoleInfo?.data?.user?.termsConsentVersion) {
+        setOpenTerms(true)
+      }
+      if (!userRoleInfo?.data?.user?.privacyConsentVersion) {
+        setOpenPrivacyPolicy(true)
+      }
+      if (userRoleInfo?.data?.user?.liabilityConsentVersion) {
+        setOpenLiability(false)
+      }
+      if (userRoleInfo?.data?.user?.termsConsentVersion) {
+        setOpenTerms(false)
+      }
+      if (userRoleInfo?.data?.user?.privacyConsentVersion) {
+        setOpenPrivacyPolicy(false)
+      }
+    }
+  }, [userRoleInfo, userRoleInfoFetching, isLoading])
   return (
     <footer className="bg-white border-t border-slate-100 py-8 mt-auto relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -39,8 +81,9 @@ const Footer = () => {
           </p>
         </div>
       </div>
-      <PrivacyPolicyModal dialogOpen={openPrivacyPolicy} setDialogOpen={setOpenPrivacyPolicy} />
-      <TermsOfServiceModal dialogOpen={openTerms} setDialogOpen={setOpenTerms} />
+      <PrivacyPolicyModal handleAccept={handleAccept} dialogOpen={openPrivacyPolicy} setDialogOpen={setOpenPrivacyPolicy} />
+      <TermsOfServiceModal handleAccept={handleAccept} dialogOpen={openTerms} setDialogOpen={setOpenTerms} />
+      <ReleaseOfLiabilityModal handleAccept={handleAccept} dialogOpen={openLiability} setDialogOpen={setOpenLiability} />
     </footer>
   )
 }

@@ -1,7 +1,9 @@
 import React from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
+import { useGetUserRoleQuery } from '@/services/userApi'
 
-const TermsOfServiceModal = ({ dialogOpen, setDialogOpen }) => {
+const TermsOfServiceModal = ({ dialogOpen, setDialogOpen, handleAccept }) => {
+  const { data: userRoleInfo, isLoading: userRoleInfoFetching } = useGetUserRoleQuery()
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogContent className="max-w-3xl! max-h-screen md:max-h-[90vh] max-sm:px-0 overflow-y-auto">
@@ -9,11 +11,11 @@ const TermsOfServiceModal = ({ dialogOpen, setDialogOpen }) => {
           <DialogTitle className={"text-3xl"}>{'Terms of Service'}</DialogTitle>
         </DialogHeader>
         <main className="max-w-3xl mx-auto px-3 space-y-5">
-          <div class="flex flex-col justify-center text-sm">
-            <span class="bg-white/15 backdrop-blur rounded-full px-4 py-0.5">📅 Effective: February 2026</span>
-            <span class="bg-white/15 backdrop-blur rounded-full px-4 py-0.5">📍 11954 Narcoossee Rd Suite 607, Orlando, FL 32832</span>
-            <span class="bg-white/15 backdrop-blur rounded-full px-4 py-0.5">✉️ support@island360.com</span>
-            <span class="bg-white/15 backdrop-blur rounded-full px-4 py-0.5">⚖️ Governing Law: Florida</span>
+          <div className="flex flex-col justify-center text-sm">
+            <span className="bg-white/15 backdrop-blur rounded-full px-4 py-0.5">📅 Effective: February 2026</span>
+            <span className="bg-white/15 backdrop-blur rounded-full px-4 py-0.5">📍 11954 Narcoossee Rd Suite 607, Orlando, FL 32832</span>
+            <span className="bg-white/15 backdrop-blur rounded-full px-4 py-0.5">✉️ support@island360.com</span>
+            <span className="bg-white/15 backdrop-blur rounded-full px-4 py-0.5">⚖️ Governing Law: Florida</span>
           </div>
           <section id="s1" className="bg-white overflow-hidden">
             <div className="px-2">
@@ -253,7 +255,14 @@ const TermsOfServiceModal = ({ dialogOpen, setDialogOpen }) => {
               <p>Liability limitations, arbitration, indemnification, and governing law provisions survive termination.</p>
             </div>
           </section>
-
+          {
+            handleAccept && !userRoleInfo?.data?.user?.termsConsentVersion &&
+            <div onClick={() => {
+              handleAccept("TERMS_OF_SERVICE")
+            }} className="mt-4 cursor-pointer hover:bg-sky-700 hover:shadow-md bg-sky-600 text-white rounded-sm px-6 py-2 text-center">
+              <p className="font-bold">✔ I Agree</p>
+            </div>
+          }
         </main>
       </DialogContent>
     </Dialog>

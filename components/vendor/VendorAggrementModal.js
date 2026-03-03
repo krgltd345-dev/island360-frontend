@@ -10,11 +10,11 @@ const VendorAggrementModal = ({ dialogOpen, setDialogOpen, agree, setAgree }) =>
           <DialogTitle className={"text-3xl"}>{'Vendor Service Agreement'}</DialogTitle>
         </DialogHeader>
         <main className="max-w-3xl mx-auto px-3 space-y-5">
-          <div class="flex flex-col justify-center text-sm">
-            <span class="bg-white/15 backdrop-blur rounded-full px-4 py-0.5">📅 Effective: February 2026</span>
-            <span class="bg-white/15 backdrop-blur rounded-full px-4 py-0.5">📍 11954 Narcoossee Rd Suite 607, Orlando, FL 32832</span>
-            <span class="bg-white/15 backdrop-blur rounded-full px-4 py-0.5">✉️ support@island360.com</span>
-            <span class="bg-white/15 backdrop-blur rounded-full px-4 py-0.5">⚖️ Governing Law: Florida</span>
+          <div className="flex flex-col justify-center text-sm">
+            <span className="bg-white/15 backdrop-blur rounded-full px-4 py-0.5">📅 Effective: February 2026</span>
+            <span className="bg-white/15 backdrop-blur rounded-full px-4 py-0.5">📍 11954 Narcoossee Rd Suite 607, Orlando, FL 32832</span>
+            <span className="bg-white/15 backdrop-blur rounded-full px-4 py-0.5">✉️ support@island360.com</span>
+            <span className="bg-white/15 backdrop-blur rounded-full px-4 py-0.5">⚖️ Governing Law: Florida</span>
           </div>
           <section id="s1" className="bg-white overflow-hidden">
             <div className="px-2">

@@ -83,6 +83,7 @@ export default function VendorSignup() {
         insurance: formData?.insurance,
         taxDoc: formData?.taxDoc,
         govtId: formData?.govtId,
+        vendorAgreementConsent: agree,
         businessLicenseExpiry: isExpiry ? new Date(formData?.licenseExpiry).getTime() : null,
         businessLicense: formData?.businessLicense,
         nonProfitStatus: formData?.nonProfitStatus,

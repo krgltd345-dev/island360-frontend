@@ -116,6 +116,14 @@ export const userApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["LICENSE"]
     }),
+    userConsent: builder.mutation({
+      query: (body) => ({
+        url: '/user/consent',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ["USER"]
+    }),
   }),
 })
 
@@ -139,6 +147,7 @@ export const {
   useGetLicenseStatusQuery,
   useGetLicenseRequestQuery,
   useLicenseActionMutation,
-  useGetEarningsQuery
+  useGetEarningsQuery,
+  useUserConsentMutation
 
 } = userApi
