@@ -33,12 +33,13 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       const res = await Logout().unwrap();
+      toast.success(res?.message)
+    } catch (error) {
+      // toast.error(error?.data?.message)
+    } finally {
       deleteCookie('role')
       deleteCookie('authKey')
       router.push("/login");
-      toast.success(res?.message)
-    } catch (error) {
-      toast.error(error?.data?.message)
     }
   }
 
@@ -115,26 +116,26 @@ const Navbar = () => {
             }
             {
               !userRoleInfo?.data?.user && !userRoleInfoFetching &&
-            <div className='flex items-center gap-2'>
-              <Button
-                onClick={() => {
-                  dispatch(setSignUp("signin"))
-                  router.push("/login")
-                }}
-                className={"bg-amber-300 hover:bg-black h-9  hover:text-white border-0 px-7 py-4"} variant="outline" size="sm">
-                <LogIn className="w-5 h-5" />
-                Login
-              </Button>
-              <Button
-                onClick={() => {
-                  dispatch(setSignUp("signup"))
-                  router.push("/login")
-                }}
-                className={"bg-amber-300 hover:bg-black h-9 hover:text-white border-0 px-7 py-4"} variant="outline" size="sm">
-                <RiUserAddLine className="w-5 h-5" />
-                Signup
-              </Button>
-            </div>
+              <div className='flex items-center gap-2'>
+                <Button
+                  onClick={() => {
+                    dispatch(setSignUp("signin"))
+                    router.push("/login")
+                  }}
+                  className={"bg-amber-300 hover:bg-black h-9  hover:text-white border-0 px-7 py-4"} variant="outline" size="sm">
+                  <LogIn className="w-5 h-5" />
+                  Login
+                </Button>
+                <Button
+                  onClick={() => {
+                    dispatch(setSignUp("signup"))
+                    router.push("/login")
+                  }}
+                  className={"bg-amber-300 hover:bg-black h-9 hover:text-white border-0 px-7 py-4"} variant="outline" size="sm">
+                  <RiUserAddLine className="w-5 h-5" />
+                  Signup
+                </Button>
+              </div>
             }
           </div>
 

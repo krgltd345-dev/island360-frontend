@@ -14,6 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import VendorAggrementModal from '@/components/vendor/VendorAggrementModal';
+import LoadingScreen from '@/components/loader/Loading';
 
 export default function VendorSignup() {
   const router = useRouter()
@@ -105,11 +106,7 @@ export default function VendorSignup() {
 
   if (userRoleInfoFetching) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Card className="p-8 text-center">
-          <p className="text-slate-600">Loading...</p>
-        </Card>
-      </div>
+      <LoadingScreen/>
     );
   }
 

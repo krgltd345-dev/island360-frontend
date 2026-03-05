@@ -6,9 +6,9 @@ const TermsOfServiceModal = ({ dialogOpen, setDialogOpen, handleAccept }) => {
   const { data: userRoleInfo, isLoading: userRoleInfoFetching } = useGetUserRoleQuery()
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      <DialogContent className="max-w-3xl! max-h-screen md:max-h-[90vh] max-sm:px-0 overflow-y-auto">
+      <DialogContent className="max-w-3xl! max-h-screen md:max-h-[90vh] max-sm:py-12 max-sm:px-1 overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className={"text-3xl"}>{'Terms of Service'}</DialogTitle>
+          <DialogTitle className={"text-2xl sm:text-3xl"}>{'Terms of Service'}</DialogTitle>
         </DialogHeader>
         <main className="max-w-3xl mx-auto px-3 space-y-5">
           <div className="flex flex-col justify-center text-sm">
@@ -256,7 +256,7 @@ const TermsOfServiceModal = ({ dialogOpen, setDialogOpen, handleAccept }) => {
             </div>
           </section>
           {
-            handleAccept && !userRoleInfo?.data?.user?.termsConsentVersion &&
+            handleAccept && userRoleInfo && !userRoleInfo?.data?.user?.termsConsentVersion &&
             <div onClick={() => {
               handleAccept("TERMS_OF_SERVICE")
             }} className="mt-4 cursor-pointer hover:bg-sky-700 hover:shadow-md bg-sky-600 text-white rounded-sm px-6 py-2 text-center">

@@ -16,8 +16,12 @@ import VendorBusinessSection from '@/components/profile/VendorBusinessSection';
 
 export default function ProfilePage() {
   const { data: userData, isLoading: userDataFetching } = useGetUserProfileQuery()
-  const { data: VendorData, isLoading: vendorDataFetching } = useGetVendorDetailsQuery()
   const { data: userRoleInfo, isLoading: userRoleInfoFetching } = useGetUserRoleQuery()
+  const { data: VendorData, isLoading: vendorDataFetching } = useGetVendorDetailsQuery({}, {
+    skip: !userRoleInfo?.data?.user?.vendorId
+  })
+
+  console.log(userRoleInfo, "userData");
 
   if (
     userDataFetching || vendorDataFetching || userRoleInfoFetching
@@ -81,21 +85,22 @@ export default function ProfilePage() {
                     </Button>
                   </Link>
                 )}
-                {userRoleInfo?.data?.user?.vendorId ? (
+                {userRoleInfo?.data?.user?.vendorId && (
                   <Link href={'/vendordashboard'}>
                     <Button className="bg-slate-900 hover:bg-slate-800">
                       <Store className="w-4 h-4 mr-2" />
                       Vendor Portal
                     </Button>
                   </Link>
-                ) : (
-                  <Link href={'/vendorsignup'}>
-                    <Button className="bg-slate-900 hover:bg-slate-800">
-                      <Store className="w-4 h-4 mr-2" />
-                      Join as Vendor
-                    </Button>
-                  </Link>
-                )
+                ) 
+                //  (
+                //   <Link href={'/vendorsignup'}>
+                //     <Button className="bg-slate-900 hover:bg-slate-800">
+                //       <Store className="w-4 h-4 mr-2" />
+                //       Join as Vendor
+                //     </Button>
+                //   </Link>
+                // )
                 }
               </div>
             </div>

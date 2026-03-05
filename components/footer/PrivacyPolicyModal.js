@@ -6,9 +6,9 @@ const PrivacyPolicyModal = ({ dialogOpen, setDialogOpen, handleAccept }) => {
   const { data: userRoleInfo, isLoading: userRoleInfoFetching } = useGetUserRoleQuery()
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      <DialogContent className="max-w-3xl! max-h-screen md:max-h-[90vh] max-sm:px-0 overflow-y-auto">
+      <DialogContent className="max-w-3xl! max-h-screen md:max-h-[90vh] max-sm:py-12 max-sm:px-1 overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className={"text-3xl"}>{'Island 360 Privacy Policy'}</DialogTitle>
+          <DialogTitle className={"text-2xl sm:text-3xl"}>{'Island 360 Privacy Policy'}</DialogTitle>
         </DialogHeader>
         <main className="max-w-3xl mx-auto px-3 space-y-5">
 
@@ -271,7 +271,7 @@ const PrivacyPolicyModal = ({ dialogOpen, setDialogOpen, handleAccept }) => {
             </div>
           </section>
           {
-            handleAccept && !userRoleInfo?.data?.user?.privacyConsentVersion &&
+            handleAccept && userRoleInfo && !userRoleInfo?.data?.user?.privacyConsentVersion &&
             <div onClick={() => {
               handleAccept("PRIVACY_POLICY")
             }} className="mt-4 cursor-pointer hover:bg-sky-700 hover:shadow-md bg-sky-600 text-white rounded-sm px-6 py-2 text-center">

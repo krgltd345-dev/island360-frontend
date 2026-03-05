@@ -71,30 +71,38 @@ const Footer = () => {
     }
   }, [userRoleInfo, openPrivacyPolicy, openTerms, openLiability, userRoleInfoFetching, isLoading])
   return (
-    <footer className="bg-white border-t border-slate-100 py-8 mt-auto relative">
+    <footer className="bg-white border-t border-slate-100 py-6 mt-auto relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex lg:w-60 items-center gap-2 text-slate-600">
             <img src={"/island_logo.png"} alt="Logo" className="w-8 h-6" />
             <span className="font-semibold">Island 360</span>
           </div>
-          <div className='flex text-sm items-center text-slate-500 gap-1'>
-            <div
-              onClick={() => {
-                setOpenTerms(true)
-              }}
+          <div className='flex flex-col text-sm items-center gap-2 text-slate-500'>
+            <Link
+              href={"/vendorsignup"}
               className="underline cursor-pointer underline-offset-2 hover:text-slate-700"
             >
-              Terms of Service
-            </div>
-            |
-            <div
-              onClick={() => {
-                setOpenPrivacyPolicy(true)
-              }}
-              className="underline cursor-pointer underline-offset-2 hover:text-slate-700"
-            >
-              Privacy Policy
+              Join Vendor Application
+            </Link>
+            <div className='flex text-sm items-center text-slate-500 gap-1'>
+              <div
+                onClick={() => {
+                  setOpenTerms(true)
+                }}
+                className="underline cursor-pointer underline-offset-2 hover:text-slate-700"
+              >
+                Terms of Service
+              </div>
+              |
+              <div
+                onClick={() => {
+                  setOpenPrivacyPolicy(true)
+                }}
+                className="underline cursor-pointer underline-offset-2 hover:text-slate-700"
+              >
+                Privacy Policy
+              </div>
             </div>
           </div>
           <p className="text-sm text-slate-500">

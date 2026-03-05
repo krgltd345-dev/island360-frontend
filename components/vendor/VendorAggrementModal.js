@@ -5,9 +5,9 @@ import { Label } from '../ui/label'
 const VendorAggrementModal = ({ dialogOpen, setDialogOpen, agree, setAgree }) => {
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      <DialogContent className="max-w-3xl! max-h-screen md:max-h-[90vh] max-sm:px-0 overflow-y-auto">
+      <DialogContent className="max-w-3xl! max-h-screen md:max-h-[90vh] max-sm:py-12 max-sm:px-1 overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className={"text-3xl"}>{'Vendor Service Agreement'}</DialogTitle>
+          <DialogTitle className={"text-2xl sm:text-3xl"}>{'Vendor Service Agreement'}</DialogTitle>
         </DialogHeader>
         <main className="max-w-3xl mx-auto px-3 space-y-5">
           <div className="flex flex-col justify-center text-sm">

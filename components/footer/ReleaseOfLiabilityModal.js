@@ -9,9 +9,9 @@ const ReleaseOfLiabilityModal = ({ dialogOpen, setDialogOpen, handleAccept }) =>
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      <DialogContent className="max-w-3xl! max-h-screen md:max-h-[90vh] max-sm:px-0 overflow-y-auto">
+      <DialogContent className="max-w-3xl! max-h-screen md:max-h-[90vh] max-sm:py-12 max-sm:px-1 overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className={"text-3xl"}>{'Assumption of Risk, Release of Liability & Waiver Agreement'}</DialogTitle>
+          <DialogTitle className={"text-xl sm:text-3xl"}>{'Assumption of Risk, Release of Liability & Waiver Agreement'}</DialogTitle>
         </DialogHeader>
         <div className="bg-red-600 text-white rounded-xl px-6 py-5 shadow-md">
           <p className="text-sm font-bold tracking-widest uppercase mb-1 text-red-100">⚠️ Important: This is a Legal Document</p>

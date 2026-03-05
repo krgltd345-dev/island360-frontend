@@ -195,18 +195,7 @@ export default function ActivityDetailPage() {
                     )} */}
                 </div>
                 {
-                  userRoleInfo?.data?.user ?
-                    <MultiStepBookingForm Activity={Activity} />
-                    :
-                    <Button
-                      onClick={() => {
-                        const currentPath = `/activityDetail?id=${activityId}`;
-                        router.push(`/login?redirect=${encodeURIComponent(currentPath)}`)
-                      }}
-                      type="button"
-                      className="flex-1 bg-slate-900">
-                      Login to Continue Booking
-                    </Button>
+                    <MultiStepBookingForm activityId={activityId} userRoleInfo={userRoleInfo} Activity={Activity} />
                 }
 
 

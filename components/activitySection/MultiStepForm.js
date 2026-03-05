@@ -22,7 +22,7 @@ const steps = [
   { id: 3, name: 'Contact', icon: Check },
 ];
 
-export default function MultiStepBookingForm({ Activity }) {
+export default function MultiStepBookingForm({ activityId, userRoleInfo, Activity }) {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -450,16 +450,28 @@ export default function MultiStepBookingForm({ Activity }) {
               <Button type="button" variant="outline" onClick={prevStep} className="flex-1">
                 <ChevronLeft className="mr-2 w-4 h-4" /> Back
               </Button>
-              <Button type="submit" disabled={isSubmitting} className="flex-1 bg-slate-900">
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  'Book Now'
-                )}
-              </Button>
+              {
+                userRoleInfo?.data?.user ?
+                  <Button type="submit" disabled={isSubmitting} className="flex-1 bg-slate-900">
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      'Book Now'
+                    )}
+                  </Button> :
+                  <Button
+                    onClick={() => {
+                      const currentPath = `/activityDetail?id=${activityId}`;
+                      router.push(`/login?redirect=${encodeURIComponent(currentPath)}`)
+                    }}
+                    type="button"
+                    className="flex-1 bg-slate-900">
+                    Login to Continue
+                  </Button>
+              }
             </div>
           </div>
         )}
