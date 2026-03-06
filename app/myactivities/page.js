@@ -134,7 +134,6 @@ export default function MyActivities() {
         imageUrls: Object.values(images).filter(Boolean),
         ...(editingActivity && formData?.category?.name && { category: formData?.category?._id }),
       };
-      console.log(data, maxGuests,  "data");
       let res;
       if (editingActivity) {
         res = await Update(data).unwrap()
