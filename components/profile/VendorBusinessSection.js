@@ -133,7 +133,7 @@ export default function VendorBusinessSection({ vendor }) {
               <div className='flex gap-2 items-center'>
                 <p className={`${vendor?.vendor?.licenseExpiry > new Date().getTime() ? "text-slate-900" : "text-red-700"} font-medium`}>{vendor?.vendor?.licenseExpiry ? moment(vendor?.vendor?.licenseExpiry).format("MM-DD-YYYY") : 'Not provided'}</p>
                 {
-                  vendor?.vendor?.licenseExpiry < new Date().getTime() &&
+                  vendor?.vendor?.licenseExpiry && vendor?.vendor?.licenseExpiry < new Date().getTime() &&
                   <div className="flex items-center gap-1 px-2 py-1 bg-red-50 text-red-700 rounded-lg text-sm">
                     <FcExpired className="w-4 h-4" />
                     <span className="font-medium">Expired</span>

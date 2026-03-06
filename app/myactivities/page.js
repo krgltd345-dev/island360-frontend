@@ -122,7 +122,7 @@ export default function MyActivities() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { maxGuests, availableSpots, bookingGapMinutes, ...restFormData } = formData;
+      const { maxGuests, availableSpots, bookingGapMinutes, maxGroupSize,  ...restFormData } = formData;
       const data = {
         ...restFormData,
         price: parseFloat(formData.price),
@@ -134,7 +134,7 @@ export default function MyActivities() {
         imageUrls: Object.values(images).filter(Boolean),
         ...(editingActivity && formData?.category?.name && { category: formData?.category?._id }),
       };
-
+      console.log(data, maxGuests,  "data");
       let res;
       if (editingActivity) {
         res = await Update(data).unwrap()
@@ -457,6 +457,7 @@ export default function MyActivities() {
                   <div className="space-y-2">
                     <Label>Maximum Group Size *</Label>
                     <Input
+                      min={1}
                       type="number"
                       value={formData?.maxGroupSize || ''}
                       onChange={(e) => setFormData({ ...formData, maxGroupSize: e.target.value })}
@@ -478,6 +479,7 @@ export default function MyActivities() {
                   <div className="space-y-2">
                     <Label>Max Guests</Label>
                     <Input
+                      required={editingActivity?.maxGuests}
                       type="number"
                       value={formData?.maxGuests || ""}
                       onChange={(e) => setFormData({ ...formData, maxGuests: e.target.value })}
@@ -486,6 +488,7 @@ export default function MyActivities() {
                   <div className="space-y-2">
                     <Label>Available Spots</Label>
                     <Input
+                      required={editingActivity?.availableSpots}
                       type="number"
                       value={formData?.availableSpots || ""}
                       onChange={(e) => setFormData({ ...formData, availableSpots: e.target.value })}
