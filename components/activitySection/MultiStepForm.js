@@ -13,7 +13,7 @@ import { Badge } from '../ui/badge';
 import { useCreateBookingMutation, useCreatePaymentMutation, useGetAvailableSlotsQuery } from '@/services/bookingApi';
 import { useGetFeeQuery } from '@/services/adminApi';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { ConvertCentToDollar } from '@/lib/utils';
 
 const steps = [
@@ -24,11 +24,12 @@ const steps = [
 
 export default function MultiStepBookingForm({ activityId, userRoleInfo, Activity }) {
   const router = useRouter()
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGroupBooking, setIsGroupBooking] = useState(false);
   const [open, setOpen] = useState(false);
-
   const [formData, setFormData] = useState({
     activityId: '',
     bookingDate: null,
@@ -58,6 +59,9 @@ export default function MultiStepBookingForm({ activityId, userRoleInfo, Activit
   const nextStep = () => {
     if (canProceedToStep(currentStep + 1)) {
       setCurrentStep(currentStep + 1);
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('step', currentStep + 1);
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     } else {
       toast.error('Please complete the required fields');
     }
@@ -65,6 +69,9 @@ export default function MultiStepBookingForm({ activityId, userRoleInfo, Activit
 
   const prevStep = () => {
     setCurrentStep(currentStep - 1);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('step', currentStep - 1);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   function addMinutesToTime(time, minutesToAdd) {
@@ -120,6 +127,29 @@ export default function MultiStepBookingForm({ activityId, userRoleInfo, Activit
     }
   }, [isGroupBooking, Activity, formData?.quantity])
 
+  useEffect(() => {
+    const savedDate = searchParams.get('date');
+    const savedTime = searchParams.get('startTime');
+    const group = searchParams.get('isGroup');
+    const quantity = searchParams.get('quantity');
+    const persons = searchParams.get('persons');
+    const step = searchParams.get('step');
+    if (step) {
+      setCurrentStep(Number(step))
+    }
+    if(group){
+      setIsGroupBooking(Boolean(group))
+    }
+    if (savedDate || savedTime || quantity || persons) {
+      setFormData((prev) => ({
+        ...prev,
+        ...(savedDate && { bookingDate: savedDate }),
+        ...(savedTime && { slotStartTime: savedTime }),
+        ...(quantity && { quantity: parseInt(quantity) }),
+        ...(persons && { numberOfPersons: parseInt(persons) }),
+      }));
+    }
+  }, [])
 
   return (
     <div className="space-y-6">
@@ -179,6 +209,9 @@ export default function MultiStepBookingForm({ activityId, userRoleInfo, Activit
                       selected={formData?.bookingDate}
                       onSelect={(date) => {
                         setFormData({ ...formData, bookingDate: date })
+                        const params = new URLSearchParams(searchParams.toString());
+                        params.set('date', format(date, 'yyyy-MM-dd'));
+                        router.replace(`${pathname}?${params.toString()}`, { scroll: false });
                         setOpen(false);
                       }}
                       disabled={(date) => {
@@ -203,7 +236,12 @@ export default function MultiStepBookingForm({ activityId, userRoleInfo, Activit
                 <Label className="text-slate-700 font-medium">Select Time</Label>
                 <Select
                   value={formData.slotStartTime}
-                  onValueChange={(value) => setFormData({ ...formData, slotStartTime: value })}
+                  onValueChange={(value) => {
+                    setFormData({ ...formData, slotStartTime: value })
+                    const params = new URLSearchParams(searchParams.toString());
+                    params.set('startTime', value);
+                    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+                  }}
                   disabled={!formData?.bookingDate}
                 >
                   <SelectTrigger className="h-12 border-slate-200">
@@ -290,7 +328,12 @@ export default function MultiStepBookingForm({ activityId, userRoleInfo, Activit
                 }
                 <Select
                   value={formData?.quantity?.toString()}
-                  onValueChange={(value) => setFormData({ ...formData, quantity: parseInt(value) })}
+                  onValueChange={(value) => {
+                    setFormData({ ...formData, quantity: parseInt(value) })
+                    const params = new URLSearchParams(searchParams.toString());
+                    params.set('quantity', value);
+                    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+                  }}
                 >
                   <SelectTrigger className="h-12 border-slate-200">
                     <Clock className="mr-2 h-4 w-4 text-slate-500" />
@@ -324,7 +367,12 @@ export default function MultiStepBookingForm({ activityId, userRoleInfo, Activit
                 <Label className="text-slate-700 font-medium">Number of Guests</Label>
                 <Select
                   value={formData?.quantity?.toString()}
-                  onValueChange={(value) => setFormData({ ...formData, quantity: parseInt(value) })}
+                  onValueChange={(value) => {
+                    setFormData({ ...formData, quantity: parseInt(value) })
+                    const params = new URLSearchParams(searchParams.toString());
+                    params.set('quantity', value);
+                    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+                  }}
                 >
                   <SelectTrigger className="h-12 border-slate-200">
                     <Users className="mr-2 h-4 w-4 text-slate-500" />
@@ -350,7 +398,12 @@ export default function MultiStepBookingForm({ activityId, userRoleInfo, Activit
                     <p className="text-xs text-slate-500">Invite others and split the booking</p>
                   </div>
                 </div>
-                <Switch className={"cursor-pointer"} checked={isGroupBooking} onCheckedChange={setIsGroupBooking} />
+                <Switch className={"cursor-pointer"} checked={isGroupBooking} onCheckedChange={(checked) => {
+                  setIsGroupBooking(checked)
+                  const params = new URLSearchParams(searchParams.toString());
+                  params.set('isGroup', checked);
+                  router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+                }} />
               </div>
             }
             {
@@ -372,7 +425,12 @@ export default function MultiStepBookingForm({ activityId, userRoleInfo, Activit
                 </Label>
                 <Select
                   value={formData?.numberOfPersons?.toString() || Activity?.data?.maxGroupSize}
-                  onValueChange={(value) => setFormData({ ...formData, numberOfPersons: parseInt(value) })}
+                  onValueChange={(value) => {
+                    setFormData({ ...formData, numberOfPersons: parseInt(value) })
+                    const params = new URLSearchParams(searchParams.toString());
+                    params.set('persons', value);
+                    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+                  }}
                 >
                   <SelectTrigger className="h-12 border-slate-200">
                     <User className="mr-2 h-4 w-4 text-slate-500" />
@@ -464,8 +522,9 @@ export default function MultiStepBookingForm({ activityId, userRoleInfo, Activit
                   </Button> :
                   <Button
                     onClick={() => {
-                      const currentPath = `/activityDetail?id=${activityId}`;
-                      router.push(`/login?redirect=${encodeURIComponent(currentPath)}`)
+                      const params = new URLSearchParams(searchParams.toString());
+                      const redirectRoute = `/activityDetail?${params.toString()}`
+                      router.push(`/login?redirect=${encodeURIComponent(redirectRoute)}`)
                     }}
                     type="button"
                     className="flex-1 bg-slate-900">
