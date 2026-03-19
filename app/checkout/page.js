@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { RiShieldCrossLine } from 'react-icons/ri';
+import { FcCancel } from 'react-icons/fc';
 
 const Checkout = () => {
   const router = useRouter()
@@ -50,10 +51,10 @@ const Checkout = () => {
     if (status === "FAILED") {
     return (
       <LayoutWrapper>
-        <div className="min-h-[calc(100vh-100px)] bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center py-12 px-4">
+        <div className="min-h-[calc(100vh-160px)] sm:min-h-[calc(100vh-100px)] bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center py-12 px-4">
           <Card className="p-8 text-center max-w-md shadow-lg">
             <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <RiShieldCrossLine className="w-10 h-10 text-red-500" />
+              <FcCancel className="w-10 h-10 text-red-500" />
             </div>
             <h2 className="text-2xl font-bold text-slate-900 mb-2">Payment Failed!</h2>
             <p className="text-slate-600 mb-6">Payment failed, Please try again later.</p>
@@ -81,7 +82,7 @@ const Checkout = () => {
   if (status === "SUCCESS") {
     return (
       <LayoutWrapper>
-        <div className="min-h-[calc(100vh-100px)] bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center py-12 px-4">
+        <div className="min-h-[calc(100vh-160px)] sm:min-h-[calc(100vh-100px)] bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center py-12 px-4">
           <Card className="p-8 text-center max-w-md shadow-lg">
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <ShieldCheck className="w-10 h-10 text-green-500" />
