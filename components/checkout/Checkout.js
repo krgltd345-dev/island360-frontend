@@ -128,7 +128,7 @@ const CheckoutElement = ({ handlePay }) => {
         },
       }}
       appearance={appearance}
-      tokenizationKey="F2w7mF-57Gq85-qR3358-Uc64M9"
+      tokenizationKey={process.env.NEXT_PUBLIC_TOKEN_KEY}
       onPay={handlePay}
     />
   );
