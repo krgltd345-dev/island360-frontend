@@ -63,7 +63,20 @@ export const bookingApi = baseApi.injectEndpoints({
         method: 'POST',
       }),
     }),
-
+    createNmiOrder: builder.mutation({
+      query: (body) => ({
+        url: `/nmi-payments/order`,
+        method: 'POST',
+        body
+      }),
+    }),
+    nmiPayment: builder.mutation({
+      query: (body) => ({
+        url: `/nmi-payments`,
+        method: 'POST',
+        body
+      }),
+    }),
 
     getVendorBookings: builder.query({
       query: (data) => ({
@@ -100,7 +113,10 @@ export const {
   useGetVendorBookingsQuery,
   useGetBookingsCountQuery,
   useCompleteBookingMutation,
-  useGetBookingByIdQuery
+  useGetBookingByIdQuery,
+
+  useCreateNmiOrderMutation,
+  useNmiPaymentMutation
 
 
 } = bookingApi

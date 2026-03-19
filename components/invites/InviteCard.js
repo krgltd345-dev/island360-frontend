@@ -17,23 +17,13 @@ export default function InviteCard({ invite, index = 0 }) {
   const [Cancel] = useRemoveMyInviteMutation()
   const router = useRouter()
 
-
-  const handlePaymentClick = async (invite) => {
-    try {
-      const payData = await InvitePayment({ id: invite?._id }).unwrap();
-      router.push(`/checkout?id=${payData?.data?.clientSecret}`)
-    } catch (error) {
-      console.log(error, "error");
-    }
-  };
-
   const handleAction = async (action) => {
     try {
       const res = await Action({ id: invite?._id, action: action }).unwrap()
       console.log(res, "res");
       toast.success(res?.message)
       if (action == "accept") {
-        handlePaymentClick(invite)
+        router.push(`/checkout?entity=BookingInvite&id=${invite?._id}`)
       }
     } catch (error) {
       toast.error(error?.data?.message)
@@ -142,6 +132,23 @@ export default function InviteCard({ invite, index = 0 }) {
                       Accept and Pay
                     </Button>
                   </div>
+                </div>
+              )}
+            {
+              invite?.status == "ACCEPTED"
+              && (
+                <div className="bg-amber-50 mt-6 border border-amber-200 rounded-lg p-4 flex gap-2 max-sm:flex-col items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Landmark className="w-5 h-5 text-amber-600" />
+                    <div>
+                      <p className="text-sm font-medium text-amber-900">Payment Incomplete</p>
+                      <p className="text-xs text-amber-700">Complete your payment to confirm your slot</p>
+                    </div>
+                  </div>
+                  
+                    <Button onClick={() => { router.push(`/testCheckout?entity=BookingInvite&id=${invite?._id}`) }} size="sm" className="bg-amber-600 hover:bg-amber-700">
+                      Complete Payment
+                    </Button>
                 </div>
               )}
           </div>

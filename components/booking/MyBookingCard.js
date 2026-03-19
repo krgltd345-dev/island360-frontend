@@ -17,12 +17,10 @@ const statusStyles = {
 
 export default function BookingCard({ booking, index = 0, onCancel, onDelete, onEdit, onReview, hasReview, calculateAmount }) {
   const router = useRouter()
-  const [Payment] = useCreatePaymentMutation()
 
   const handlePaymentClick = async (booking) => {
     try {
-      const payData = await Payment({ id: booking?._id }).unwrap();
-      router.push(`/checkout?id=${payData?.data?.clientSecret}&booking=${booking?._id}&isGroup=${booking?.groupBooking}`)
+      router.push(`/checkout?entity=Booking&id=${booking?._id}&isGroup=${booking?.groupBooking}`)
     } catch (error) {
       console.log(error, "error");
     }

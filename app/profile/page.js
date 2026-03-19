@@ -21,7 +21,6 @@ export default function ProfilePage() {
     skip: !userRoleInfo?.data?.user?.vendorId
   })
 
-  console.log(userRoleInfo, "userData");
 
   if (
     userDataFetching || vendorDataFetching || userRoleInfoFetching

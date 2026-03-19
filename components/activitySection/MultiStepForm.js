@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Switch } from '../ui/switch';
 import { Textarea } from '../ui/textarea';
 import { Badge } from '../ui/badge';
-import { useCreateBookingMutation, useCreatePaymentMutation, useGetAvailableSlotsQuery } from '@/services/bookingApi';
+import { useCreateBookingMutation, useCreateNmiOrderMutation, useCreatePaymentMutation, useGetAvailableSlotsQuery } from '@/services/bookingApi';
 import { useGetFeeQuery } from '@/services/adminApi';
 import { toast } from 'sonner';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -42,7 +42,6 @@ export default function MultiStepBookingForm({ activityId, userRoleInfo, Activit
   const { data: slots } = useGetAvailableSlotsQuery({ id: Activity?.data?._id, date: formData?.bookingDate ? format(formData?.bookingDate, 'yyyy-MM-dd') : formData?.bookingDate }, { skip: !formData?.bookingDate })
   const { data: fee, isLoading: feesLoading } = useGetFeeQuery()
   const [createBooking] = useCreateBookingMutation()
-  const [Payment] = useCreatePaymentMutation()
   const canProceedToStep = (step) => {
     if (step === 2) {
       return formData?.bookingDate && formData?.slotStartTime;
@@ -108,8 +107,7 @@ export default function MultiStepBookingForm({ activityId, userRoleInfo, Activit
       const res = await createBooking(data).unwrap()
       console.log(res, "booking res");
       if (res?.data?.bookingId) {
-        const payData = await Payment({ id: res?.data?.bookingId }).unwrap();
-        router.push(`/checkout?id=${payData?.data?.clientSecret}&booking=${res?.data?.bookingId}&isGroup=${isGroupBooking}`)
+        router.push(`/checkout?entity=Booking&id=${res?.data?.bookingId}&isGroup=${isGroupBooking}`)
       }
       toast.success('Please Wait, redirecting to payment.');
       // navigate(createPageUrl('MyBookings'));
@@ -137,7 +135,7 @@ export default function MultiStepBookingForm({ activityId, userRoleInfo, Activit
     if (step) {
       setCurrentStep(Number(step))
     }
-    if(group){
+    if (group) {
       setIsGroupBooking(Boolean(group))
     }
     if (savedDate || savedTime || quantity || persons) {

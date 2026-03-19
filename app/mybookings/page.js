@@ -49,9 +49,12 @@ export default function MyBookings() {
     guests: 1,
     special_requests: ''
   });
-  const { data: Invites, isLoading: invitesLoading } = useGetReceivedinvitesQuery()
+  const { data: Invites, isLoading: invitesLoading } = useGetReceivedinvitesQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  })
   const { data: userBookings, isLoading } = useGetUserBookingsQuery([statusFilter], {
-    skip: statusFilter === "INVITES"
+    skip: statusFilter === "INVITES",
+    refetchOnMountOrArgChange: true,
   })
   const [Cancel] = useCancelBookingMutation()
 
@@ -104,9 +107,9 @@ export default function MyBookings() {
   const calculateAmount = (booking, cancel) => {
     if (booking?.status === "CANCELLED" || booking?.status === "REFUNDED" || cancel) {
       if (booking?.groupShare) {
-        return `Refund Amount $${ConvertCentToDollar(booking?.groupShare) * booking?.activityId?.refundOnCancellations / 100}`
+        return `Refund Amount $${(ConvertCentToDollar(booking?.groupShare) * booking?.activityId?.refundOnCancellations / 100).toFixed(2)}`
       } else {
-        return `Refund Amount $${ConvertCentToDollar(booking?.totalPrice) * booking?.activityId?.refundOnCancellations / 100}`
+        return `Refund Amount $${(ConvertCentToDollar(booking?.totalPrice) * booking?.activityId?.refundOnCancellations / 100).toFixed(2)}`
       }
     } else {
       if (booking?.groupShare) {
