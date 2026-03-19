@@ -1,13 +1,18 @@
 import React from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
+import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
 import { Label } from '../ui/label'
+import { IoMdClose } from "react-icons/io";
+
 
 const VendorAggrementModal = ({ dialogOpen, setDialogOpen, agree, setAgree }) => {
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      <DialogContent className="max-w-3xl! max-h-screen md:max-h-[90vh] max-sm:py-12 max-sm:px-1 overflow-y-auto">
-        <DialogHeader>
+      <DialogContent showCloseButton={false} className="max-w-3xl! max-h-screen md:max-h-[90vh] max-sm:py-12 max-sm:px-1 overflow-y-auto">
+        <DialogHeader className={"flex flex-row justify-between"}>
           <DialogTitle className={"text-2xl sm:text-3xl"}>{'Vendor Service Agreement'}</DialogTitle>
+          <DialogClose className={"cursor-pointer"}>
+            <IoMdClose />
+          </DialogClose>
         </DialogHeader>
         <main className="max-w-3xl mx-auto px-3 space-y-5">
           <div className="flex flex-col justify-center text-sm">
