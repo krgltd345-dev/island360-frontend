@@ -1,6 +1,7 @@
 'use client';
 import { useNmiPaymentMutation } from '@/services/bookingApi';
 import dynamic from 'next/dynamic';
+import { useState } from 'react';
 
 const NmiPayments = dynamic(
   () => import('@nmipayments/nmi-pay-react').then(mod => mod.NmiPayments),
@@ -113,24 +114,119 @@ const appearance = {
 
 const CheckoutElement = ({ handlePay }) => {
 
+  const [billingInfo, setBillingInfo] = useState({
+    fName: '',
+    lName: '',
+    zip: '',
+  });
+  const [errors, setErrors] = useState({});
+  const [load, setLoad] = useState(true);
+
+  const validate = () => {
+    const newErrors = {};
+    if (!billingInfo.fName.trim()) newErrors.fName = 'First Name is required';
+    if (!billingInfo.lName.trim()) newErrors.lName = 'Last Name is required';
+    if (!billingInfo.zip.trim()) newErrors.zip = 'ZIP code is required';
+    else if (!/^[a-zA-Z0-9\s-]{3,10}$/.test(billingInfo.zip)) newErrors.zip = 'Invalid ZIP code';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const inputStyle = {
+    width: '100%',
+    padding: '36px 16px 16px 16px',
+    border: '1px solid #E5E7EB',
+    borderRadius: '8px',
+    fontSize: '14px',
+    backgroundColor: '#ffffff',
+    color: '#11181C',
+    boxSizing: 'border-box',
+  };
+
+   const handlePayWithBilling = (event) => {
+    if (!validate()) return;
+
+    handlePay({
+      ...event,
+      billing: {
+        fName: billingInfo.fName,
+        lName: billingInfo.lName,
+        zip: billingInfo.zip,
+      },
+    });
+  };
+
   return (
-    <NmiPayments
-      layout="multiLine"
-      paymentMethods={["card"]}
-      expressCheckoutConfig={{
-        googlePay: {
-          merchantId: 'your-google-merchant-id',
-          displayName: 'Your Business Name',
-          transaction: {
-            amount: 10.9,       // ← amount goes here
-            currencyCode: 'USD',  // ← currency goes here
-          },
-        },
+    <>
+    {
+      !load && 
+      <div className="billing-fields flex flex-col gap-2 p-3 pb-0">
+        <div className='flex max-sm:flex-col gap-2 w-full'>
+          <div className="field-group relative w-full">
+            <label className=' z-10 left-4 absolute top-4 text-sm' htmlFor="cardholder-name">First Name</label>
+            <input
+              id="cardholder-name"
+              type="text"
+              placeholder="John"
+              value={billingInfo.fName}
+              className='focus:outline-none transition-all duration-300 focus:border-blue-500! relative '
+              onChange={(e) => setBillingInfo(prev => ({ ...prev, fName: e.target.value }))}
+              style={inputStyle}
+            />
+            {errors.fName && <span className="error text-sm pl-2 text-red-500">{errors.fName}</span>}
+          </div>
+          <div className="field-group relative w-full">
+            <label className=' z-10 left-4 absolute top-4 text-sm' htmlFor="cardholder-name">Last Name</label>
+            <input
+              id="cardholder-name"
+              type="text"
+              placeholder="Doe"
+              value={billingInfo.lName}
+              className='focus:outline-none transition-all duration-300 focus:border-blue-500! relative '
+              onChange={(e) => setBillingInfo(prev => ({ ...prev, lName: e.target.value }))}
+              style={inputStyle}
+            />
+            {errors.lName && <span className="error text-sm pl-2 text-red-500">{errors.lName}</span>}
+          </div>
+        </div>
+        <div className="field-group relative">
+          <label className=' z-10 left-4 top-4 absolute text-sm' htmlFor="zip-code">ZIP / Postal Code</label>
+          <input
+            id="zip-code"
+            type="text"
+            placeholder="10001"
+            className='focus:outline-none transition-all duration-300 focus:border-blue-500! relative '
+            maxLength={10}
+            value={billingInfo.zip}
+            onChange={(e) => setBillingInfo(prev => ({ ...prev, zip: e.target.value }))}
+            style={inputStyle}
+          />
+          {errors.zip && <span className="error text-sm pl-2 text-red-500">{errors.zip}</span>}
+        </div>
+      </div>
+    }
+      <NmiPayments
+      onFieldsAvailable={() => {
+        setLoad(false)
+        setErrors({})
       }}
-      appearance={appearance}
-      tokenizationKey={process.env.NEXT_PUBLIC_TOKEN_KEY}
-      onPay={handlePay}
-    />
+        layout="multiLine"
+        paymentMethods={["card"]}
+        expressCheckoutConfig={{
+          googlePay: {
+            merchantId: 'your-google-merchant-id',
+            displayName: 'Your Business Name',
+            transaction: {
+              amount: 10.9,       // ← amount goes here
+              currencyCode: 'USD',  // ← currency goes here
+            },
+          },
+        }}
+        appearance={appearance}
+        tokenizationKey={process.env.NEXT_PUBLIC_TOKEN_KEY}
+        onPay={handlePayWithBilling}
+      />
+    </>
   );
 };
 

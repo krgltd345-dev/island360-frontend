@@ -1,12 +1,13 @@
 'use client';
 import React from 'react';
-import { Clock, Users, Star, Anchor, Bike, Sparkles, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Clock, Users, Star, Anchor, Bike, Sparkles, ShieldCheck, ArrowRight, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Card } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import Link from 'next/link';
 import { ConvertCentToDollar } from '@/lib/utils';
+import { FcCancel } from 'react-icons/fc';
 
 const categoryIcons = {
   Boating: Anchor,
@@ -28,7 +29,6 @@ const categoryColors = {
 
 export default function ActivityCard({ activity, index = 0 }) {
   const Icon = categoryIcons[activity?.category?.name] || Sparkles;
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -87,6 +87,17 @@ export default function ActivityCard({ activity, index = 0 }) {
                 </motion.span>
               )}
             </div>
+            {activity?.allowCancellations && (
+              <motion.span
+                className="flex items-center gap-1.5 text-white/80 text-sm mt-2 w-fit bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-full"
+                initial={{ x: -10, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: index * 0.1 + 0.25 }}
+              >
+                <Check className="w-4 h-4 text-green-500" />
+                Cancellation
+              </motion.span>
+            )}
           </div>
         </div>
 

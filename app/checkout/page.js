@@ -27,7 +27,7 @@ const Checkout = () => {
       console.log(event?.token, event, "event");
       const payData = await Payment({ entityType: entity, entityId: bookingId }).unwrap();
       if (payData?.data?.orderId) {
-        const res = await nmiPayment({ orderId: payData?.data?.orderId, paymentToken: event?.token }).unwrap()
+        const res = await nmiPayment({ orderId: payData?.data?.orderId, paymentToken: event?.token, firstName: event?.billing?.fName, lastName: event?.billing?.lName, zipCode: event?.billing?.zip }).unwrap()
         setStatus(res?.data?.responseText)
         console.log(res, "ress");
       }
@@ -48,7 +48,7 @@ const Checkout = () => {
   }, [bookingId, status, isGroup])
 
 
-    if (status === "FAILED") {
+  if (status === "FAILED") {
     return (
       <LayoutWrapper>
         <div className="min-h-[calc(100vh-160px)] sm:min-h-[calc(100vh-100px)] bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center py-12 px-4">

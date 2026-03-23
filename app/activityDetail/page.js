@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ConvertCentToDollar } from "@/lib/utils";
 import { useGetActivityByIdQuery } from "@/services/activityApi";
 import { useGetActivityReviewsQuery, useGetUserRoleQuery } from "@/services/userApi";
-import { ArrowLeft, Clock, Heart, Star, Users } from "lucide-react";
+import { ArrowLeft, Clock, Heart, Star, Timer, Users } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -119,8 +119,8 @@ export default function ActivityDetailPage() {
                 {Activity?.data?.name}
               </h1>
 
-              <div className="flex flex-wrap items-center gap-4 mb-6">
-                {Activity?.data?.durationMinutes && (
+              <div className="flex flex-wrap items-center gap-4 mb-2">
+                {Activity?.data?.minDurationMinutes && (
                   <div className="flex items-center gap-2 text-slate-600">
                     <Clock className="w-5 h-5 text-slate-400" />
                     <span>{Activity?.data?.minDurationMinutes > 60 ? `${(Activity?.data?.minDurationMinutes / 60).toFixed(1)} h` : `${Activity?.data?.minDurationMinutes} min`}</span>
@@ -138,6 +138,12 @@ export default function ActivityDetailPage() {
                   </Badge>
                 )}
               </div>
+              {Activity?.data?.allowCancellations && (
+                  <div className="flex bg-slate-200 text-sm px-2 py-1 rounded-full w-fit items-center gap-2 text-slate-600 mb-6">
+                    <Timer className="w-4 h-4 text-slate-400" />
+                    <span>Cancellation Window:</span><span className="text-blue-600">{Activity?.data?.cancellationWindowHours} hours</span>
+                  </div>
+                )}
 
               <p className="text-slate-600 text-lg leading-relaxed mb-8">
                 {Activity?.data?.description || 'Experience an unforgettable adventure with our professional team. Perfect for all skill levels, this Activity?.data? offers a unique way to explore and create lasting memories.'}
