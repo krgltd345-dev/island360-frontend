@@ -52,6 +52,9 @@ export default function VendorDashboard() {
     operationalHoursEnd: '17:00',
     availableForBooking: true,
     allowGroupBookings: true,
+    allowCancellations: false,
+    refundOnCancellations: '',
+    cancellationWindowHours: ''
   });
   const [page, setPage] = useState(1)
   const { data: userRoleInfo, isLoading: userRoleInfoFetching } = useGetUserRoleQuery()
@@ -84,6 +87,9 @@ export default function VendorDashboard() {
       operationalHoursEnd: '17:00',
       availableForBooking: true,
       allowGroupBookings: true,
+      allowCancellations: false,
+      refundOnCancellations: '',
+      cancellationWindowHours: ''
     });
     setImages({
       image_url: '',
@@ -126,7 +132,7 @@ export default function VendorDashboard() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { maxGuests, availableSpots, bookingGapMinutes, maxGroupSize, ...restFormData } = formData;
+      const { maxGuests, availableSpots, bookingGapMinutes, maxGroupSize, refundOnCancellations, cancellationWindowHours, ...restFormData } = formData;
       const data = {
         ...restFormData,
         price: parseFloat(formData.price),
@@ -137,6 +143,10 @@ export default function VendorDashboard() {
         minDurationMinutes: formData.minDurationMinutes * 60,
         imageUrls: Object.values(images).filter(Boolean),
         ...(editingActivity && formData?.category?.name && { category: formData?.category?._id }),
+        ...(formData?.allowCancellations && {
+          refundOnCancellations: formData?.refundOnCancellations,
+          cancellationWindowHours: formData?.cancellationWindowHours
+        })
       };
       let res;
       if (editingActivity) {
@@ -529,6 +539,41 @@ export default function VendorDashboard() {
                     />
                   </div>
                 )}
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={formData.allowCancellations}
+                    onChange={(e) => setFormData({ ...formData, allowCancellations: e.target.checked })}
+                    className="w-4 h-4"
+                  />
+                  <Label className="">
+                    Enable Booking Cancellation
+                  </Label>
+                </div>
+                {
+                  formData?.allowCancellations &&
+                  <>
+                    <div className="space-y-2">
+                      <Label>Refund on Cancellation *</Label>
+                      <Input
+                        value={formData.refundOnCancellations}
+                        onChange={(e) => setFormData({ ...formData, refundOnCancellations: e.target.value })}
+                        placeholder="70%"
+                        required={formData?.allowCancellations}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>{`Cancellation Window ( in Hours ) *`}</Label>
+                      <Input
+                        value={formData.cancellationWindowHours}
+                        onChange={(e) => setFormData({ ...formData, cancellationWindowHours: e.target.value })}
+                        placeholder="48"
+                        required={formData?.allowCancellations}
+                      />
+                    </div>
+                  </>
+                }
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Price {'*'}</Label>

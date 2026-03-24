@@ -40,9 +40,6 @@ export default function VendorSignup() {
     govtId: '',
     businessLicense: '',
     nonProfitStatus: false,
-    allowCancellations: false,
-    refundOnCancellations: '',
-    cancellationWindowHours: ''
   });
   const [uploadingDocs, setUploadingDocs] = useState(false);
   const [documents, setDocuments] = useState([]);
@@ -88,11 +85,6 @@ export default function VendorSignup() {
         businessLicenseExpiry: isExpiry ? new Date(formData?.licenseExpiry).getTime() : null,
         businessLicense: formData?.businessLicense,
         nonProfitStatus: formData?.nonProfitStatus,
-        allowCancellations: formData?.allowCancellations,
-        ...(formData?.allowCancellations && {
-          refundOnCancellations: formData?.refundOnCancellations,
-          cancellationWindowHours: formData?.cancellationWindowHours
-        })
 
       }
       console.log(data, "data");
@@ -307,41 +299,6 @@ export default function VendorSignup() {
                 />
               </div>
 
-              <div className="flex items-center gap-2 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                <input
-                  type="checkbox"
-                  checked={formData.allowCancellations}
-                  onChange={(e) => setFormData({ ...formData, allowCancellations: e.target.checked })}
-                  className="w-4 h-4"
-                />
-                <Label className="text-yellow-700">
-                  Enable Booking Cancellation
-                </Label>
-              </div>
-              {
-                formData?.allowCancellations &&
-                <>
-                  <div className="space-y-2">
-                    <Label>Refund on Cancellation *</Label>
-                    <Input
-                      value={formData.refundOnCancellations}
-                      onChange={(e) => setFormData({ ...formData, refundOnCancellations: e.target.value })}
-                      placeholder="70%"
-                      required={formData?.allowCancellations}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>{`Cancellation Window ( in Hours ) *`}</Label>
-                    <Input
-                      value={formData.cancellationWindowHours}
-                      onChange={(e) => setFormData({ ...formData, cancellationWindowHours: e.target.value })}
-                      placeholder="48"
-                      required={formData?.allowCancellations}
-                    />
-                  </div>
-                </>
-              }
 
               <div className="border-t pt-6 space-y-4">
                 <h3 className="font-semibold text-slate-900">Verification Documents</h3>
