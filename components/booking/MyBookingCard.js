@@ -2,7 +2,7 @@ import React from 'react';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Users, Star, XCircle, Share2, Landmark } from 'lucide-react';
+import { Calendar, Clock, Users, Star, XCircle, Share2, Landmark, Clock10Icon, Clock1, TimerReset } from 'lucide-react';
 import { motion } from 'framer-motion';
 import moment from 'moment';
 import { useCreatePaymentMutation } from '@/services/bookingApi';
@@ -15,9 +15,9 @@ const statusStyles = {
   "COMPLETED": "bg-slate-100 text-slate-700 border-slate-200"
 };
 
-export default function BookingCard({ booking, index = 0, onCancel, onDelete, onEdit, onReview, hasReview, calculateAmount }) {
+export default function BookingCard({ booking, index = 0, onCancel, onReview, onReschedule, calculateAmount }) {
   const router = useRouter()
-
+  console.log(booking, "booking");
   const handlePaymentClick = async (booking) => {
     try {
       router.push(`/checkout?entity=Booking&id=${booking?._id}&isGroup=${booking?.groupBooking}`)
@@ -50,7 +50,7 @@ export default function BookingCard({ booking, index = 0, onCancel, onDelete, on
                   {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                 </Badge>
               </div>
-              <div className='flex gap-2'>
+              <div className='flex max-sm:flex-col gap-2'>
                 {
                   (booking.status === 'CANCELLED' || booking.status === 'REFUNDED') &&
                   <Button size='sm' variant="outline" className={"cursor-pointer"} onClick={() => onReview(booking)}>
@@ -64,6 +64,13 @@ export default function BookingCard({ booking, index = 0, onCancel, onDelete, on
                   <Button size='sm' variant="outline" className={"cursor-pointer"} onClick={() => router.push(`/invite?id=${booking?._id}`)}>
                     <Share2 className="w-4 h-4 mr-2" />
                     Invite
+                  </Button>
+                }
+                {
+                  (booking.status === 'CONFIRMED' || booking.status === 'PARTIALLY_CONFIRMED') &&
+                  <Button size='sm' variant="outline" className={"cursor-pointer"} onClick={() => onReschedule(booking)}>
+                    <TimerReset className="w-4 h-4" />
+                    Reschedule
                   </Button>
                 }
                 {(booking.status === 'CONFIRMED' || booking.status === 'PARTIALLY_CONFIRMED') &&

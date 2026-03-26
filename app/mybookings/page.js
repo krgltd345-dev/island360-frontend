@@ -26,6 +26,7 @@ import ReviewDialog from '@/components/booking/ReviewDialog';
 import { useGetReceivedinvitesQuery } from '@/services/inviteApi';
 import InviteCard from '@/components/invites/InviteCard';
 import { Badge } from '@/components/ui/badge';
+import RescheduleDialog from '@/components/booking/RescheduleModal';
 
 
 
@@ -44,7 +45,9 @@ export default function MyBookings() {
   const [showBookings, setShowBookings] = useState(true);
   const [bookingToEdit, setBookingToEdit] = useState(null);
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [rescheduleDialogOpen, setRescheduleDialogOpen] = useState(false);
   const [bookingToReview, setBookingToReview] = useState(null);
+  const [bookingSelected, setBookingSelected] = useState(null);
   const [editFormData, setEditFormData] = useState({
     guests: 1,
     special_requests: ''
@@ -61,20 +64,6 @@ export default function MyBookings() {
   const handleCancelClick = (booking) => {
     setBookingToCancel(booking);
     setCancelDialogOpen(true);
-  };
-
-  const handleDeleteClick = (booking) => {
-    setBookingToDelete(booking);
-    setDeleteDialogOpen(true);
-  };
-
-  const handleEditClick = (booking) => {
-    setBookingToEdit(booking);
-    setEditFormData({
-      guests: booking.guests,
-      special_requests: booking.special_requests || ''
-    });
-    setEditDialogOpen(true);
   };
 
   const confirmCancel = async () => {
@@ -94,14 +83,10 @@ export default function MyBookings() {
     setReviewDialogOpen(true);
   };
 
-  const hasReview = (bookingId) => {
-    // return existingReviews.some(r => r.booking_id === bookingId);
+    const handleRescheduleClick = (booking) => {
+    setBookingSelected(booking);
+    setRescheduleDialogOpen(true);
   };
-
-  // const getParticipantInfo = (booking) => {
-  //   const participation = myParticipations.find(p => p.booking_id === booking.id);
-  //   return participation;
-  // };
 
 
   const calculateAmount = (booking, cancel) => {
@@ -236,11 +221,10 @@ export default function MyBookings() {
                           booking={booking}
                           index={index}
                           onCancel={handleCancelClick}
-                          onDelete={handleDeleteClick}
-                          onEdit={handleEditClick}
                           onReview={handleReviewClick}
+
+                          onReschedule={handleRescheduleClick}
                           calculateAmount={calculateAmount}
-                          hasReview={hasReview(booking.id)}
                         />
                       </div>
                     );
@@ -340,6 +324,11 @@ export default function MyBookings() {
           reviewDialogOpen={reviewDialogOpen}
           setReviewDialogOpen={setReviewDialogOpen}
           bookingToReview={bookingToReview}
+        />
+        <RescheduleDialog
+          rescheduleDialogOpen={rescheduleDialogOpen}
+          setRescheduleDialogOpen={setRescheduleDialogOpen}
+          booking={bookingSelected}
         />
 
         {/* Participant Payment Dialog */}

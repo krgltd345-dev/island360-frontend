@@ -50,6 +50,14 @@ export const bookingApi = baseApi.injectEndpoints({
         body,
       }),
     }),
+    rescheduleBooking: builder.mutation({
+      query: (body) => ({
+        url: '/bookings/reschedule',
+        method: 'PATCH',
+        body,
+      }),
+      invalidatesTags: ["BOOKING"]
+    }),
     cancelBooking: builder.mutation({
       query: (body) => ({
         url: `/bookings/${body?.id}`,
@@ -106,6 +114,7 @@ export const bookingApi = baseApi.injectEndpoints({
 export const {
   useGetAvailableSlotsQuery,
   useCreateBookingMutation,
+  useRescheduleBookingMutation,
   useCreatePaymentMutation,
   useGetUserBookingsQuery,
   useGetAllBookingsQuery,
