@@ -125,7 +125,9 @@ const CheckoutElement = ({ handlePay }) => {
   const validate = () => {
     const newErrors = {};
     if (!billingInfo.fName.trim()) newErrors.fName = 'First Name is required';
+    else if (billingInfo.fName.trim().length < 2) newErrors.fName = 'First Name must be at least 2 characters';
     if (!billingInfo.lName.trim()) newErrors.lName = 'Last Name is required';
+    else if (billingInfo.lName.trim().length < 2) newErrors.lName = 'Last Name must be at least 2 characters';
     if (!billingInfo.zip.trim()) newErrors.zip = 'ZIP code is required';
     else if (!/^[a-zA-Z0-9\s-]{3,10}$/.test(billingInfo.zip)) newErrors.zip = 'Invalid ZIP code';
     setErrors(newErrors);

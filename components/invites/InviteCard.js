@@ -135,7 +135,7 @@ export default function InviteCard({ invite, index = 0 }) {
                 </div>
               )}
             {
-              invite?.status == "ACCEPTED"
+              invite?.status == "ACCEPTED" && invite?.activityId?.allowCancellations
               && (
                 <div className="bg-amber-50 mt-6 border border-amber-200 rounded-lg p-4 flex gap-2 max-sm:flex-col items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -146,7 +146,7 @@ export default function InviteCard({ invite, index = 0 }) {
                     </div>
                   </div>
                   
-                    <Button onClick={() => { router.push(`/testCheckout?entity=BookingInvite&id=${invite?._id}`) }} size="sm" className="bg-amber-600 hover:bg-amber-700">
+                    <Button onClick={() => { router.push(`/checkout?entity=BookingInvite&id=${invite?._id}`) }} size="sm" className="bg-amber-600 hover:bg-amber-700">
                       Complete Payment
                     </Button>
                 </div>
