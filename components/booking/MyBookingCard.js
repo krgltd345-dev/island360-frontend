@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import moment from 'moment';
 import { useCreatePaymentMutation } from '@/services/bookingApi';
 import { useRouter } from 'next/navigation';
+import { Textarea } from '../ui/textarea';
 
 const statusStyles = {
   'HOLD': "bg-amber-100 text-amber-700 border-amber-200",
@@ -108,7 +109,7 @@ export default function BookingCard({ booking, index = 0, onCancel, onReview, on
             </div>
             <div className='mt-2 text-slate-600 text-sm bg-gray-100 w-fit px-3 py-1 rounded-full'>
               Booking ID :
-               {booking?._id}
+              {booking?._id}
             </div>
 
             {booking?.specialRequests && (
@@ -132,6 +133,30 @@ export default function BookingCard({ booking, index = 0, onCancel, onReview, on
                   <Button onClick={() => handlePaymentClick(booking)} size="sm" className="bg-amber-600 hover:bg-amber-700">
                     Pay Now
                   </Button>
+                </div>
+              )}
+            {
+              (booking?.status === "CONFIRMED" || booking.status === 'PARTIALLY_CONFIRMED')
+              && (
+                <div className="bg-amber-50 mt-6 border border-amber-200 rounded-lg p-4 flex flex-col gap-2">
+                  <div className='flex gap-2 max-sm:flex-col items-center justify-between'>
+                    <div className="flex items-center gap-3">
+                      <TimerReset className="w-5 h-5 text-amber-600" />
+                      <div>
+                        <p className="text-sm font-medium text-amber-900">Booking Rescheduled</p>
+                        <p className="text-xs text-amber-700">Please accept the changes else your booking will be cancelled and refunded</p>
+                      </div>
+                    </div>
+                    <Button onClick={() => { }} size="sm" className="bg-amber-600 hover:bg-amber-700">
+                      Accept
+                    </Button>
+                  </div>
+                  <Textarea
+                    className={"mt-2 bg-slate-50"}
+                    value={"Please accept the changes else your booking will be cancelled and refunded"}
+                    readOnly
+                    rows={4}
+                  />
                 </div>
               )}
           </div>

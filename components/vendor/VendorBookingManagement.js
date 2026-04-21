@@ -1,11 +1,19 @@
 'use Client';
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Calendar } from 'lucide-react';
 import { BookingCard } from './Bookingcard';
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
+import RescheduleDialog from '../booking/RescheduleModal';
 
 export default function VendorBookingManagement({ bookings, state, setState }) {
+  const [bookingSelected, setBookingSelected] = useState(null);
+  const [rescheduleDialogOpen, setRescheduleDialogOpen] = useState(false);
+
+  const handleRescheduleClick = (booking) => {
+    setBookingSelected(booking);
+    setRescheduleDialogOpen(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -28,9 +36,14 @@ export default function VendorBookingManagement({ bookings, state, setState }) {
       }
       {
         bookings?.data?.map((booking) => (
-          <BookingCard key={booking?._id} booking={booking} />
+          <BookingCard key={booking?._id} booking={booking} onReschedule={handleRescheduleClick} />
         ))
       }
+      <RescheduleDialog
+        rescheduleDialogOpen={rescheduleDialogOpen}
+        setRescheduleDialogOpen={setRescheduleDialogOpen}
+        booking={bookingSelected}
+      />
     </div>
   );
 }

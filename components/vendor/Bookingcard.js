@@ -3,12 +3,12 @@ import { ConvertCentToDollar, statusStyles } from "@/lib/utils";
 import { Badge } from "../ui/badge";
 import { Card } from "../ui/card";
 import moment from "moment";
-import { Ban, Calendar, CheckCircle, Clock, Mail, Users } from "lucide-react";
+import { Ban, Calendar, CheckCircle, Clock, Mail, TimerReset, Users } from "lucide-react";
 import { Button } from "../ui/button";
 import { useCompleteBookingMutation } from "@/services/bookingApi";
 import { toast } from "sonner";
 
-export const BookingCard = ({ booking }) => {
+export const BookingCard = ({ booking, onReschedule }) => {
 
   const [Complete, { isLoading }] = useCompleteBookingMutation()
 
@@ -48,7 +48,7 @@ export const BookingCard = ({ booking }) => {
                 {
                   booking?.activityId?.billingType === "PER_HOUR" && <Clock className="w-4 h-4" />
                 }
-                {booking?.quantity} { booking?.activityId?.billingType === "PER_HOUR" ? "Hours" : "Units"}
+                {booking?.quantity} {booking?.activityId?.billingType === "PER_HOUR" ? "Hours" : "Units"}
               </div>
             }
             {
@@ -101,17 +101,10 @@ export const BookingCard = ({ booking }) => {
               <CheckCircle className="w-4 h-4 mr-1" />
               Mark Complete
             </Button>
-            {/* <Button
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                toast.warning("Cannot Cancel Bookings at the Moment")
-              }}
-              className="text-red-600 hover:text-red-700"
-            >
-              <Ban className="w-4 h-4 mr-1" />
-              Cancel
-            </Button> */}
+            <Button size='sm' variant="outline" className={"cursor-pointer"} onClick={() => onReschedule(booking)}>
+              <TimerReset className="w-4 h-4" />
+              Reschedule
+            </Button>
           </>
         )}
       </div>
